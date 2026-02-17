@@ -1,0 +1,45 @@
+/*
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #dbdbdb;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*/
+
+html,
+body {
+  margin: 0;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+ 
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+
+.preview-node {
+  height: 100px;
+  width: 200px;
+  border: 1px solid #4d4d4d;
+  padding: 5px;
+  border-radius: 5px;
+  background: white;
+  display: grid;
+  place-items: center;
+}
+
+#preview-node-label {
+  font-size: 8px;
+  font-weight: bold;
+  color: #333;
+}
