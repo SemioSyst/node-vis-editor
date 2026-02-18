@@ -7,6 +7,7 @@ import PreviewNode from './CustomNodes/PreviewNode.jsx';
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
 import { OutputsProvider } from './OutputsContext.jsx';
+import { topoSort } from './topoSort.js';
 
 import '@xyflow/react/dist/style.css';
 
@@ -50,6 +51,7 @@ export default function App() {
     [],
   );
 
+  // --- Compile graph to IR ---
   const graphIR = useMemo(() => compileGraph(nodes, edges), [nodes, edges]);
   useEffect(() => {
     console.groupCollapsed(
@@ -58,6 +60,16 @@ export default function App() {
     console.log(graphIR);
     console.groupEnd();
   }, [graphIR]);
+
+  // --- Topological sort for potential execution order ---
+  const topo = useMemo(() => topoSort(graphIR), [graphIR]);
+  useEffect(() => {
+    if (topo.hasCycle) {
+      console.warn('[TopoSort] cycle detected, partial order:', topo.order, 'remaining:', topo.remaining);
+    } else {
+      console.log('[TopoSort] order:', topo.order);
+    }
+  }, [topo]);
 
   const initialOutputs = useMemo(() => ({
   // Let n6 (Preview) subscribe to n4's output, creating a simple demo data flow
@@ -69,6 +81,15 @@ export default function App() {
         { kind: 'circle', cx: 50, cy: 50, r: 22, fill: 'rgba(255,255,255,0.15)', stroke: '#000000', strokeWidth: 2 },
         { kind: 'line', x1: 10, y1: 50, x2: 90, y2: 50, stroke: '#000000', strokeWidth: 2 },
       ],
+    },
+    n5: {
+      kind: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 40,
+      fill: 'rgba(255,0,0,0.15)',
+      stroke: '#ff0000',
+      strokeWidth: 2,
     },
   }), []);
 

@@ -26,20 +26,3 @@ body {
   width: 100vw;
   height: 100vh;
 }
-
-.preview-node {
-  height: 100px;
-  width: 200px;
-  border: 1px solid #4d4d4d;
-  padding: 5px;
-  border-radius: 5px;
-  background: white;
-  display: grid;
-  place-items: center;
-}
-
-#preview-node-label {
-  font-size: 8px;
-  font-weight: bold;
-  color: #333;
-}
