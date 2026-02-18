@@ -16,6 +16,7 @@ export function useOutputs() {
  *   outputs[nodeId] = svgSpec
  */
 export function OutputsProvider({ children, initialOutputs = null }) {
+  // We use an object with null prototype to avoid potential key collisions (e.g. with built-in Object properties)
   const [outputs, setOutputs] = useState(() => initialOutputs ?? Object.create(null));
 
   // Helper function to set output for a specific node

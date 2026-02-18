@@ -6,8 +6,10 @@ import {
 import PreviewNode from './CustomNodes/PreviewNode.jsx';
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
-import { OutputsProvider } from './OutputsContext.jsx';
+import { OutputsProvider, useOutputs } from './OutputsContext.jsx';
 import { topoSort } from './topoSort.js';
+import { createEvaluator } from './evaluator/createEvaluator.js';
+import { evaluatorsByType } from './evaluator/evaluatorsByType.js';
 
 import '@xyflow/react/dist/style.css';
 
@@ -50,6 +52,9 @@ export default function App() {
     (params) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     [],
   );
+
+  // Create the evaluator function once (it can be memoized since it doesn't depend on changing state)
+  const evaluator = useMemo(() => createEvaluator({ evaluatorsByType }), []);
 
   // --- Compile graph to IR ---
   const graphIR = useMemo(() => compileGraph(nodes, edges), [nodes, edges]);
@@ -108,12 +113,55 @@ export default function App() {
             fitView
           >
             <Panel position="bottom-center">Node Panel Placeholder</Panel>
-            <Panel position="top-right">Debug Panel Placeholder</Panel>
+            <Panel position="top-right">
+              <RunEvaluatorButton evaluator={evaluator} graphIR={graphIR} topo={topo} nodes={nodes} />
+            </Panel>
             <Background color="#ccc" variant={BackgroundVariant.Dots}/>
             <Controls/>
           </ReactFlow>
         </OutputsProvider>
       </GraphIRContext.Provider>
     </div>
+  );
+}
+
+// --- Below are the implementations of the evaluator and topoSort, which are imported and used in App.jsx ---
+function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
+  // We need access to setOutput and outputs to manage the evaluation results
+  const { setOutput, outputs } = useOutputs();
+
+  // Helper function to get output of a node by id (returns undefined if not set)
+  const getOutput = (nodeId) => outputs[String(nodeId)];
+
+  // When the button is clicked, run the evaluator with the current graphIR and topo order
+  const onRun = () => {
+    console.groupCollapsed('[Evaluator] run');
+    if (topo.hasCycle) {
+      console.warn('[Evaluator] cycle detected, partial order will be used', topo.remaining);
+    }
+    evaluator.run({
+      graphIR,
+      nodes,     //TODO: demo ver: directly pass nodes array. In later versions, it should be relying on graphIR for node metadata (e.g. params) instead of reading from nodes.data
+      topo,
+      setOutput,
+      getOutput,
+    });
+    console.groupEnd();
+  };
+
+  return (
+    <button
+      onClick={onRun}
+      style={{
+        padding: '6px 10px',
+        borderRadius: 6,
+        border: '1px solid #555',
+        background: '#222',
+        color: '#fff',
+        cursor: 'pointer',
+      }}
+    >
+      Run Evaluator
+    </button>
   );
 }

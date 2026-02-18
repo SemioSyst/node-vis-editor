@@ -55,7 +55,10 @@ export function createEvaluator({ evaluatorsByType }) {
       // use node type to find the corresponding evaluator function; if no type, treat as 'default'
       const type = irNode.type ?? 'default';
       const evalFn = evaluatorsByType[type];
-      if (!evalFn) continue; // e.g. preview nodes
+      if (!evalFn) {
+        console.warn(`[Evaluator] no evaluator found for node ${id} (type=${type}), skipping`);
+        continue; // e.g. preview nodes
+        }
 
       // Gather inputs for this node
       const inputs = getInputs(id);
@@ -80,6 +83,8 @@ export function createEvaluator({ evaluatorsByType }) {
 
       // Execute the node's function with the context and store the output
       const out = evalFn(ctx);
+
+      console.log(`[Evaluator] node ${id} (type=${type}) evaluated with output:`, out);
 
       // Store the output in the context (e.g. for downstream nodes to access)
       if (out !== undefined) {
