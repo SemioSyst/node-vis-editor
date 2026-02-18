@@ -12,6 +12,7 @@ const DEBUG_COMPILER = true; // Set to true to enable debug logging
  *   nodesById: Record<string, { id: string, type: string|null }>,
  *   edges: Array<{ id: string, source: string, target: string, sourceHandle: string|null, targetHandle: string|null }>,
  *   adj: Record<string, string[]>,
+ *   reverseAdj: Record<string, string[]>,
  *   inDegree: Record<string, number>,
  *   outDegree: Record<string, number>,
  *   invalidEdges: Array<{ id: string, reason: string }>
@@ -27,6 +28,7 @@ function compileGraph(nodes, edges) {
     // --- Build node lookup ---
     const nodesById = Object.create(null);
     const adj = Object.create(null);
+    const reverseAdj = Object.create(null);
     const inDegree = Object.create(null);
     const outDegree = Object.create(null);
 
@@ -36,6 +38,7 @@ function compileGraph(nodes, edges) {
         const type = n.type ?? null; // React Flow nodes often have undefined type for "default"
         nodesById[id] = { id, type }; // Store minimal node info
         adj[id] = []; // Initialize adjacency list
+        reverseAdj[id] = []; // Initialize reverse adjacency list
         inDegree[id] = 0; // Initialize in-degree count
         outDegree[id] = 0; // Initialize out-degree count
     }
@@ -73,6 +76,8 @@ function compileGraph(nodes, edges) {
 
         // Add the target to the source's adjacency list
         adj[source].push(target);
+        // Add the source to the target's reverse adjacency list
+        reverseAdj[target].push(source);
 
         // Update in/out degree counts
         outDegree[source] += 1;
@@ -84,6 +89,7 @@ function compileGraph(nodes, edges) {
         nodesById,
         edges: irEdges,
         adj,
+        reverseAdj,
         inDegree,
         outDegree,
         invalidEdges,
@@ -93,6 +99,7 @@ function compileGraph(nodes, edges) {
         console.log("nodesById:", nodesById);
         console.log("edges:", irEdges);
         console.log("adj:", adj);
+        console.log("reverseAdj:", reverseAdj);
         console.log("inDegree:", inDegree, "outDegree:", outDegree);
         if (invalidEdges.length) console.warn("invalidEdges:", invalidEdges);
         console.groupEnd();

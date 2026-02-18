@@ -6,6 +6,7 @@ import {
 import PreviewNode from './CustomNodes/PreviewNode.jsx';
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
+import { OutputsProvider } from './OutputsContext.jsx';
 
 import '@xyflow/react/dist/style.css';
 
@@ -57,23 +58,40 @@ export default function App() {
     console.log(graphIR);
     console.groupEnd();
   }, [graphIR]);
+
+  const initialOutputs = useMemo(() => ({
+  // Let n6 (Preview) subscribe to n4's output, creating a simple demo data flow
+    n4: {
+      kind: 'group',
+      viewBox: '0 0 100 100',
+      children: [
+        { kind: 'rect', x: 8, y: 8, w: 84, h: 84, rx: 10, ry: 10, fill: 'none', stroke: '#000000', strokeWidth: 2 },
+        { kind: 'circle', cx: 50, cy: 50, r: 22, fill: 'rgba(255,255,255,0.15)', stroke: '#000000', strokeWidth: 2 },
+        { kind: 'line', x1: 10, y1: 50, x2: 90, y2: 50, stroke: '#000000', strokeWidth: 2 },
+      ],
+    },
+  }), []);
+
  
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <GraphIRContext.Provider value={graphIR}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          fitView
-        >
-          <Panel position="bottom-center">Panel Placeholder</Panel>
-          <Background color="#ccc" variant={BackgroundVariant.Dots}/>
-          <Controls/>
-        </ReactFlow>
+        <OutputsProvider initialOutputs={initialOutputs}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            fitView
+          >
+            <Panel position="bottom-center">Node Panel Placeholder</Panel>
+            <Panel position="top-right">Debug Panel Placeholder</Panel>
+            <Background color="#ccc" variant={BackgroundVariant.Dots}/>
+            <Controls/>
+          </ReactFlow>
+        </OutputsProvider>
       </GraphIRContext.Provider>
     </div>
   );
