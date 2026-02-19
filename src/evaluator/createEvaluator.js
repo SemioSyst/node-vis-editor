@@ -2,9 +2,22 @@
 
 export function createEvaluator({ evaluatorsByType }) {
   function run({ graphIR, nodes, topo, setOutput, getOutput }) {
+    //Local cache for outputs during this run; this allows immediate access to outputs of upstream nodes without waiting for state updates.
+    //We will flush this to the main outputs store at the end of the run.
+    const localOutputs = Object.create(null);
+    const getOutputSync = (nodeId) => {
+        const id = String(nodeId);
+        return Object.prototype.hasOwnProperty.call(localOutputs, id)
+            ? localOutputs[id]
+            : getOutput(id);
+    };
+
+    // Build an index for quick node lookup by id
     const nodeIndex = new Map((nodes ?? []).map((n) => [String(n.id), n]));
 
     // demo: params read from node.data (later: graphIR.nodesById[id].params)
+    // TODO: in future versions, we want to decouple the evaluator from React Flow's node structure, and rely solely on graphIR for node metadata (including params). 
+    // This will make the evaluator more flexible and reusable across different graph representations. For now, we keep it simple by reading params directly from nodes' data.
     const getParams = (nodeId) => nodeIndex.get(String(nodeId))?.data ?? {};
 
     // upstream sources of a node (multi-input)
@@ -29,7 +42,7 @@ export function createEvaluator({ evaluatorsByType }) {
         const from = String(edge.source);
         return {
           from,
-          value: getOutput(from),
+          value: getOutputSync(from),
           edge,
         };
       });
@@ -77,7 +90,7 @@ export function createEvaluator({ evaluatorsByType }) {
         getUpstreamOutputs: () => inputs.list.map((x) => x.value).filter((v) => v != null),
 
         graphIR,
-        getOutput,
+        getOutput: getOutputSync, // allows evaluator functions to access outputs of any node (including upstream nodes that have been evaluated in this run, via localOutputs cache)
         setOutput,
       };
 
@@ -88,6 +101,7 @@ export function createEvaluator({ evaluatorsByType }) {
 
       // Store the output in the context (e.g. for downstream nodes to access)
       if (out !== undefined) {
+        localOutputs[id] = out; // store in localOutputs for immediate access within this run
         setOutput(id, out);
       }
     }

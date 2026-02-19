@@ -3,7 +3,13 @@ import {
   ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, 
   Controls, Background, Panel, BackgroundVariant
 } from '@xyflow/react';
+// Import custom nodes
 import PreviewNode from './CustomNodes/PreviewNode.jsx';
+import CircleNode from './CustomNodes/CircleNode.jsx';
+import RectNode from './CustomNodes/RectNode.jsx';
+import LineNode from './CustomNodes/LineNode.jsx';
+import GroupNode from './CustomNodes/GroupNode.jsx';
+// Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
 import { OutputsProvider, useOutputs } from './OutputsContext.jsx';
@@ -11,28 +17,33 @@ import { topoSort } from './topoSort.js';
 import { createEvaluator } from './evaluator/createEvaluator.js';
 import { evaluatorsByType } from './evaluator/evaluatorsByType.js';
 
+
 import '@xyflow/react/dist/style.css';
 
 //Initial Nodes and Edges
 const initialNodes = [
-  { id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
-  { id: 'n2', position: { x: -100, y: 100 }, data: { label: 'Node 2' } },
-  { id: 'n3', position: { x: 100, y: 100 }, data: { label: 'Node 3' } },
-  { id: 'n4', position: { x: -100, y: 200 }, data: { label: 'Node 4' } },
-  { id: 'n5', position: { x: 100, y: 200 }, data: { label: 'Node 5' } },
-  { id: 'n6', position: { x: 0, y: 300 }, data: { label: 'Preview Node' }, type: 'previewNode' },
+  { id: 'c1', type: 'circle', position: { x: -260, y: 0 }, data: {} },
+  { id: 'r1', type: 'rect', position: { x: -260, y: 200 }, data: {} },
+  { id: 'l1', type: 'line', position: { x: -260, y: 400 }, data: {} },
+
+  { id: 'g1', type: 'group', position: { x: 40, y: 200 }, data: {} },
+  { id: 'p1', type: 'previewNode', position: { x: 360, y: 200 }, data: { label: 'Preview' } },
 ];
+
 const initialEdges = [
-  { id: 'n1-n2', source: 'n1', target: 'n2' },
-  { id: 'n1-n3', source: 'n1', target: 'n3' },
-  { id: 'n2-n4', source: 'n2', target: 'n4' },
-  { id: 'n3-n5', source: 'n3', target: 'n5' },
-  { id: 'n4-n6', source: 'n4', target: 'n6' },
+  { id: 'c1-g1', source: 'c1', target: 'g1' },
+  { id: 'r1-g1', source: 'r1', target: 'g1' },
+  { id: 'l1-g1', source: 'l1', target: 'g1' },
+  { id: 'g1-p1', source: 'g1', target: 'p1' },
 ];
 
 //Define custom node types
 const nodeTypes = {
   previewNode: PreviewNode,
+  circle: CircleNode,
+  rect: RectNode,
+  line: LineNode,
+  group: GroupNode,
 };
 
 //Main App Component
