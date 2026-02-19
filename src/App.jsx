@@ -17,16 +17,24 @@ import { topoSort } from './topoSort.js';
 import { createEvaluator } from './evaluator/createEvaluator.js';
 import { evaluatorsByType } from './evaluator/evaluatorsByType.js';
 
-
 import '@xyflow/react/dist/style.css';
+
+// Define the node library with default data for each node type
+const NODE_LIBRARY = [
+  { type: 'circle', label: 'Circle', defaultData: { cx: 50, cy: 50, r: 22, stroke: '#000000', strokeWidth: 2, fill: 'none' } },
+  { type: 'rect',   label: 'Rect',   defaultData: { x: 8, y: 8, w: 84, h: 84, rx: 10, ry: 10, stroke: '#000000', strokeWidth: 2, fill: 'none' } },
+  { type: 'line',   label: 'Line',   defaultData: { x1: 10, y1: 50, x2: 90, y2: 50, stroke: '#000000', strokeWidth: 2 } },
+  { type: 'group',  label: 'Group',  defaultData: { } },
+  { type: 'previewNode', label: 'Preview', defaultData: { label: 'Preview' } },
+];
 
 //Initial Nodes and Edges
 const initialNodes = [
-  { id: 'c1', type: 'circle', position: { x: -260, y: 0 }, data: {} },
+  { id: 'c1', type: 'circle', position: { x: -260, y: -100 }, data: {} },
   { id: 'r1', type: 'rect', position: { x: -260, y: 200 }, data: {} },
-  { id: 'l1', type: 'line', position: { x: -260, y: 400 }, data: {} },
+  { id: 'l1', type: 'line', position: { x: -260, y: 600 }, data: {} },
 
-  { id: 'g1', type: 'group', position: { x: 40, y: 200 }, data: {} },
+  { id: 'g1', type: 'group', position: { x: 100, y: 200 }, data: {} },
   { id: 'p1', type: 'previewNode', position: { x: 360, y: 200 }, data: { label: 'Preview' } },
 ];
 
@@ -64,7 +72,30 @@ export default function App() {
     [],
   );
 
-  // Create the evaluator function once (it can be memoized since it doesn't depend on changing state)
+  // --- Node addition logic ---
+  const nextIdRef = useMemo(() => ({ n: 1 }), []); // simple ref to keep track of next node id for demo purposes
+  // Function to add a new node of a given type to the canvas
+  const addNode = useCallback((nodeType) => {
+    const entry = NODE_LIBRARY.find((x) => x.type === nodeType);
+    if (!entry) return;
+    // Generate a unique id for the new node
+    const id = `${nodeType}-${nextIdRef.n++}`;
+
+    // For demo purposes, new nodes are added with a random offset from the center.
+    const pos = { x: 0 + (Math.random() * 80 - 40), y: 0 + (Math.random() * 80 - 40) };
+
+    setNodes((prev) => [
+      ...prev,
+      {
+        id,
+        type: entry.type,
+        position: pos,
+        data: { ...(entry.defaultData ?? {}) },
+      },
+    ]);
+  }, [setNodes, nextIdRef]);
+
+  // --- Create the evaluator function once (it can be memoized since it doesn't depend on changing state) ---
   const evaluator = useMemo(() => createEvaluator({ evaluatorsByType }), []);
 
   // --- Compile graph to IR ---
@@ -113,7 +144,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <GraphIRContext.Provider value={graphIR}>
-        <OutputsProvider initialOutputs={initialOutputs}>
+        <OutputsProvider>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -123,7 +154,27 @@ export default function App() {
             nodeTypes={nodeTypes}
             fitView
           >
-            <Panel position="bottom-center">Node Panel Placeholder</Panel>
+            <Panel position="bottom-center">
+              <div style={{ display: 'flex', gap: 8, padding: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 10 }}>
+                {NODE_LIBRARY.map((n) => (
+                  <button
+                    key={n.type}
+                    onClick={() => addNode(n.type)}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: 6,
+                      border: '1px solid #555',
+                      background: '#222',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                    }}
+                  >
+                    + {n.label}
+                  </button>
+                ))}
+              </div>
+            </Panel>
             <Panel position="top-right">
               <RunEvaluatorButton evaluator={evaluator} graphIR={graphIR} topo={topo} nodes={nodes} />
             </Panel>
