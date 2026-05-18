@@ -9,6 +9,8 @@ import CircleNode from './CustomNodes/CircleNode.jsx';
 import RectNode from './CustomNodes/RectNode.jsx';
 import LineNode from './CustomNodes/LineNode.jsx';
 import GroupNode from './CustomNodes/GroupNode.jsx';
+import TestVisualNode from './CustomNodes/TestVisualNode.jsx';
+import TransformInteractionTestNode from './CustomNodes/TransformInteractionTestNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -36,6 +38,22 @@ const initialNodes = [
 
   { id: 'g1', type: 'group', position: { x: 100, y: 200 }, data: {} },
   { id: 'p1', type: 'previewNode', position: { x: 360, y: 200 }, data: { label: 'Preview' } },
+
+  { id: 'test1', type: 'testVisual', position: { x: 300, y: -120 }, data: {} },
+  { id: 'preview-test', type: 'previewNode', position: { x: 600, y: -120 }, data: { label: 'Preview Test' } },
+
+  {
+  id: 'transform-test-1',
+  type: 'transformInteractionTest',
+  position: { x: 300, y: -180 },
+  data: {},
+  },
+  {
+    id: 'preview-transform-test',
+    type: 'previewNode',
+    position: { x: 620, y: -180 },
+    data: { label: 'Transform Test Preview' },
+  },
 ];
 
 const initialEdges = [
@@ -43,6 +61,13 @@ const initialEdges = [
   { id: 'r1-g1', source: 'r1', target: 'g1' },
   { id: 'l1-g1', source: 'l1', target: 'g1' },
   { id: 'g1-p1', source: 'g1', target: 'p1' },
+
+  { id: 'test1-preview-test', source: 'test1', target: 'preview-test' },
+  {
+    id: 'transform-test-1-preview-transform-test',
+    source: 'transform-test-1',
+    target: 'preview-transform-test',
+  },
 ];
 
 //Define custom node types
@@ -52,6 +77,8 @@ const nodeTypes = {
   rect: RectNode,
   line: LineNode,
   group: GroupNode,
+  testVisual: TestVisualNode,
+  transformInteractionTest: TransformInteractionTestNode,
 };
 
 //Main App Component
@@ -203,7 +230,7 @@ function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
     }
     evaluator.run({
       graphIR,
-      nodes,     //TODO: demo ver: directly pass nodes array. In later versions, it should be relying on graphIR for node metadata (e.g. params) instead of reading from nodes.data
+      nodes,
       topo,
       setOutput,
       getOutput,

@@ -1,12 +1,16 @@
 // src/renderer/SvgRenderer.jsx
-import { renderSvgElement } from './renderSvgElement.jsx';
+
+import { renderVisualNode } from './renderVisualNode.jsx';
 
 export default function SvgRenderer({ spec }) {
   if (!spec) {
     return null;
   }
 
-  const viewBox = spec.viewBox ?? '0 0 100 100';
+  const viewBox =
+    spec.viewBox ??
+    spec.root?.viewBox ??
+    '0 0 100 100';
 
   return (
     <svg
@@ -16,7 +20,7 @@ export default function SvgRenderer({ spec }) {
       viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
     >
-      {renderSvgElement(spec)}
+      {renderVisualNode(spec.root)}
     </svg>
   );
 }
