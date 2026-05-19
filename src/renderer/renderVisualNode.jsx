@@ -204,6 +204,8 @@ function renderShapeContent(node) {
         fontFamily={content.fontFamily ?? style.text?.fontFamily}
         fontWeight={content.fontWeight ?? style.text?.fontWeight}
         fill={style.fill?.color ?? style.fill ?? '#000'}
+        textAnchor={content.textAnchor}
+        dominantBaseline={content.dominantBaseline}
       >
         {content.text ?? ''}
       </text>

@@ -1,4 +1,5 @@
 // src/CustomNodes/UI/NodeFields.jsx
+// A collection of common field components for node UIs, like text inputs, dropdowns, color pickers, etc.
 import './nodeUi.css';
 
 function BaseField({ label, children }) {
@@ -45,12 +46,13 @@ export function NumberField({ label, value, onChange, step = 1, min, max }) {
   );
 }
 
-export function SelectField({ label, value, onChange, options }) {
+export function SelectField({ label, value, onChange, options, disabled = false }) {
   return (
     <BaseField label={label}>
       <select
         className="node-input nodrag"
         value={value ?? ''}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
       >
         {options.map((opt) => {

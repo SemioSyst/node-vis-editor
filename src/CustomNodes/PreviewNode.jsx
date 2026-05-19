@@ -1,49 +1,93 @@
 import { useCallback, useMemo } from 'react';
-import { Position, Handle } from '@xyflow/react';
-import { useGraphIR } from '../GraphIRContext.js'; // import the custom hook to access graphIR context
-import { useOutputs } from '../OutputsContext.jsx'; // import the custom hook to access outputs context
-import OutputRenderer from '../renderer/OutputRenderer.jsx'; // import the Renderer components
+import { Position, Handle, useViewport } from '@xyflow/react';
+import { useGraphIR } from '../GraphIRContext.js';
+import { useOutputs } from '../OutputsContext.jsx';
+import OutputRenderer from '../renderer/OutputRenderer.jsx';
+import ResizablePanel from './UI/ResizablePanel.jsx';
+import { useUpdateNodeData } from './UI/useUpdateNodeData.js';
 import './PreviewNode.css';
 
 function PreviewNode(props) {
-    const graphIR = useGraphIR(); // use the custom hook to get the current graphIR from context
-    const { outputs } = useOutputs(); // use the custom hook to get the current outputs from context
+  const graphIR = useGraphIR();
+  const { outputs } = useOutputs();
 
-    const myId = String(props.id);
+  const myId = String(props.id);
+  const data = props.data ?? {};
+  const update = useUpdateNodeData(myId);
 
-    const sourceId = useMemo(() => {
-        const upstream = graphIR.reverseAdj?.[myId] ?? [];
-        return upstream.length ? String(upstream[0]) : null; // demo: just take the first upstream node as the source
-    }, [graphIR, myId]);
+  const previewWidth = data.previewWidth ?? 240;
+  const previewHeight = data.previewHeight ?? 160;
+  const previewMode = data.previewMode ?? 'fit';
 
-    const spec = sourceId ? outputs[sourceId] : null;
+  const { zoom } = useViewport();
+  const zoomPercent = Math.round(zoom * 100);
 
-    const onClick = useCallback(() => {
-        // log the graphIR snapshot when the node is clicked
-        console.log('[PreviewNode] graphIR snapshot:', graphIR);
-    }, [graphIR]);
+  const sourceId = useMemo(() => {
+    const upstream = graphIR.reverseAdj?.[myId] ?? [];
+    return upstream.length ? String(upstream[0]) : null;
+  }, [graphIR, myId]);
 
-    const stats = useMemo(() => {
-        const id = String(props.id);
-        const inD = graphIR.inDegree?.[id] ?? 0;
-        const outD = graphIR.outDegree?.[id] ?? 0;
-        return { inD, outD };
-    }, [graphIR, props.id]);
+  const spec = sourceId ? outputs[sourceId] : null;
 
-    return (
-        <div className="preview-node" onClick={onClick}>
-            <Handle type="target" position={Position.Left} />
+  const onClick = useCallback(() => {
+    console.log('[PreviewNode] graphIR snapshot:', graphIR);
+    console.log('[PreviewNode] sourceId:', sourceId);
+    console.log('[PreviewNode] output spec:', spec);
+  }, [graphIR, sourceId, spec]);
 
-            <div id="preview-node-label">Preview Node</div>
+  return (
+    <div className="preview-node" onClick={onClick}>
+      <Handle type="target" position={Position.Left} />
 
-            <div id="preview-node-content">
-                <OutputRenderer
-                output={spec}
-                emptyText={sourceId ? `No output from ${sourceId}` : 'No input'}
-                />
-            </div>
+      <div className="preview-node__header">
+        <div>
+          <div className="preview-node__title">
+            Preview Node
+          </div>
+
+          <div className="preview-node__meta">
+            {previewWidth}×{previewHeight}
+            {previewMode === 'actual' && ` · canvas ${zoomPercent}%`}
+          </div>
         </div>
-    );
+
+        <select
+          className="preview-node__mode nodrag"
+          value={previewMode}
+          onChange={(e) => update({ previewMode: e.target.value })}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <option value="fit">Fit</option>
+          <option value="actual">Actual</option>
+        </select>
+      </div>
+
+      <ResizablePanel
+        nodeId={myId}
+        width={previewWidth}
+        height={previewHeight}
+        minWidth={160}
+        minHeight={100}
+        maxWidth={800}
+        maxHeight={600}
+        className="preview-node__resizable"
+      >
+        <div className="preview-node__content">
+          <OutputRenderer
+            output={spec}
+            emptyText={sourceId ? `No output from ${sourceId}` : 'No input'}
+            renderOptions={{
+                mode: previewMode,
+                viewportWidth: previewWidth,
+                viewportHeight: previewHeight,
+                paddingRatio: 0.12,
+                overflow: 'auto',
+            }}
+          />
+        </div>
+      </ResizablePanel>
+    </div>
+  );
 }
 
 export default PreviewNode;

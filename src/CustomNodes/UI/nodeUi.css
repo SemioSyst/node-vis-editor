@@ -118,3 +118,228 @@
   border-radius: 6px;
   background: transparent;
 }
+
+/* ---------- Node sections ---------- */
+
+.node-section {
+  display: grid;
+  gap: 7px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.node-section:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.node-section__header {
+  display: grid;
+  gap: 2px;
+}
+
+.node-section__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f2f2f2;
+  opacity: 0.86;
+}
+
+.node-section__subtitle {
+  font-size: 10px;
+  line-height: 1.3;
+  color: #aaa;
+}
+
+.node-section__body {
+  display: grid;
+  gap: 6px;
+}
+
+/* ---------- Port field states ---------- */
+
+.port-field {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px 64px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  min-height: 28px;
+}
+
+.port-field__handle-slot {
+  position: relative;
+  width: 14px;
+  height: 24px;
+}
+
+.port-field__handle {
+  left: -10px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border: 2px solid #2c2c2c !important;
+  background: #e4e4e4 !important;
+}
+
+.port-field__label-wrap {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.port-field__label {
+  font-size: 11px;
+  color: #d8d8d8;
+  opacity: 0.82;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.port-field__note {
+  font-size: 9px;
+  color: #8d8d8d;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.port-field__control {
+  min-width: 0;
+}
+
+/* Controlled = externally driven, still active */
+.port-field--controlled .port-field__label {
+  color: #9db7ff;
+  opacity: 0.75;
+}
+
+.port-field--controlled .port-field__note {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+.port-field--controlled .port-field__handle {
+  border-color: #6f8cff !important;
+  background: #1b2440 !important;
+}
+
+.port-field--controlled .node-input,
+.port-field--controlled .node-textarea,
+.port-field--controlled .node-color {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Inactive = not used in current mode */
+.port-field--inactive {
+  opacity: 0.42;
+}
+
+.port-field--inactive .port-field__label,
+.port-field--inactive .port-field__note {
+  color: #777;
+}
+
+.port-field--inactive .port-field__handle {
+  border-color: #555 !important;
+  background: #1a1a1a !important;
+  opacity: 0.45;
+}
+
+.port-field--inactive .node-input,
+.port-field--inactive .node-textarea,
+.port-field--inactive .node-color {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Disabled native controls */
+.node-input:disabled,
+.node-textarea:disabled,
+.node-color:disabled {
+  color: #888;
+  background: #111;
+  border-color: #333;
+}
+
+/* ---------- Advanced input status row states ---------- */
+
+.port-status-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 6px 3px 0;
+  border-radius: 8px;
+}
+
+.port-status-row__text {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.port-status-row__label {
+  font-size: 11px;
+  color: #d8d8d8;
+  opacity: 0.82;
+}
+
+.port-status-row__status {
+  font-size: 10px;
+  color: #8d8d8d;
+}
+
+.port-status-row--active {
+  background: rgba(91, 120, 255, 0.12);
+}
+
+.port-status-row--active .port-status-row__label {
+  color: #b9c8ff;
+}
+
+.port-status-row--active .port-status-row__status {
+  color: #b9c8ff;
+}
+
+.port-status-row--inactive {
+  opacity: 0.45;
+}
+/* ---------- Resizable panel ---------- */
+
+.resizable-panel {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 120px;
+  min-height: 80px;
+}
+
+.resizable-panel__content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.resizable-panel__handle {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  border-right: 2px solid rgba(0, 0, 0, 0.45);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.45);
+  opacity: 0.65;
+}
+
+.resizable-panel__handle:hover {
+  opacity: 1;
+}

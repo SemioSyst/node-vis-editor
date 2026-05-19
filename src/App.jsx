@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, 
-  Controls, Background, Panel, BackgroundVariant
+  Controls, Background, Panel, BackgroundVariant, useViewport,
 } from '@xyflow/react';
 // Import custom nodes
 import PreviewNode from './CustomNodes/PreviewNode.jsx';
@@ -11,6 +11,9 @@ import LineNode from './CustomNodes/LineNode.jsx';
 import GroupNode from './CustomNodes/GroupNode.jsx';
 import TestVisualNode from './CustomNodes/TestVisualNode.jsx';
 import TransformInteractionTestNode from './CustomNodes/TransformInteractionTestNode.jsx';
+import ShapeGeneratorNode from './CustomNodes/ShapeGeneratorNode.jsx';
+import SimpleDataInputNode from './CustomNodes/SimpleDataInputNode.jsx';
+import AxisGeneratorNode from './CustomNodes/AxisGeneratorNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -28,6 +31,9 @@ const NODE_LIBRARY = [
   { type: 'line',   label: 'Line',   defaultData: { x1: 10, y1: 50, x2: 90, y2: 50, stroke: '#000000', strokeWidth: 2 } },
   { type: 'group',  label: 'Group',  defaultData: { } },
   { type: 'previewNode', label: 'Preview', defaultData: { label: 'Preview' } },
+  { type: 'shapeGenerator', label: 'Shape Generator', defaultData: { } },
+  { type: 'simpleDataInput', label: 'Simple Data Input', defaultData: { } },
+  { type: 'axisGenerator', label: 'Axis Generator', defaultData: { } },
 ];
 
 //Initial Nodes and Edges
@@ -54,6 +60,104 @@ const initialNodes = [
     position: { x: 620, y: -180 },
     data: { label: 'Transform Test Preview' },
   },
+
+  {
+    id: 'data-x-mismatch',
+    type: 'simpleDataInput',
+    position: { x: -520, y: 20 },
+    data: {
+      dataMode: 'array',
+      rawText: '10,35,60',
+    },
+  },
+
+  {
+    id: 'data-y-mismatch',
+    type: 'simpleDataInput',
+    position: { x: -520, y: 180 },
+    data: {
+      dataMode: 'array',
+      rawText: '20,45',
+    },
+  },
+
+  {
+    id: 'shape-generator-mismatch',
+    type: 'shapeGenerator',
+    position: { x: -140, y: 80 },
+    data: {
+      shapeType: 'circle',
+      defaultRadius: 7,
+
+      fillColor: '#66cc88',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      opacity: 0.7,
+
+      layoutAxis: 'x',
+      layoutStartX: 8,
+      layoutStartY: 90,
+      layoutStep: 18,
+    },
+  },
+
+  {
+    id: 'preview-mismatch',
+    type: 'previewNode',
+    position: { x: 280, y: 100 },
+    data: { label: 'Mismatch Preview' },
+  },
+
+  {
+    id: 'data-height-opacity',
+    type: 'simpleDataInput',
+    position: { x: -460, y: 80 },
+    data: {
+      dataMode: 'array',
+      rawText: '0.2,0.45,0.7,0.35',
+    },
+  },
+
+  {
+    id: 'data-height-values',
+    type: 'simpleDataInput',
+    position: { x: -460, y: -80 },
+    data: {
+      dataMode: 'array',
+      rawText: '20,45,70,35',
+    },
+  },
+
+  {
+    id: 'shape-generator-opacity',
+    type: 'shapeGenerator',
+    position: { x: -120, y: 40 },
+    data: {
+      shapeType: 'rect',
+
+      defaultX: 8,
+      defaultY: 90,
+      defaultWidth: 12,
+      defaultHeight: 40,
+
+      fillColor: '#5b78ff',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      opacity: 1,
+
+      layoutAxis: 'x',
+      layoutStartX: 8,
+      layoutStartY: 90,
+      layoutStep: 18,
+    },
+  },
+
+  {
+    id: 'preview-opacity',
+    type: 'previewNode',
+    position: { x: 280, y: 60 },
+    data: { label: 'Opacity Preview' },
+  },
 ];
 
 const initialEdges = [
@@ -68,6 +172,41 @@ const initialEdges = [
     source: 'transform-test-1',
     target: 'preview-transform-test',
   },
+
+  {
+    id: 'data-x-mismatch-shape-generator-mismatch-x',
+    source: 'data-x-mismatch',
+    target: 'shape-generator-mismatch',
+    targetHandle: 'x',
+  },
+  {
+    id: 'data-y-mismatch-shape-generator-mismatch-y',
+    source: 'data-y-mismatch',
+    target: 'shape-generator-mismatch',
+    targetHandle: 'y',
+  },
+  {
+    id: 'shape-generator-mismatch-preview-mismatch',
+    source: 'shape-generator-mismatch',
+    target: 'preview-mismatch',
+  },
+  {
+    id: 'data-height-values-shape-generator-opacity-height',
+    source: 'data-height-values',
+    target: 'shape-generator-opacity',
+    targetHandle: 'height',
+  },
+  {
+    id: 'data-height-opacity-shape-generator-opacity-opacity',
+    source: 'data-height-opacity',
+    target: 'shape-generator-opacity',
+    targetHandle: 'opacity',
+  },
+  {
+    id: 'shape-generator-opacity-preview-opacity',
+    source: 'shape-generator-opacity',
+    target: 'preview-opacity',
+  },
 ];
 
 //Define custom node types
@@ -79,6 +218,9 @@ const nodeTypes = {
   group: GroupNode,
   testVisual: TestVisualNode,
   transformInteractionTest: TransformInteractionTestNode,
+  shapeGenerator: ShapeGeneratorNode,
+  simpleDataInput: SimpleDataInputNode,
+  axisGenerator: AxisGeneratorNode,
 };
 
 //Main App Component
@@ -206,6 +348,7 @@ export default function App() {
               <RunEvaluatorButton evaluator={evaluator} graphIR={graphIR} topo={topo} nodes={nodes} />
             </Panel>
             <Background color="#ccc" variant={BackgroundVariant.Dots}/>
+            <ViewportZoomIndicator />
             <Controls/>
           </ReactFlow>
         </OutputsProvider>
@@ -252,5 +395,17 @@ function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
     >
       Run Evaluator
     </button>
+  );
+}
+
+function ViewportZoomIndicator() {
+  const { zoom } = useViewport();
+
+  return (
+    <Panel position="top-left">
+      <div className="zoom-indicator">
+        Canvas {Math.round(zoom * 100)}%
+      </div>
+    </Panel>
   );
 }
