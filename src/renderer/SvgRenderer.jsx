@@ -2,7 +2,11 @@
 
 import { renderVisualNode } from './renderVisualNode.jsx';
 
-export default function SvgRenderer({ spec, renderFrame }) {
+export default function SvgRenderer({
+  spec,
+  renderFrame,
+  renderOptions = {},
+}) {
   if (!spec || !renderFrame) return null;
 
   return (
@@ -13,7 +17,11 @@ export default function SvgRenderer({ spec, renderFrame }) {
       viewBox={renderFrame.viewBox}
       preserveAspectRatio={renderFrame.preserveAspectRatio}
     >
-      {renderVisualNode(spec.root)}
+      {renderVisualNode(spec.root, {
+        spec,
+        renderFrame,
+        renderOptions,
+      })}
     </svg>
   );
 }

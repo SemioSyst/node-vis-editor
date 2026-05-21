@@ -1,19 +1,74 @@
 // src/evaluator/generators/evalAxisGenerator.js
+import {
+  inheritProvenance,
+  makeProvenanceEntry,
+} from '../utils/metaUtils.js';
+
+import {
+  scaleBand,
+  scalePoint,
+} from 'd3-scale';
 
 export function evalAxisGenerator(ctx) {
   const p = ctx.params ?? {};
   const warnings = [];
 
   const axisMode = p.axisMode ?? p.axisType ?? 'xy';
-  const scaleType = p.scaleType ?? 'linear';
+  const requestedScaleType = p.scaleType ?? 'linear';
 
-  const plotWidth = Math.max(1, toNumber(p.plotWidth ?? p.axisLength, 200));
-  const plotHeight = Math.max(1, toNumber(p.plotHeight ?? p.axisLength, 120));
+  const inputsByHandle = ctx.inputs?.byTargetHandle ?? {};
 
-  const xDomainMin = toNumber(p.xDomainMin ?? p.domainMin, 0);
-  const xDomainMax = toNumber(p.xDomainMax ?? p.domainMax, 100);
-  const yDomainMin = toNumber(p.yDomainMin ?? p.domainMin, 0);
-  const yDomainMax = toNumber(p.yDomainMax ?? p.domainMax, 100);
+  const xScaleInput = getScaleInput(inputsByHandle, 'xScale');
+  const yScaleInput = getScaleInput(inputsByHandle, 'yScale');
+
+  const showX = axisMode === 'x' || axisMode === 'xy';
+  const showY = axisMode === 'y' || axisMode === 'xy';
+
+  if (!showX && xScaleInput) {
+    warnings.push('xScale input ignored because axisMode does not include x axis.');
+  }
+
+  if (!showY && yScaleInput) {
+    warnings.push('yScale input ignored because axisMode does not include y axis.');
+  }
+
+  const xScale = showX ? xScaleInput?.scale : null;
+  const yScale = showY ? yScaleInput?.scale : null;
+
+  const xScaleType = xScale?.scaleType ?? requestedScaleType ?? 'linear';
+  const yScaleType = yScale?.scaleType ?? requestedScaleType ?? 'linear';
+
+  const xIsDiscrete = isDiscretePositionScale(xScaleType);
+  const yIsDiscrete = isDiscretePositionScale(yScaleType);
+
+  const xDomain = xScale?.domain ?? [
+    toNumber(p.xDomainMin ?? p.domainMin, 0),
+    toNumber(p.xDomainMax ?? p.domainMax, 100),
+  ];
+
+  const yDomain = yScale?.domain ?? [
+    toNumber(p.yDomainMin ?? p.domainMin, 0),
+    toNumber(p.yDomainMax ?? p.domainMax, 100),
+  ];
+
+  const plotWidth = Math.max(
+    1,
+    xScale
+      ? getRangeLength(xScale.range, toNumber(p.plotWidth ?? p.axisLength, 200))
+      : toNumber(p.plotWidth ?? p.axisLength, 200)
+  );
+
+  const plotHeight = Math.max(
+    1,
+    yScale
+      ? getRangeLength(yScale.range, toNumber(p.plotHeight ?? p.axisLength, 120))
+      : toNumber(p.plotHeight ?? p.axisLength, 120)
+  );
+
+  const xDomainMin = xIsDiscrete ? null : toNumber(xDomain[0], 0);
+  const xDomainMax = xIsDiscrete ? null : toNumber(xDomain[1], 100);
+  const yDomainMin = yIsDiscrete ? null : toNumber(yDomain[0], 0);
+  const yDomainMax = yIsDiscrete ? null : toNumber(yDomain[1], 100);
 
   const xTickCount = Math.max(1, Math.round(toNumber(p.xTickCount ?? p.tickCount, 5)));
   const yTickCount = Math.max(1, Math.round(toNumber(p.yTickCount ?? p.tickCount, 5)));
@@ -29,26 +84,22 @@ export function evalAxisGenerator(ctx) {
   const strokeColor = p.strokeColor ?? '#000000';
   const strokeWidth = Math.max(0, toNumber(p.strokeWidth, 1));
   const textColor = p.textColor ?? '#000000';
+  const originMarkerFill = p.originMarkerFill ?? '#ffffff';
 
-  const showX = axisMode === 'x' || axisMode === 'xy';
-  const showY = axisMode === 'y' || axisMode === 'xy';
-
-  if (scaleType !== 'linear') {
-    warnings.push(
-      `Scale type "${scaleType}" is reserved for later. Linear scale is used for now.`
-    );
-  }
-
-  if (showX && xDomainMax === xDomainMin) {
+  if (showX && !xIsDiscrete && xDomainMax === xDomainMin) {
     warnings.push('xDomainMax equals xDomainMin. X axis positions collapse to 0.');
   }
 
-  if (showY && yDomainMax === yDomainMin) {
+  if (showY && !yIsDiscrete && yDomainMax === yDomainMin) {
     warnings.push('yDomainMax equals yDomainMin. Y axis positions collapse to 0.');
   }
 
   const xTicks = showX
-    ? makeLinearTicks({
+    ? makeAxisTicks({
+        axis: 'x',
+        scaleInput: xScaleInput,
+        scaleType: xScaleType,
+        domain: xDomain,
         domainMin: xDomainMin,
         domainMax: xDomainMax,
         length: plotWidth,
@@ -58,7 +109,11 @@ export function evalAxisGenerator(ctx) {
     : [];
 
   const yTicks = showY
-    ? makeLinearTicks({
+    ? makeAxisTicks({
+        axis: 'y',
+        scaleInput: yScaleInput,
+        scaleType: yScaleType,
+        domain: yDomain,
         domainMin: yDomainMin,
         domainMax: yDomainMax,
         length: plotHeight,
@@ -67,30 +122,32 @@ export function evalAxisGenerator(ctx) {
       })
     : [];
 
-  const xZeroPosition = domainIncludesZero(xDomainMin, xDomainMax)
-    ? mapLinearValue({
-        value: 0,
-        domainMin: xDomainMin,
-        domainMax: xDomainMax,
-        length: plotWidth,
-      })
-    : null;
+  const xZeroPosition =
+    showX && !xIsDiscrete && domainIncludesZero(xDomainMin, xDomainMax)
+      ? mapLinearValue({
+          value: 0,
+          domainMin: xDomainMin,
+          domainMax: xDomainMax,
+          length: plotWidth,
+        })
+      : null;
 
-  const yZeroPosition = domainIncludesZero(yDomainMin, yDomainMax)
-    ? mapLinearValue({
-        value: 0,
-        domainMin: yDomainMin,
-        domainMax: yDomainMax,
-        length: plotHeight,
-      })
-    : null;
+  const yZeroPosition =
+    showY && !yIsDiscrete && domainIncludesZero(yDomainMin, yDomainMax)
+      ? mapLinearValue({
+          value: 0,
+          domainMin: yDomainMin,
+          domainMax: yDomainMax,
+          length: plotHeight,
+        })
+      : null;
 
   // Visual coordinate system:
   // x range: 0 → plotWidth
   // y range: 0 → -plotHeight
   //
-  // xAxisY is where x axis is drawn.
-  // yAxisX is where y axis is drawn.
+  // For discrete scale, there is no mathematical zero.
+  // Axis falls back to the bottom / left edge.
   const xAxisY = showY
     ? (yZeroPosition == null ? 0 : -yZeroPosition)
     : 0;
@@ -117,41 +174,45 @@ export function evalAxisGenerator(ctx) {
     );
 
     xTicks.forEach((tick, index) => {
-    const isOriginTick = axisMode === 'xy' && isZeroTick(tick);
+      const isOriginTick =
+        axisMode === 'xy' &&
+        !xIsDiscrete &&
+        !yIsDiscrete &&
+        isZeroTick(tick);
 
-    // In 2D mode, the origin should be marked by a small circle,
-    // not by overlapping x/y tick marks.
-    if (!isOriginTick) {
+      // In 2D continuous mode, the origin is marked by one shared marker.
+      // Do not draw overlapping x/y tick marks at the origin.
+      if (!isOriginTick) {
         children.push(
-            makeTickLineElement({
-                ctx,
-                idSuffix: `x-tick-line-${index}`,
-                role: 'x-axis-tick',
-                axis: 'x',
-                x: tick.position,
-                y: xAxisY,
-                tickSize,
-                strokeColor,
-                strokeWidth,
-                dataRef: tickDataRef(index, tick),
-            })
+          makeTickLineElement({
+            ctx,
+            idSuffix: `x-tick-line-${index}`,
+            role: 'x-axis-tick',
+            axis: 'x',
+            x: tick.position,
+            y: xAxisY,
+            tickSize,
+            strokeColor,
+            strokeWidth,
+            dataRef: tickDataRef(index, tick),
+          })
         );
-    }
+      }
 
-    children.push(
-            makeTickLabelElement({
-                ctx,
-                idSuffix: `x-tick-label-${index}`,
-                role: 'x-axis-label',
-                axis: 'x',
-                x: tick.position + (isOriginTick ? originLabelOffsetX : 0),
-                y: xAxisY + labelOffset,
-                text: tick.label,
-                fontSize,
-                textColor,
-                dataRef: tickDataRef(index, tick),
-            })
-        );
+      children.push(
+        makeTickLabelElement({
+          ctx,
+          idSuffix: `x-tick-label-${index}`,
+          role: 'x-axis-label',
+          axis: 'x',
+          x: tick.position + (isOriginTick ? originLabelOffsetX : 0),
+          y: xAxisY + labelOffset,
+          text: tick.label,
+          fontSize,
+          textColor,
+          dataRef: tickDataRef(index, tick),
+        })
+      );
     });
   }
 
@@ -171,58 +232,90 @@ export function evalAxisGenerator(ctx) {
     );
 
     yTicks.forEach((tick, index) => {
-    const y = -tick.position;
-    const isOriginTick = axisMode === 'xy' && isZeroTick(tick);
+      const y = -tick.position;
 
-    // In 2D mode, the origin is represented by the shared origin marker.
-    // Do not draw a second y-axis zero tick or zero label.
-    if (!isOriginTick) {
+      const isOriginTick =
+        axisMode === 'xy' &&
+        !xIsDiscrete &&
+        !yIsDiscrete &&
+        isZeroTick(tick);
+
+      // In 2D continuous mode, do not draw a second y-axis zero tick or zero label.
+      if (!isOriginTick) {
         children.push(
-        makeTickLineElement({
-                ctx,
-                idSuffix: `y-tick-line-${index}`,
-                role: 'y-axis-tick',
-                axis: 'y',
-                x: yAxisX,
-                y,
-                tickSize,
-                strokeColor,
-                strokeWidth,
-                dataRef: tickDataRef(index, tick),
-            })
+          makeTickLineElement({
+            ctx,
+            idSuffix: `y-tick-line-${index}`,
+            role: 'y-axis-tick',
+            axis: 'y',
+            x: yAxisX,
+            y,
+            tickSize,
+            strokeColor,
+            strokeWidth,
+            dataRef: tickDataRef(index, tick),
+          })
         );
 
         children.push(
-            makeTickLabelElement({
-                    ctx,
-                    idSuffix: `y-tick-label-${index}`,
-                    role: 'y-axis-label',
-                    axis: 'y',
-                    x: yAxisX - labelOffset,
-                    y,
-                    text: tick.label,
-                    fontSize,
-                    textColor,
-                    dataRef: tickDataRef(index, tick),
-                })
-            );
-        }
+          makeTickLabelElement({
+            ctx,
+            idSuffix: `y-tick-label-${index}`,
+            role: 'y-axis-label',
+            axis: 'y',
+            x: yAxisX - labelOffset,
+            y,
+            text: tick.label,
+            fontSize,
+            textColor,
+            dataRef: tickDataRef(index, tick),
+          })
+        );
+      }
     });
   }
 
-  if (axisMode === 'xy' && xZeroPosition != null && yZeroPosition != null) {
+  if (
+    axisMode === 'xy' &&
+    !xIsDiscrete &&
+    !yIsDiscrete &&
+    xZeroPosition != null &&
+    yZeroPosition != null
+  ) {
     children.push(
-                makeOriginMarkerElement({
-                ctx,
-                x: yAxisX,
-                y: xAxisY,
-                radius: originMarkerRadius,
-                strokeColor,
-                strokeWidth,
-                strokeColor,
-            })
-        );
-    }
+      makeOriginMarkerElement({
+        ctx,
+        x: yAxisX,
+        y: xAxisY,
+        radius: originMarkerRadius,
+        strokeColor,
+        strokeWidth,
+        fillColor: originMarkerFill,
+      })
+    );
+  }
+
+  const scaleInputsForProvenance = [
+    showX ? xScaleInput?.output : null,
+    showY ? yScaleInput?.output : null,
+  ].filter(Boolean);
+
+  const inputProvenance = inheritProvenance(...scaleInputsForProvenance);
+
+  const ownProvenanceEntry = makeProvenanceEntry({
+    nodeId: ctx.nodeId,
+    role: axisMode === 'xy' ? 'axis-system-generator' : 'axis-generator',
+    outputType: 'visual',
+    label: 'Axis Generator Output',
+    transform: {
+      type: 'generate-axis-system',
+      axisMode,
+      xScaleType,
+      yScaleType,
+      plotWidth,
+      plotHeight,
+    },
+  });
 
   return {
     outputType: 'visual',
@@ -246,7 +339,7 @@ export function evalAxisGenerator(ctx) {
 
       meta: {
         role: axisMode === 'xy' ? 'axis-system' : 'axis',
-        tags: ['axis-generator', 'axis', axisMode, scaleType],
+        tags: ['axis-generator', 'axis', axisMode, xScaleType, yScaleType],
         sourceNodeId: ctx.nodeId,
       },
     },
@@ -257,9 +350,12 @@ export function evalAxisGenerator(ctx) {
       outputRole: axisMode === 'xy' ? 'axis-system' : 'axis',
       warnings,
 
+      provenance: [
+        ...inputProvenance,
+        ownProvenanceEntry,
+      ],
+
       coordinateSystem: {
-        scaleType: 'linear',
-        requestedScaleType: scaleType,
         axisMode,
 
         plotSize: {
@@ -270,6 +366,12 @@ export function evalAxisGenerator(ctx) {
         origin: {
           x: yAxisX,
           y: xAxisY,
+          hasOrigin:
+            axisMode === 'xy' &&
+            !xIsDiscrete &&
+            !yIsDiscrete &&
+            xZeroPosition != null &&
+            yZeroPosition != null,
           source: {
             x: xZeroPosition == null ? 'left-edge' : 'x-domain-zero',
             y: yZeroPosition == null ? 'bottom-edge' : 'y-domain-zero',
@@ -278,38 +380,72 @@ export function evalAxisGenerator(ctx) {
 
         x: showX
           ? {
-              domain: [xDomainMin, xDomainMax],
+              scaleType: xScaleType,
+              scaleFamily: xIsDiscrete ? 'discrete-position' : 'continuous-position',
+
+              domain: xDomain,
               range: [0, plotWidth],
+
               zeroPosition: xZeroPosition,
+              hasZero: xZeroPosition != null,
               axisY: xAxisY,
+
+              bandwidth: xScale?.d3?.bandwidth ?? xScale?.bandwidth ?? null,
+              step: xScale?.d3?.step ?? xScale?.step ?? null,
+
+              sourceScale: xScaleInput
+                ? makeSourceScaleSummary({
+                    scaleInput: xScaleInput,
+                    interpretedRange: [0, plotWidth],
+                  })
+                : null,
+
               ticks: xTicks.map((tick) => ({
                 value: tick.value,
                 label: tick.label,
-                normalized: tick.normalized,
+                normalized: tick.normalized ?? null,
                 position: tick.position,
                 visualPosition: {
                   x: tick.position,
                   y: xAxisY,
                 },
+                source: tick.source ?? 'axis-generator',
               })),
             }
           : null,
 
         y: showY
           ? {
-              domain: [yDomainMin, yDomainMax],
+              scaleType: yScaleType,
+              scaleFamily: yIsDiscrete ? 'discrete-position' : 'continuous-position',
+
+              domain: yDomain,
               range: [0, -plotHeight],
+
               zeroPosition: yZeroPosition == null ? null : -yZeroPosition,
+              hasZero: yZeroPosition != null,
               axisX: yAxisX,
+
+              bandwidth: yScale?.d3?.bandwidth ?? yScale?.bandwidth ?? null,
+              step: yScale?.d3?.step ?? yScale?.step ?? null,
+
+              sourceScale: yScaleInput
+                ? makeSourceScaleSummary({
+                    scaleInput: yScaleInput,
+                    interpretedRange: [0, -plotHeight],
+                  })
+                : null,
+
               ticks: yTicks.map((tick) => ({
                 value: tick.value,
                 label: tick.label,
-                normalized: tick.normalized,
+                normalized: tick.normalized ?? null,
                 position: -tick.position,
                 visualPosition: {
                   x: yAxisX,
                   y: -tick.position,
                 },
+                source: tick.source ?? 'axis-generator',
               })),
             }
           : null,
@@ -503,6 +639,167 @@ function makeLineStyle(strokeColor, strokeWidth) {
   };
 }
 
+function makeAxisTicks({
+  axis,
+  scaleInput,
+  scaleType,
+  domain,
+  domainMin,
+  domainMax,
+  length,
+  tickCount,
+  decimalPlaces,
+}) {
+  if (scaleType === 'band') {
+    return makeBandAxisTicks({
+      scaleInput,
+      domain,
+      length,
+    });
+  }
+
+  if (scaleType === 'point') {
+    return makePointAxisTicks({
+      scaleInput,
+      domain,
+      length,
+    });
+  }
+
+  return makeLinearTicks({
+    domainMin,
+    domainMax,
+    length,
+    tickCount,
+    decimalPlaces,
+  }).map((tick) => ({
+    ...tick,
+    source: 'continuous-scale',
+  }));
+}
+
+function makeBandAxisTicks({
+  scaleInput,
+  domain,
+  length,
+}) {
+  const sourceScale = scaleInput?.scale;
+  const sourceItems = scaleInput?.items;
+
+  if (Array.isArray(sourceItems) && sourceItems.length > 0) {
+    return sourceItems
+      .filter((item) => item.center != null)
+      .map((item, index) => ({
+        value: item.category ?? item.value,
+        label: String(item.category ?? item.value),
+        normalized: null,
+        position: normalizeDiscretePositionFromItem({
+          item,
+          sourceScale,
+          length,
+          preferredPosition: 'center',
+        }),
+        source: 'band-scale-items',
+        index,
+      }));
+  }
+
+  const domainValues = Array.isArray(domain) ? domain : [];
+
+  const scale = scaleBand()
+    .domain(domainValues)
+    .range([0, length])
+    .paddingInner(sourceScale?.d3?.paddingInner ?? sourceScale?.paddingInner ?? 0.1)
+    .paddingOuter(sourceScale?.d3?.paddingOuter ?? sourceScale?.paddingOuter ?? 0.1);
+
+  const bandwidth = scale.bandwidth();
+
+  return domainValues.map((value, index) => ({
+    value,
+    label: String(value),
+    normalized: null,
+    position: scale(value) + bandwidth / 2,
+    source: 'band-scale-rebuilt',
+    index,
+  }));
+}
+
+function makePointAxisTicks({
+  scaleInput,
+  domain,
+  length,
+}) {
+  const sourceScale = scaleInput?.scale;
+  const sourceItems = scaleInput?.items;
+
+  if (Array.isArray(sourceItems) && sourceItems.length > 0) {
+    return sourceItems
+      .filter((item) => item.center != null || item.position != null)
+      .map((item, index) => ({
+        value: item.category ?? item.value,
+        label: String(item.category ?? item.value),
+        normalized: null,
+        position: normalizeDiscretePositionFromItem({
+          item,
+          sourceScale,
+          length,
+          preferredPosition: 'center',
+        }),
+        source: 'point-scale-items',
+        index,
+      }));
+  }
+
+  const domainValues = Array.isArray(domain) ? domain : [];
+
+  const scale = scalePoint()
+    .domain(domainValues)
+    .range([0, length])
+    .padding(sourceScale?.d3?.paddingOuter ?? sourceScale?.paddingOuter ?? 0.1);
+
+  return domainValues.map((value, index) => ({
+    value,
+    label: String(value),
+    normalized: null,
+    position: scale(value),
+    source: 'point-scale-rebuilt',
+    index,
+  }));
+}
+
+function normalizeDiscretePositionFromItem({
+  item,
+  sourceScale,
+  length,
+  preferredPosition,
+}) {
+  const rawRange = sourceScale?.range;
+
+  const rawPosition =
+    preferredPosition === 'center'
+      ? item.center ?? item.position ?? item.start
+      : item.position ?? item.start ?? item.center;
+
+  const n = Number(rawPosition);
+
+  if (!Number.isFinite(n)) return 0;
+
+  if (!Array.isArray(rawRange) || rawRange.length < 2) {
+    return Math.abs(n);
+  }
+
+  const r0 = Number(rawRange[0]);
+  const r1 = Number(rawRange[1]);
+
+  if (!Number.isFinite(r0) || !Number.isFinite(r1) || r0 === r1) {
+    return Math.abs(n);
+  }
+
+  const t = (n - r0) / (r1 - r0);
+
+  return t * length;
+}
+
 function makeLinearTicks({
   domainMin,
   domainMax,
@@ -578,13 +875,16 @@ function tickDataRef(index, tick) {
   return {
     index,
     value: tick.value,
-    normalized: tick.normalized,
+    normalized: tick.normalized ?? null,
     label: tick.label,
     position: tick.position,
+    source: tick.source ?? null,
   };
 }
 
 function domainIncludesZero(domainMin, domainMax) {
+  if (!Number.isFinite(domainMin) || !Number.isFinite(domainMax)) return false;
+
   const min = Math.min(domainMin, domainMax);
   const max = Math.max(domainMin, domainMax);
 
@@ -673,4 +973,74 @@ function makeOriginMarkerElement({
 
 function isZeroTick(tick) {
   return Math.abs(Number(tick.value)) < 1e-9;
+}
+
+function isDiscretePositionScale(scaleType) {
+  return scaleType === 'band' || scaleType === 'point';
+}
+
+function getScaleInput(inputsByHandle, handleId) {
+  const input = inputsByHandle?.[handleId]?.[0];
+  const output = input?.value;
+  const scale = output?.meta?.scale;
+
+  if (!input || !output || !scale) return null;
+
+  return {
+    input,
+    output,
+    scale,
+    items: output.meta?.items ?? null,
+  };
+}
+
+function getRangeLength(range, fallback) {
+  if (!Array.isArray(range) || range.length < 2) {
+    return Math.max(1, fallback);
+  }
+
+  const start = Number(range[0]);
+  const end = Number(range[1]);
+
+  if (!Number.isFinite(start) || !Number.isFinite(end)) {
+    return Math.max(1, fallback);
+  }
+
+  return Math.abs(end - start);
+}
+
+function makeSourceScaleSummary({ scaleInput, interpretedRange }) {
+  const inputItem = scaleInput.input;
+  const output = scaleInput.output;
+  const scale = scaleInput.scale;
+  const edge = inputItem.edge ?? {};
+
+  return {
+    sourceNodeId: inputItem.from ?? output.meta?.sourceNodeId ?? null,
+    sourceHandle: edge.sourceHandle ?? null,
+    targetHandle: edge.targetHandle ?? null,
+    edgeId: edge.id ?? null,
+
+    scaleId: scale.scaleId ?? null,
+    scaleType: scale.scaleType,
+    scaleFamily: scale.scaleFamily ?? scale.d3?.scaleFamily ?? null,
+    requestedScaleType: scale.requestedScaleType,
+
+    domain: scale.domain,
+    originalRange: scale.range,
+    interpretedRange,
+
+    bandwidth: scale.d3?.bandwidth ?? scale.bandwidth ?? null,
+    step: scale.d3?.step ?? scale.step ?? null,
+    outputPosition: scale.outputPosition ?? null,
+
+    zeroInputValue: scale.zeroInputValue ?? null,
+    zeroOutputValue: scale.zeroOutputValue ?? null,
+
+    parameterSpace: scale.parameterSpace ?? null,
+
+    itemCount: Array.isArray(scaleInput.items) ? scaleInput.items.length : null,
+
+    provenance: inheritProvenance(output),
+  };
 }

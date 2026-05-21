@@ -1,4 +1,8 @@
 // src/evaluator/generators/evalShapeGenerator.js
+import {
+  inheritProvenance,
+  makeProvenanceEntry,
+} from '../utils/metaUtils.js';
 
 const STRUCTURAL_HANDLES = [
   'x',
@@ -28,6 +32,23 @@ export function evalShapeGenerator(ctx) {
 
   const hasFrameInput = hasHandleInput(inputsByHandle, 'frame');
   const hasStyleInput = hasHandleInput(inputsByHandle, 'style');
+
+  const parameterSources = collectParameterSources(inputsByHandle, [
+  'x',
+  'y',
+  'width',
+  'height',
+  'radius',
+  'cornerRadius',
+  'alignX',
+  'alignY',
+  'fill',
+  'stroke',
+  'strokeWidth',
+  'opacity',
+  'frame',
+  'style',
+  ]);
 
   const streams = buildParamStreams({
     ctx,
@@ -59,6 +80,20 @@ export function evalShapeGenerator(ctx) {
       resolved,
     }));
   }
+
+    const inputProvenance = collectInputProvenanceFromSources(parameterSources);
+
+    const ownProvenanceEntry = makeProvenanceEntry({
+    nodeId: ctx.nodeId,
+    role: 'shape-generator',
+    outputType: 'visual',
+    label: 'Generated Shape Collection',
+    transform: {
+        type: 'generate-visual-elements',
+        shapeType,
+        count,
+    },
+    });
 
   return {
     outputType: 'visual',
@@ -97,6 +132,8 @@ export function evalShapeGenerator(ctx) {
         resolved: {
             count,
         },
+
+        parameterSources,
         },
     },
 
@@ -106,7 +143,14 @@ export function evalShapeGenerator(ctx) {
         outputRole: 'generated-visual-collection',
         warnings,
         resolvedCount: count,
-    },
+
+        provenance: [
+            ...inputProvenance,
+            ownProvenanceEntry,
+        ],
+
+        parameterSources,
+        },
     };
 }
 
@@ -723,4 +767,73 @@ function clampNumber(value, min, max) {
   if (!Number.isFinite(n)) return min;
 
   return Math.max(min, Math.min(max, n));
+}
+
+function collectParameterSources(inputsByHandle, handles) {
+  const result = {};
+
+  handles.forEach((handleId) => {
+    const input = inputsByHandle?.[handleId]?.[0];
+    const output = input?.value;
+
+    if (!output) return;
+
+    result[handleId] = makeParameterSourceSummary({
+      handleId,
+      input,
+      output,
+    });
+  });
+
+  return result;
+}
+
+function makeParameterSourceSummary({ handleId, input, output }) {
+  const meta = output.meta ?? {};
+  const edge = input.edge ?? {};
+
+  return {
+    targetHandle: handleId,
+
+    sourceNodeId: input.from ?? meta.sourceNodeId ?? null,
+    sourceHandle: edge.sourceHandle ?? null,
+    targetHandleFromEdge: edge.targetHandle ?? handleId,
+
+    edgeId: edge.id ?? null,
+
+    outputType: output.outputType,
+    dataType: output.dataType,
+    parameterType: output.parameterType,
+
+    parameterSpace: meta.scale ? 'scaled-visual' : 'visual',
+    scale: meta.scale ?? null,
+
+    label: meta.label ?? null,
+    role: meta.role ?? null,
+
+    provenance: inheritProvenance(output),
+  };
+}
+
+function collectInputProvenanceFromSources(parameterSources) {
+  return Object.values(parameterSources).flatMap((source) => {
+    if (Array.isArray(source.provenance) && source.provenance.length > 0) {
+      return source.provenance;
+    }
+
+    if (source.sourceNodeId) {
+      return [
+        {
+          sourceNodeId: source.sourceNodeId,
+          role: source.role,
+          label: source.label,
+          outputType: source.outputType,
+          dataType: source.dataType,
+          parameterType: source.parameterType,
+        },
+      ];
+    }
+
+    return [];
+  });
 }

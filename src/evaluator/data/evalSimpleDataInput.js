@@ -6,14 +6,18 @@ export function evalSimpleDataInput(ctx) {
   const rawText = p.rawText ?? getDefaultText(mode);
 
   if (mode === 'number') {
+    const value = parseNumber(rawText);
+
     return {
       outputType: 'data',
       version: '0.1',
       dataType: 'number',
-      value: parseNumber(rawText),
+      value,
       meta: {
         sourceNodeId: ctx.nodeId,
         label: 'Simple Number',
+        valueType: 'number',
+        rawText,
       },
     };
   }
@@ -30,18 +34,24 @@ export function evalSimpleDataInput(ctx) {
       meta: {
         sourceNodeId: ctx.nodeId,
         label: 'Simple Table',
+        rawText,
       },
     };
   }
+
+  const array = parseAutoArray(rawText);
 
   return {
     outputType: 'data',
     version: '0.1',
     dataType: 'array',
-    values: parseNumberArray(rawText),
+    values: array.values,
     meta: {
       sourceNodeId: ctx.nodeId,
       label: 'Simple Array',
+      valueType: array.valueType,
+      rawItems: array.rawItems,
+      rawText,
     },
   };
 }
@@ -57,13 +67,36 @@ function parseNumber(text) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function parseNumberArray(text) {
-  const values = String(text)
+function parseAutoArray(text) {
+  const rawItems = String(text)
     .split(/[\n,]+/)
-    .map((s) => Number(s.trim()))
-    .filter((n) => Number.isFinite(n));
+    .map((s) => s.trim())
+    .filter(Boolean);
 
-  return values.length ? values : [];
+  if (!rawItems.length) {
+    return {
+      values: [],
+      rawItems: [],
+      valueType: 'empty',
+    };
+  }
+
+  const numericValues = rawItems.map((item) => Number(item));
+  const allNumbers = numericValues.every((n) => Number.isFinite(n));
+
+  if (allNumbers) {
+    return {
+      values: numericValues,
+      rawItems,
+      valueType: 'number',
+    };
+  }
+
+  return {
+    values: rawItems,
+    rawItems,
+    valueType: 'string',
+  };
 }
 
 function parseCsvTable(text) {

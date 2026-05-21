@@ -62,6 +62,10 @@ function getNodeBounds(node) {
     localBounds = getElementContentBounds(node);
   }
 
+  if (node.nodeType === 'procedural') {
+    localBounds = getProceduralBounds(node);
+  }
+
   const childBounds = unionBounds((node.children ?? []).map(getNodeBounds));
   localBounds = unionBounds([localBounds, childBounds]);
 
@@ -136,6 +140,32 @@ function getElementContentBounds(node) {
     const h = Number(content.height ?? node.frame?.height ?? 100);
 
     return makeBounds(x, y, x + w, y + h);
+  }
+
+  return getFrameFallbackBounds(node);
+}
+
+function getProceduralBounds(node) {
+  const bounds = node.geometrySummary?.bounds;
+
+  if (bounds) {
+    const minX = Number(bounds.minX);
+    const minY = Number(bounds.minY);
+    const maxX = Number(bounds.maxX);
+    const maxY = Number(bounds.maxY);
+
+    if ([minX, minY, maxX, maxY].every(Number.isFinite)) {
+      return makeBounds(minX, minY, maxX, maxY);
+    }
+
+    const x = Number(bounds.x ?? 0);
+    const y = Number(bounds.y ?? 0);
+    const width = Number(bounds.width);
+    const height = Number(bounds.height);
+
+    if ([x, y, width, height].every(Number.isFinite)) {
+      return makeBounds(x, y, x + width, y + height);
+    }
   }
 
   return getFrameFallbackBounds(node);

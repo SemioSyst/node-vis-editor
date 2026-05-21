@@ -1,6 +1,7 @@
 // src/renderer/renderVisualNode.jsx
 
 import { renderSvgElement } from './renderSvgElement.jsx';
+import ProceduralRenderer from './procedural/ProceduralRenderer.jsx';
 
 function buildTransform(node) {
   const frame = node.frame ?? {};
@@ -266,6 +267,33 @@ function renderGroupLikeNode(node, ctx) {
   );
 }
 
+function renderProceduralNode(node, ctx) {
+  const transform = buildTransform(node);
+  const interactionProps = buildInteractionProps(node);
+
+  return (
+    <g
+      key={node.id}
+      transform={transform}
+      opacity={node.opacity}
+      {...interactionProps}
+    >
+      {renderHitArea(node)}
+
+      <ProceduralRenderer
+        node={node}
+        renderFrame={ctx.renderFrame}
+        renderOptions={ctx.renderOptions}
+        ctx={ctx}
+      />
+
+      {(node.children ?? []).map((child, i) =>
+        renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
+      )}
+    </g>
+  );
+}
+
 export function renderVisualNode(node, ctx = {}) {
   if (!node) return null;
 
@@ -288,6 +316,9 @@ export function renderVisualNode(node, ctx = {}) {
     case 'container':
     case 'layer':
       return renderGroupLikeNode(node, ctx);
+
+    case 'procedural':
+      return renderProceduralNode(node, ctx);
 
     default:
       console.warn('[renderVisualNode] Unsupported visual node:', node);

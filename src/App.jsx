@@ -14,6 +14,9 @@ import TransformInteractionTestNode from './CustomNodes/TransformInteractionTest
 import ShapeGeneratorNode from './CustomNodes/ShapeGeneratorNode.jsx';
 import SimpleDataInputNode from './CustomNodes/SimpleDataInputNode.jsx';
 import AxisGeneratorNode from './CustomNodes/AxisGeneratorNode.jsx';
+import ScaleMapperNode from './CustomNodes/ScaleMapperNode.jsx';
+import D3AxisGeneratorNode from './CustomNodes/D3AxisGeneratorNode.jsx';
+import CoordinateGroupNode from './CustomNodes/CoordinateGroupNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -34,33 +37,13 @@ const NODE_LIBRARY = [
   { type: 'shapeGenerator', label: 'Shape Generator', defaultData: { } },
   { type: 'simpleDataInput', label: 'Simple Data Input', defaultData: { } },
   { type: 'axisGenerator', label: 'Axis Generator', defaultData: { } },
+  { type: 'scaleMapper', label: 'Scale Mapper', defaultData: { } },
+  { type: 'd3AxisGenerator', label: 'Axis Generator(D3)', defaultData: { } },
+  { type: 'coordinateGroup', label: 'Coordinate Group', defaultData: { } },
 ];
 
 //Initial Nodes and Edges
 const initialNodes = [
-  { id: 'c1', type: 'circle', position: { x: -260, y: -100 }, data: {} },
-  { id: 'r1', type: 'rect', position: { x: -260, y: 200 }, data: {} },
-  { id: 'l1', type: 'line', position: { x: -260, y: 600 }, data: {} },
-
-  { id: 'g1', type: 'group', position: { x: 100, y: 200 }, data: {} },
-  { id: 'p1', type: 'previewNode', position: { x: 360, y: 200 }, data: { label: 'Preview' } },
-
-  { id: 'test1', type: 'testVisual', position: { x: 300, y: -120 }, data: {} },
-  { id: 'preview-test', type: 'previewNode', position: { x: 600, y: -120 }, data: { label: 'Preview Test' } },
-
-  {
-  id: 'transform-test-1',
-  type: 'transformInteractionTest',
-  position: { x: 300, y: -180 },
-  data: {},
-  },
-  {
-    id: 'preview-transform-test',
-    type: 'previewNode',
-    position: { x: 620, y: -180 },
-    data: { label: 'Transform Test Preview' },
-  },
-
   {
     id: 'data-x-mismatch',
     type: 'simpleDataInput',
@@ -158,21 +141,76 @@ const initialNodes = [
     position: { x: 280, y: 60 },
     data: { label: 'Opacity Preview' },
   },
+
+  {
+    id: 'data-raw-values',
+    type: 'simpleDataInput',
+    position: { x: -720, y: 80 },
+    data: {
+      dataMode: 'array',
+      rawText: '1000,5000,10000,20000',
+    },
+  },
+
+  {
+    id: 'scale-height',
+    type: 'scaleMapper',
+    position: { x: -440, y: 80 },
+    data: {
+      scaleType: 'linear',
+      domainMode: 'auto',
+
+      domainMin: 0,
+      domainMax: 20000,
+
+      rangeMin: 0,
+      rangeMax: 100,
+
+      clamp: true,
+    },
+  },
+
+  {
+    id: 'shape-scaled-bars',
+    type: 'shapeGenerator',
+    position: { x: -120, y: 40 },
+    data: {
+      shapeType: 'rect',
+
+      defaultX: 0,
+      defaultY: 0,
+      defaultWidth: 12,
+      defaultHeight: 40,
+      cornerRadius: 0,
+
+      alignX: 'left',
+      alignY: 'bottom',
+
+      fillColor: '#5b78ff',
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      opacity: 0.75,
+
+      layoutAxis: 'x',
+      layoutGapX: 18,
+      layoutGapY: 18,
+    },
+  },
+
+  {
+    id: 'preview-scaled-bars',
+    type: 'previewNode',
+    position: { x: 260, y: 60 },
+    data: {
+      previewWidth: 320,
+      previewHeight: 220,
+      previewMode: 'fit',
+    },
+  },
+
 ];
 
 const initialEdges = [
-  { id: 'c1-g1', source: 'c1', target: 'g1' },
-  { id: 'r1-g1', source: 'r1', target: 'g1' },
-  { id: 'l1-g1', source: 'l1', target: 'g1' },
-  { id: 'g1-p1', source: 'g1', target: 'p1' },
-
-  { id: 'test1-preview-test', source: 'test1', target: 'preview-test' },
-  {
-    id: 'transform-test-1-preview-transform-test',
-    source: 'transform-test-1',
-    target: 'preview-transform-test',
-  },
-
   {
     id: 'data-x-mismatch-shape-generator-mismatch-x',
     source: 'data-x-mismatch',
@@ -207,6 +245,26 @@ const initialEdges = [
     source: 'shape-generator-opacity',
     target: 'preview-opacity',
   },
+
+  {
+    id: 'data-raw-values-scale-height',
+    source: 'data-raw-values',
+    target: 'scale-height',
+    targetHandle: 'input',
+  },
+
+  {
+    id: 'scale-height-shape-height',
+    source: 'scale-height',
+    target: 'shape-scaled-bars',
+    targetHandle: 'height',
+  },
+
+  {
+    id: 'shape-scaled-bars-preview',
+    source: 'shape-scaled-bars',
+    target: 'preview-scaled-bars',
+  },
 ];
 
 //Define custom node types
@@ -221,6 +279,9 @@ const nodeTypes = {
   shapeGenerator: ShapeGeneratorNode,
   simpleDataInput: SimpleDataInputNode,
   axisGenerator: AxisGeneratorNode,
+  scaleMapper: ScaleMapperNode,
+  d3AxisGenerator: D3AxisGeneratorNode,
+  coordinateGroup: CoordinateGroupNode,
 };
 
 //Main App Component

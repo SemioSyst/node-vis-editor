@@ -12,6 +12,9 @@ import { evalTransformInteractionTest } from './tests/evalTransformInteractionTe
 import { evalShapeGenerator } from './generators/evalShapeGenerator.js';
 import { evalSimpleDataInput } from './data/evalSimpleDataInput.js';
 import { evalAxisGenerator } from './generators/evalAxisGenerator.js';
+import { evalScaleMapper } from './mappers/evalScaleMapper.js';
+import { evalD3AxisGenerator } from './generators/evalD3AxisGenerator.js';
+import { evalCoordinateGroup } from './groups/evalCoordinateGroup.js';
 
 /**
  * Registry
@@ -30,4 +33,7 @@ export const evaluatorsByType = {
   shapeGenerator: evalShapeGenerator,
   simpleDataInput: evalSimpleDataInput,
   axisGenerator: evalAxisGenerator,
+  scaleMapper: evalScaleMapper,
+  d3AxisGenerator: evalD3AxisGenerator,
+  coordinateGroup: evalCoordinateGroup,
 };

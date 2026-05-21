@@ -8,14 +8,20 @@ import {
   NumberField,
   ColorField,
 } from './UI/NodeFields.jsx';
+import { PortStatusRow } from './UI/PortFields.jsx';
 import { useUpdateNodeData } from './UI/useUpdateNodeData.js';
+import { useNodeInputStates } from './UI/useNodeInputStates.js';
 
 export default function AxisGeneratorNode({ id, data }) {
   const update = useUpdateNodeData(id);
+  const { isConnected } = useNodeInputStates(id);
 
   const axisMode = data.axisMode ?? 'xy';
   const showX = axisMode === 'x' || axisMode === 'xy';
   const showY = axisMode === 'y' || axisMode === 'xy';
+
+  const xScaleControlled = showX && isConnected('xScale');
+  const yScaleControlled = showY && isConnected('yScale');
 
   return (
     <NodeShell
@@ -51,12 +57,36 @@ export default function AxisGeneratorNode({ id, data }) {
         />
       </NodeSection>
 
+      <NodeSection
+        title="Scale Inputs"
+        subtitle="Optional scale metadata from ScaleMapper"
+      >
+        {showX && (
+          <PortStatusRow
+            handleId="xScale"
+            label="X Scale"
+            status="domain / width"
+            state={xScaleControlled ? 'controlled' : 'normal'}
+          />
+        )}
+
+        {showY && (
+          <PortStatusRow
+            handleId="yScale"
+            label="Y Scale"
+            status="domain / height"
+            state={yScaleControlled ? 'controlled' : 'normal'}
+          />
+        )}
+      </NodeSection>
+
       <NodeSection title="Plot Size" subtitle="Local coordinate space size">
         <NumberField
           label="Width"
           value={data.plotWidth ?? 200}
           onChange={(v) => update({ plotWidth: v })}
           min={1}
+          disabled={xScaleControlled}
         />
 
         <NumberField
@@ -64,6 +94,7 @@ export default function AxisGeneratorNode({ id, data }) {
           value={data.plotHeight ?? 120}
           onChange={(v) => update({ plotHeight: v })}
           min={1}
+          disabled={yScaleControlled}
         />
       </NodeSection>
 
@@ -73,12 +104,14 @@ export default function AxisGeneratorNode({ id, data }) {
             label="X Min"
             value={data.xDomainMin ?? 0}
             onChange={(v) => update({ xDomainMin: v })}
+            disabled={xScaleControlled}
           />
 
           <NumberField
             label="X Max"
             value={data.xDomainMax ?? 100}
             onChange={(v) => update({ xDomainMax: v })}
+            disabled={xScaleControlled}
           />
 
           <NumberField
@@ -96,12 +129,14 @@ export default function AxisGeneratorNode({ id, data }) {
             label="Y Min"
             value={data.yDomainMin ?? 0}
             onChange={(v) => update({ yDomainMin: v })}
+            disabled={yScaleControlled}
           />
 
           <NumberField
             label="Y Max"
             value={data.yDomainMax ?? 100}
             onChange={(v) => update({ yDomainMax: v })}
+            disabled={yScaleControlled}
           />
 
           <NumberField
@@ -130,7 +165,7 @@ export default function AxisGeneratorNode({ id, data }) {
         />
 
         <NumberField
-          label="Label Offset"
+          label="Label Off"
           value={data.labelOffset ?? 18}
           onChange={(v) => update({ labelOffset: v })}
           min={0}
@@ -146,25 +181,25 @@ export default function AxisGeneratorNode({ id, data }) {
 
       {axisMode === 'xy' && (
         <NodeSection
-            title="Origin"
-            subtitle="Origin marker settings"
+          title="Origin"
+          subtitle="Shared origin marker in 2D axis mode"
         >
-            <NumberField
+          <NumberField
             label="Marker R"
             value={data.originMarkerRadius ?? 3}
             onChange={(v) => update({ originMarkerRadius: v })}
             min={0}
             step={0.5}
-            />
+          />
 
-            <NumberField
-            label="Label Offset"
+          <NumberField
+            label="0 Offset X"
             value={data.originLabelOffsetX ?? 4}
             onChange={(v) => update({ originLabelOffsetX: v })}
             step={0.5}
-            />
+          />
         </NodeSection>
-        )}
+      )}
 
       <NodeSection title="Style" subtitle="Axis line, tick and label appearance">
         <ColorField

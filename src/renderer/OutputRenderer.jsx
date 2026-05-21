@@ -37,10 +37,18 @@ export default function OutputRenderer({
     >
       {renderFrame.mode === 'actual' ? (
         <div className="output-renderer-actual-inner">
-          <SvgRenderer spec={normalized} renderFrame={renderFrame} />
+          <SvgRenderer
+            spec={normalized}
+            renderFrame={renderFrame}
+            renderOptions={renderOptions}
+          />
         </div>
       ) : (
-        <SvgRenderer spec={normalized} renderFrame={renderFrame} />
+        <SvgRenderer
+          spec={normalized}
+          renderFrame={renderFrame}
+          renderOptions={renderOptions}
+        />
       )}
     </div>
   );

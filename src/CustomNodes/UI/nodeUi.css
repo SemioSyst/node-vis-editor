@@ -56,15 +56,33 @@
   font-size: 11px;
 }
 
+/* ---------- Normal node field states ---------- */
+
 .node-field {
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
-  gap: 7px;
+  gap: 6px;
   align-items: center;
 }
 
+.node-field__label-wrap {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
 .node-field__label {
-  opacity: 0.72;
+  font-size: 11px;
+  color: #d8d8d8;
+  opacity: 0.82;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.node-field__note {
+  font-size: 9px;
+  color: #8d8d8d;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -72,6 +90,41 @@
 
 .node-field__control {
   min-width: 0;
+}
+
+/* Controlled = externally driven but still meaningful */
+.node-field--controlled .node-field__label {
+  color: #9db7ff;
+  opacity: 0.75;
+}
+
+.node-field--controlled .node-field__note {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+.node-field--controlled .node-input,
+.node-field--controlled .node-textarea,
+.node-field--controlled .node-color {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Inactive = not used in current mode */
+.node-field--inactive {
+  opacity: 0.42;
+}
+
+.node-field--inactive .node-field__label,
+.node-field--inactive .node-field__note {
+  color: #777;
+}
+
+.node-field--inactive .node-input,
+.node-field--inactive .node-textarea,
+.node-field--inactive .node-color {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
 .node-input,
@@ -101,6 +154,15 @@
 .node-input:focus,
 .node-textarea:focus {
   border-color: #777;
+}
+
+/* Native disabled controls */
+.node-input:disabled,
+.node-textarea:disabled,
+.node-color:disabled {
+  color: #888;
+  background: #111;
+  border-color: #333;
 }
 
 .node-color-row {
@@ -342,4 +404,128 @@
 
 .resizable-panel__handle:hover {
   opacity: 1;
+}
+
+/* ---------- Unified controlled / inactive visual intensity ---------- */
+
+/* Make normal node fields match port fields when controlled */
+.node-field--controlled .node-field__label {
+  color: #9db7ff;
+  opacity: 0.75;
+}
+
+.node-field--controlled .node-field__note {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+.node-field--controlled .node-input,
+.node-field--controlled .node-textarea,
+.node-field--controlled .node-color {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Make normal node fields match port fields when inactive */
+.node-field--inactive {
+  opacity: 0.42;
+}
+
+.node-field--inactive .node-field__label,
+.node-field--inactive .node-field__note {
+  color: #777;
+}
+
+.node-field--inactive .node-input,
+.node-field--inactive .node-textarea,
+.node-field--inactive .node-color {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+/* Make advanced PortStatusRow handles show controlled state */
+.port-status-row--active .port-field__handle {
+  border-color: #6f8cff !important;
+  background: #1b2440 !important;
+}
+
+/* Make advanced PortStatusRow handle fade when inactive */
+.port-status-row--inactive .port-field__handle {
+  border-color: #555 !important;
+  background: #1a1a1a !important;
+  opacity: 0.45;
+}
+
+/* Make advanced PortStatusRow text match controlled field color */
+.port-status-row--active .port-status-row__label {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+.port-status-row--active .port-status-row__status {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+/* Stronger disabled visual consistency */
+.node-input:disabled,
+.node-textarea:disabled,
+.node-color:disabled {
+  color: #888;
+  background: #111;
+  border-color: #333;
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.coordinate-layer-list {
+  display: grid;
+  gap: 8px;
+}
+
+.coordinate-layer-row {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #151515;
+}
+
+.coordinate-layer-row__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coordinate-layer-row__drag {
+  color: #777;
+  cursor: grab;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.coordinate-layer-row__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: #ddd;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.coordinate-layer-row__button {
+  border: 1px solid #333;
+  background: #202020;
+  color: #ccc;
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 1px 5px;
+  cursor: pointer;
+}
+
+.coordinate-layer-row__button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
