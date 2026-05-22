@@ -119,6 +119,13 @@ export function evalScaleMapper(ctx) {
     return Number.isFinite(Number(mapped)) ? Number(mapped) : null;
   });
 
+  const mappedItems = makeMappedItems({
+    inputInfo,
+    inputValues,
+    mappedValues,
+    d3ScaleInfo,
+  });
+
   const zeroOutputValue =
     !isDiscreteScale &&
     d3ScaleInfo.canMapZero &&
@@ -160,7 +167,7 @@ export function evalScaleMapper(ctx) {
     parameterSpace: 'visual',
 
     // Important for downstream nodes:
-    // For band, values are currently band start positions.
+    // For band, values follow outputPosition.
     // AxisGenerator should usually use meta.items.center for tick positions.
     outputPosition: d3ScaleInfo.outputPosition,
 
@@ -231,20 +238,32 @@ export function evalScaleMapper(ctx) {
         outputType: inputOutput?.outputType,
         dataType: inputOutput?.dataType,
         parameterType: inputOutput?.parameterType,
+
         rawValues: inputInfo.rawValues,
         values: inputValues,
         valueType: inputInfo.valueType,
+
+        // Pass-through metadata for future TagMapper / BindingNode.
+        tags: inputInfo.tags ?? null,
+        taggedItems: inputInfo.taggedItems ?? null,
+
         meta: inputOutput?.meta ?? null,
       },
 
       scale: scaleMeta,
 
-      // Used by AxisGenerator / ChartSpace / later binding nodes.
-      // For band:
-      //   ShapeGenerator.x can use output.values as band starts.
-      //   AxisGenerator ticks should use item.center.
-      //   ShapeGenerator.width can later use scale.d3.bandwidth.
+      // Used by AxisGenerator / CoordinateGroup / future BindingNode.
+      // For band, output.values follow scale.outputPosition.
+      // Axis ticks should usually use meta.items.center.
       items: d3ScaleInfo.items,
+
+      // Per-index mapping summary.
+      // This is useful for downstream generators to preserve item-level lineage.
+      mappedItems,
+
+      // Pass-through tags from upstream data/parameter outputs.
+      tags: inputInfo.tags ?? null,
+      taggedItems: inputInfo.taggedItems ?? null,
     },
   };
 
@@ -278,6 +297,11 @@ function normalizeInputValues(output, { scaleType }) {
         rawValues,
         valueType: isDiscreteScale ? 'category' : 'number',
         sourceNodeId: output.meta?.sourceNodeId,
+
+        // New: preserve upstream identity/tag metadata.
+        tags: output.meta?.tags ?? null,
+        taggedItems: output.meta?.taggedItems ?? null,
+        inputMeta: output.meta ?? null,
       };
     }
 
@@ -298,6 +322,11 @@ function normalizeInputValues(output, { scaleType }) {
         rawValues,
         valueType: isDiscreteScale ? 'category' : 'number',
         sourceNodeId: output.meta?.sourceNodeId,
+
+        // New: preserve upstream identity/tag metadata.
+        tags: output.meta?.tags ?? null,
+        taggedItems: output.meta?.taggedItems ?? null,
+        inputMeta: output.meta ?? null,
       };
     }
   }
@@ -314,6 +343,11 @@ function normalizeInputValues(output, { scaleType }) {
         rawValues,
         valueType: isDiscreteScale ? 'category' : 'number',
         sourceNodeId: output.meta?.sourceNodeId,
+
+        // New: preserve upstream identity/tag metadata.
+        tags: output.meta?.tags ?? null,
+        taggedItems: output.meta?.taggedItems ?? null,
+        inputMeta: output.meta ?? null,
       };
     }
 
@@ -334,6 +368,11 @@ function normalizeInputValues(output, { scaleType }) {
         rawValues,
         valueType: isDiscreteScale ? 'category' : 'number',
         sourceNodeId: output.meta?.sourceNodeId,
+
+        // New: preserve upstream identity/tag metadata.
+        tags: output.meta?.tags ?? null,
+        taggedItems: output.meta?.taggedItems ?? null,
+        inputMeta: output.meta ?? null,
       };
     }
   }
@@ -667,4 +706,54 @@ function mapValueWithD3Scale(scaleInfo, value) {
   }
 
   return Number(base);
+}
+
+function makeMappedItems({
+  inputInfo,
+  inputValues,
+  mappedValues,
+  d3ScaleInfo,
+}) {
+  return inputValues.map((value, index) => {
+    const scaleItem = Array.isArray(d3ScaleInfo.items)
+      ? d3ScaleInfo.items[index] ?? null
+      : null;
+
+    const tags =
+      getTagsForIndexFromInputInfo(inputInfo, index) ??
+      scaleItem?.tags ??
+      null;
+
+    return {
+      index,
+
+      // rawValue is what came from the upstream output before normalization.
+      // For category scales this is usually the original category label.
+      rawValue: inputInfo.rawValues?.[index] ?? value,
+
+      // inputValue is the value actually passed into the D3 scale.
+      inputValue: value,
+
+      // mappedValue is the visual-space output from this ScaleMapper.
+      mappedValue: mappedValues[index] ?? null,
+
+      // For band / point scales, this records category/start/center/end.
+      // For continuous scales, it is usually null.
+      scaleItem,
+
+      // Tags are currently pass-through only.
+      // Future TagMapper can populate taggedItems or tags upstream.
+      tags,
+    };
+  });
+}
+
+function getTagsForIndexFromInputInfo(inputInfo, index) {
+  const taggedItems = inputInfo?.taggedItems;
+
+  if (Array.isArray(taggedItems)) {
+    return taggedItems[index]?.tags ?? null;
+  }
+
+  return inputInfo?.tags ?? null;
 }

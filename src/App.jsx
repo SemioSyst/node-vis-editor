@@ -17,6 +17,8 @@ import AxisGeneratorNode from './CustomNodes/AxisGeneratorNode.jsx';
 import ScaleMapperNode from './CustomNodes/ScaleMapperNode.jsx';
 import D3AxisGeneratorNode from './CustomNodes/D3AxisGeneratorNode.jsx';
 import CoordinateGroupNode from './CustomNodes/CoordinateGroupNode.jsx';
+import TextGeneratorNode from './CustomNodes/TextGeneratorNode.jsx';
+import PathGeneratorNode from './CustomNodes/PathGeneratorNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -40,231 +42,8 @@ const NODE_LIBRARY = [
   { type: 'scaleMapper', label: 'Scale Mapper', defaultData: { } },
   { type: 'd3AxisGenerator', label: 'Axis Generator(D3)', defaultData: { } },
   { type: 'coordinateGroup', label: 'Coordinate Group', defaultData: { } },
-];
-
-//Initial Nodes and Edges
-const initialNodes = [
-  {
-    id: 'data-x-mismatch',
-    type: 'simpleDataInput',
-    position: { x: -520, y: 20 },
-    data: {
-      dataMode: 'array',
-      rawText: '10,35,60',
-    },
-  },
-
-  {
-    id: 'data-y-mismatch',
-    type: 'simpleDataInput',
-    position: { x: -520, y: 180 },
-    data: {
-      dataMode: 'array',
-      rawText: '20,45',
-    },
-  },
-
-  {
-    id: 'shape-generator-mismatch',
-    type: 'shapeGenerator',
-    position: { x: -140, y: 80 },
-    data: {
-      shapeType: 'circle',
-      defaultRadius: 7,
-
-      fillColor: '#66cc88',
-      strokeColor: '#000000',
-      strokeWidth: 2,
-      opacity: 0.7,
-
-      layoutAxis: 'x',
-      layoutStartX: 8,
-      layoutStartY: 90,
-      layoutStep: 18,
-    },
-  },
-
-  {
-    id: 'preview-mismatch',
-    type: 'previewNode',
-    position: { x: 280, y: 100 },
-    data: { label: 'Mismatch Preview' },
-  },
-
-  {
-    id: 'data-height-opacity',
-    type: 'simpleDataInput',
-    position: { x: -460, y: 80 },
-    data: {
-      dataMode: 'array',
-      rawText: '0.2,0.45,0.7,0.35',
-    },
-  },
-
-  {
-    id: 'data-height-values',
-    type: 'simpleDataInput',
-    position: { x: -460, y: -80 },
-    data: {
-      dataMode: 'array',
-      rawText: '20,45,70,35',
-    },
-  },
-
-  {
-    id: 'shape-generator-opacity',
-    type: 'shapeGenerator',
-    position: { x: -120, y: 40 },
-    data: {
-      shapeType: 'rect',
-
-      defaultX: 8,
-      defaultY: 90,
-      defaultWidth: 12,
-      defaultHeight: 40,
-
-      fillColor: '#5b78ff',
-      strokeColor: '#000000',
-      strokeWidth: 2,
-      opacity: 1,
-
-      layoutAxis: 'x',
-      layoutStartX: 8,
-      layoutStartY: 90,
-      layoutStep: 18,
-    },
-  },
-
-  {
-    id: 'preview-opacity',
-    type: 'previewNode',
-    position: { x: 280, y: 60 },
-    data: { label: 'Opacity Preview' },
-  },
-
-  {
-    id: 'data-raw-values',
-    type: 'simpleDataInput',
-    position: { x: -720, y: 80 },
-    data: {
-      dataMode: 'array',
-      rawText: '1000,5000,10000,20000',
-    },
-  },
-
-  {
-    id: 'scale-height',
-    type: 'scaleMapper',
-    position: { x: -440, y: 80 },
-    data: {
-      scaleType: 'linear',
-      domainMode: 'auto',
-
-      domainMin: 0,
-      domainMax: 20000,
-
-      rangeMin: 0,
-      rangeMax: 100,
-
-      clamp: true,
-    },
-  },
-
-  {
-    id: 'shape-scaled-bars',
-    type: 'shapeGenerator',
-    position: { x: -120, y: 40 },
-    data: {
-      shapeType: 'rect',
-
-      defaultX: 0,
-      defaultY: 0,
-      defaultWidth: 12,
-      defaultHeight: 40,
-      cornerRadius: 0,
-
-      alignX: 'left',
-      alignY: 'bottom',
-
-      fillColor: '#5b78ff',
-      strokeColor: '#000000',
-      strokeWidth: 1,
-      opacity: 0.75,
-
-      layoutAxis: 'x',
-      layoutGapX: 18,
-      layoutGapY: 18,
-    },
-  },
-
-  {
-    id: 'preview-scaled-bars',
-    type: 'previewNode',
-    position: { x: 260, y: 60 },
-    data: {
-      previewWidth: 320,
-      previewHeight: 220,
-      previewMode: 'fit',
-    },
-  },
-
-];
-
-const initialEdges = [
-  {
-    id: 'data-x-mismatch-shape-generator-mismatch-x',
-    source: 'data-x-mismatch',
-    target: 'shape-generator-mismatch',
-    targetHandle: 'x',
-  },
-  {
-    id: 'data-y-mismatch-shape-generator-mismatch-y',
-    source: 'data-y-mismatch',
-    target: 'shape-generator-mismatch',
-    targetHandle: 'y',
-  },
-  {
-    id: 'shape-generator-mismatch-preview-mismatch',
-    source: 'shape-generator-mismatch',
-    target: 'preview-mismatch',
-  },
-  {
-    id: 'data-height-values-shape-generator-opacity-height',
-    source: 'data-height-values',
-    target: 'shape-generator-opacity',
-    targetHandle: 'height',
-  },
-  {
-    id: 'data-height-opacity-shape-generator-opacity-opacity',
-    source: 'data-height-opacity',
-    target: 'shape-generator-opacity',
-    targetHandle: 'opacity',
-  },
-  {
-    id: 'shape-generator-opacity-preview-opacity',
-    source: 'shape-generator-opacity',
-    target: 'preview-opacity',
-  },
-
-  {
-    id: 'data-raw-values-scale-height',
-    source: 'data-raw-values',
-    target: 'scale-height',
-    targetHandle: 'input',
-  },
-
-  {
-    id: 'scale-height-shape-height',
-    source: 'scale-height',
-    target: 'shape-scaled-bars',
-    targetHandle: 'height',
-  },
-
-  {
-    id: 'shape-scaled-bars-preview',
-    source: 'shape-scaled-bars',
-    target: 'preview-scaled-bars',
-  },
+  { type: 'textGenerator', label: 'Text Generator', defaultData: { } },
+  { type: 'pathGenerator', label: 'Path Generator', defaultData: { } },
 ];
 
 //Define custom node types
@@ -282,7 +61,253 @@ const nodeTypes = {
   scaleMapper: ScaleMapperNode,
   d3AxisGenerator: D3AxisGeneratorNode,
   coordinateGroup: CoordinateGroupNode,
+  textGenerator: TextGeneratorNode,
+  pathGenerator: PathGeneratorNode,
 };
+
+//Initial Nodes and Edges
+const initialNodes = [
+  {
+    id: 'data-x-categories',
+    type: 'simpleDataInput',
+    position: { x: -900, y: 40 },
+    data: {
+      dataMode: 'array',
+      rawText: 'A,B,C,D',
+      label: 'X Categories',
+    },
+  },
+
+  {
+    id: 'data-y-values',
+    type: 'simpleDataInput',
+    position: { x: -900, y: 260 },
+    data: {
+      dataMode: 'array',
+      rawText: '1000,5000,10000,20000',
+      label: 'Y Values',
+    },
+  },
+
+  {
+    id: 'scale-x-band',
+    type: 'scaleMapper',
+    position: { x: -620, y: 40 },
+    data: {
+      label: 'X Band Scale',
+
+      scaleType: 'band',
+      domainMode: 'auto',
+
+      rangeMin: 0,
+      rangeMax: 240,
+
+      paddingInner: 0.25,
+      paddingOuter: 0.15,
+
+      // important: x values represent category centers
+      bandOutput: 'center',
+
+      clamp: true,
+    },
+  },
+
+  {
+    id: 'scale-y-linear',
+    type: 'scaleMapper',
+    position: { x: -620, y: 260 },
+    data: {
+      label: 'Y Linear Scale',
+
+      scaleType: 'linear',
+      domainMode: 'auto',
+      domainBaseline: 'zero',
+      baselineValue: 0,
+
+      rangeMin: 0,
+      rangeMax: 140,
+
+      clamp: true,
+    },
+  },
+
+  {
+    id: 'shape-bars',
+    type: 'shapeGenerator',
+    position: { x: -280, y: 40 },
+    data: {
+      label: 'Bars',
+
+      shapeType: 'rect',
+
+      defaultX: 0,
+      defaultY: 0,
+
+      defaultWidth: 34,
+      defaultHeight: 40,
+      cornerRadius: 0,
+
+      alignX: 'center',
+      alignY: 'bottom',
+
+      fillColor: '#6f86e8',
+      strokeColor: '#222222',
+      strokeWidth: 1.5,
+      opacity: 1,
+
+      layoutAxis: 'x',
+      layoutGapX: 20,
+      layoutGapY: 20,
+    },
+  },
+
+  {
+    id: 'd3-axis-system',
+    type: 'd3AxisGenerator',
+    position: { x: -280, y: 330 },
+    data: {
+      label: 'D3 Axis System',
+
+      axisMode: 'xy',
+
+      // these will be controlled by xScale / yScale once connected
+      xScaleType: 'band',
+      yScaleType: 'linear',
+
+      plotWidth: 240,
+      plotHeight: 140,
+
+      xTickCount: 5,
+      yTickCount: 5,
+
+      decimalPlaces: 0,
+      tickSize: 6,
+      tickPadding: 4,
+      fontSize: 10,
+
+      showDomainLine: true,
+      showTickLines: true,
+      showTickLabels: true,
+
+      strokeColor: '#222222',
+      strokeWidth: 1.5,
+      textColor: '#111111',
+
+      originMarkerRadius: 0,
+      originLabelOffsetX: 4,
+      originMarkerFill: '#ffffff',
+    },
+  },
+
+  {
+    id: 'coordinate-chart',
+    type: 'coordinateGroup',
+    position: { x: 140, y: 160 },
+    data: {
+      label: 'Coordinate Chart',
+
+      layers: [
+        {
+          id: 'layer-axis',
+          sourceNodeId: 'd3-axis-system',
+          label: 'Axis',
+          role: 'axis',
+          visible: true,
+          locked: false,
+          opacity: 1,
+          x: 0,
+          y: 0,
+        },
+        {
+          id: 'layer-bars',
+          sourceNodeId: 'shape-bars',
+          label: 'Bars',
+          role: 'marks',
+          visible: true,
+          locked: false,
+          opacity: 1,
+          x: 0,
+          y: 0,
+        },
+      ],
+    },
+  },
+
+  {
+    id: 'preview-chart',
+    type: 'previewNode',
+    position: { x: 520, y: 160 },
+    data: {
+      previewWidth: 420,
+      previewHeight: 300,
+      previewMode: 'fit',
+    },
+  },
+];
+
+const initialEdges = [
+  {
+    id: 'edge-data-x-to-scale-x',
+    source: 'data-x-categories',
+    target: 'scale-x-band',
+    targetHandle: 'input',
+  },
+
+  {
+    id: 'edge-data-y-to-scale-y',
+    source: 'data-y-values',
+    target: 'scale-y-linear',
+    targetHandle: 'input',
+  },
+
+  {
+    id: 'edge-scale-x-to-shape-x',
+    source: 'scale-x-band',
+    target: 'shape-bars',
+    targetHandle: 'x',
+  },
+
+  {
+    id: 'edge-scale-y-to-shape-height',
+    source: 'scale-y-linear',
+    target: 'shape-bars',
+    targetHandle: 'height',
+  },
+
+  {
+    id: 'edge-scale-x-to-axis-x',
+    source: 'scale-x-band',
+    target: 'd3-axis-system',
+    targetHandle: 'xScale',
+  },
+
+  {
+    id: 'edge-scale-y-to-axis-y',
+    source: 'scale-y-linear',
+    target: 'd3-axis-system',
+    targetHandle: 'yScale',
+  },
+
+  {
+    id: 'edge-axis-to-coordinate-group',
+    source: 'd3-axis-system',
+    target: 'coordinate-chart',
+    targetHandle: 'layers',
+  },
+
+  {
+    id: 'edge-shape-to-coordinate-group',
+    source: 'shape-bars',
+    target: 'coordinate-chart',
+    targetHandle: 'layers',
+  },
+
+  {
+    id: 'edge-coordinate-group-to-preview',
+    source: 'coordinate-chart',
+    target: 'preview-chart',
+  },
+];
 
 //Main App Component
 export default function App() {

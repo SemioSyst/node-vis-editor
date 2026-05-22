@@ -78,6 +78,8 @@ export function evalShapeGenerator(ctx) {
       index,
       shapeType,
       resolved,
+      streams,
+      parameterSources,
     }));
   }
 
@@ -420,12 +422,14 @@ function resolveElementParams({
     repeatStyle: false,
   });
 
-  const y = resolveParam({
+  const userY = resolveParam({
     stream: streams.y,
     index,
     fallback: layoutPoint.y ?? params.defaultY ?? 0,
     repeatStyle: false,
   });
+
+  const y = toSvgY(userY, params);
 
   const width = resolveParam({
     stream: streams.width,
@@ -499,7 +503,10 @@ function resolveElementParams({
 
   return {
     x,
+    // SVG-space y used for rendering.
     y,
+    // User-space y before SVG conversion.
+    userY,
     width,
     height,
     radius,
@@ -562,27 +569,69 @@ function resolveLocalLayoutPoint(index, params, streams) {
   };
 }
 
-function makeShapeElement({ ctx, index, shapeType, resolved }) {
+function makeShapeElement({
+  ctx,
+  index,
+  shapeType,
+  resolved,
+  streams,
+  parameterSources,
+}) {
   const frame = makeFrame({ shapeType, resolved });
   const content = makeContent({ shapeType, resolved });
+
+  const parameterLineage = makeElementParameterLineage({
+    index,
+    streams,
+    parameterSources,
+    resolved,
+  });
+
+  const inheritedTags = collectElementTags({
+    index,
+    parameterLineage,
+    parameterSources,
+  });
 
   return {
     nodeType: 'element',
     id: `${ctx.nodeId}-${shapeType}-${index}`,
+
+    // Keep this as a technical role, not a user-facing semantic category.
+    // Later binding logic should rely mainly on lineage/tags/source, not this role.
     role: 'mark',
     tags: ['shape', shapeType],
 
     dataRef: {
       index,
+      collectionId: `${ctx.nodeId}-collection`,
+      generatorNodeId: ctx.nodeId,
+
       inputValues: {
         x: resolved.x,
+        // SVG-space y
         y: resolved.y,
+        // User-space y before SVG conversion
+        userY: resolved.userY,
         width: resolved.width,
         height: resolved.height,
         radius: resolved.radius,
+        cornerRadius: resolved.cornerRadius,
+        alignX: resolved.alignX,
+        alignY: resolved.alignY,
         fill: resolved.fill,
+        stroke: resolved.stroke,
+        strokeWidth: resolved.strokeWidth,
         opacity: resolved.opacity,
       },
+
+      // The important new part.
+      // Binding nodes can compare this with TextGenerator / PathGenerator later.
+      parameterLineage,
+
+      // Empty for now unless upstream nodes already provide tags.
+      // Future TagMapper can make this useful without changing ShapeGenerator again.
+      tags: inheritedTags,
     },
 
     elementType: 'graphic',
@@ -606,6 +655,14 @@ function makeShapeElement({ ctx, index, shapeType, resolved }) {
 
     meta: {
       sourceNodeId: ctx.nodeId,
+      elementIndex: index,
+      collectionId: `${ctx.nodeId}-collection`,
+      generatorNodeId: ctx.nodeId,
+
+      // Duplicate a lightweight copy in meta so future selectors do not need
+      // to know whether to read dataRef or meta first.
+      parameterLineage,
+      tags: inheritedTags,
     },
   };
 }
@@ -724,8 +781,13 @@ function makeContent({ shapeType, resolved }) {
         shapeType: 'line',
         x1: 0,
         y1: 0,
+
+        // Line width/endX remains normal x delta.
         x2: resolved.width,
-        y2: resolved.height,
+
+        // Line height/endY is treated as user-space y delta,
+        // so positive value goes upward.
+        y2: toSvgY(resolved.height),
       },
     };
   }
@@ -788,30 +850,238 @@ function collectParameterSources(inputsByHandle, handles) {
   return result;
 }
 
+function makeElementParameterLineage({
+  index,
+  streams,
+  parameterSources,
+  resolved,
+}) {
+  const handles = [
+    'x',
+    'y',
+    'width',
+    'height',
+    'radius',
+    'cornerRadius',
+    'alignX',
+    'alignY',
+    'fill',
+    'stroke',
+    'strokeWidth',
+    'opacity',
+    'frame',
+    'style',
+  ];
+
+  const lineage = {};
+
+  handles.forEach((handleId) => {
+    const stream = streams?.[handleId];
+    const source = parameterSources?.[handleId];
+
+    lineage[handleId] = makeSingleParamLineage({
+      handleId,
+      index,
+      stream,
+      source,
+      resolvedValue: resolved?.[handleId],
+    });
+  });
+
+  return lineage;
+}
+
+function makeSingleParamLineage({
+  handleId,
+  index,
+  stream,
+  source,
+  resolvedValue,
+}) {
+  const base = {
+    handleId,
+    connected: Boolean(stream?.connected && source),
+    streamKind: stream?.kind ?? 'missing',
+
+    // The final value actually used by this generated element.
+    resolvedValue,
+
+    // Which index of the upstream array was consumed.
+    // For scalar/default values this remains null.
+    sourceIndex: null,
+
+    // Useful for later auto binding.
+    sourceNodeId: source?.sourceNodeId ?? null,
+    sourceHandle: source?.sourceHandle ?? null,
+    edgeId: source?.edgeId ?? null,
+
+    outputType: source?.outputType ?? null,
+    dataType: source?.dataType ?? null,
+    parameterType: source?.parameterType ?? null,
+
+    scaleId: source?.scale?.scaleId ?? null,
+    scaleType: source?.scale?.scaleType ?? null,
+    scaleFamily: source?.scale?.scaleFamily ?? source?.scale?.d3?.scaleFamily ?? null,
+
+    rawValue: null,
+    scaleItem: null,
+    tags: null,
+
+    provenance: source?.provenance ?? [],
+  };
+
+  if (!stream || stream.kind === 'missing') {
+    return {
+      ...base,
+      valueSource: 'fallback',
+    };
+  }
+
+  if (stream.kind === 'scalar') {
+    return {
+      ...base,
+      valueSource: source ? 'connected-scalar' : 'local-scalar',
+      rawValue: stream.value,
+    };
+  }
+
+  if (stream.kind === 'array') {
+    const safeIndex = clampIndex(index, stream.values.length);
+    const rawValue =
+      safeIndex == null
+        ? null
+        : stream.values[safeIndex];
+
+    return {
+      ...base,
+      valueSource: source ? 'connected-array' : 'local-array',
+      sourceIndex: safeIndex,
+      rawValue,
+
+      // For band / point ScaleMapper this can contain category/start/center/end.
+      // For linear scales it will usually be null.
+      scaleItem: getScaleItemForIndex(source, safeIndex),
+
+      // Future TagMapper can expose meta.taggedItems or meta.items tags here.
+      tags: getTagsForIndex(source, safeIndex),
+    };
+  }
+
+  return base;
+}
+
+function clampIndex(index, length) {
+  if (!Number.isFinite(length) || length <= 0) return null;
+  if (index < length) return index;
+  return null;
+}
+
+function getScaleItemForIndex(source, index) {
+  if (!source || index == null) return null;
+
+  const items =
+    source.items ??
+    source.scale?.items ??
+    source.meta?.items ??
+    null;
+
+  if (!Array.isArray(items)) return null;
+
+  return items[index] ?? null;
+}
+
+function getTagsForIndex(source, index) {
+  if (!source || index == null) return null;
+
+  const taggedItems =
+    source.taggedItems ??
+    source.meta?.taggedItems ??
+    null;
+
+  if (Array.isArray(taggedItems)) {
+    return taggedItems[index]?.tags ?? null;
+  }
+
+  const items =
+    source.items ??
+    source.meta?.items ??
+    null;
+
+  if (Array.isArray(items)) {
+    return items[index]?.tags ?? null;
+  }
+
+  return source.tags ?? source.meta?.tags ?? null;
+}
+
+function collectElementTags({
+  index,
+  parameterLineage,
+  parameterSources,
+}) {
+  const merged = {};
+
+  Object.values(parameterLineage ?? {}).forEach((lineage) => {
+    mergeTagsInto(merged, lineage?.tags);
+    mergeTagsInto(merged, lineage?.scaleItem?.tags);
+  });
+
+  Object.values(parameterSources ?? {}).forEach((source) => {
+    const tags = getTagsForIndex(source, index);
+    mergeTagsInto(merged, tags);
+  });
+
+  return Object.keys(merged).length > 0 ? merged : null;
+}
+
+function mergeTagsInto(target, tags) {
+  if (!tags || typeof tags !== 'object') return;
+
+  Object.entries(tags).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+
+    if (Array.isArray(value)) {
+      const existing = Array.isArray(target[key]) ? target[key] : [];
+      target[key] = [...new Set([...existing, ...value])];
+      return;
+    }
+
+    target[key] = value;
+  });
+}
+
 function makeParameterSourceSummary({ handleId, input, output }) {
   const meta = output.meta ?? {};
   const edge = input.edge ?? {};
 
   return {
-    targetHandle: handleId,
+  targetHandle: handleId,
 
-    sourceNodeId: input.from ?? meta.sourceNodeId ?? null,
-    sourceHandle: edge.sourceHandle ?? null,
-    targetHandleFromEdge: edge.targetHandle ?? handleId,
+  sourceNodeId: input.from ?? meta.sourceNodeId ?? null,
+  sourceHandle: edge.sourceHandle ?? null,
+  targetHandleFromEdge: edge.targetHandle ?? handleId,
 
-    edgeId: edge.id ?? null,
+  edgeId: edge.id ?? null,
 
-    outputType: output.outputType,
-    dataType: output.dataType,
-    parameterType: output.parameterType,
+  outputType: output.outputType,
+  dataType: output.dataType,
+  parameterType: output.parameterType,
 
-    parameterSpace: meta.scale ? 'scaled-visual' : 'visual',
-    scale: meta.scale ?? null,
+  parameterSpace: meta.scale ? 'scaled-visual' : 'visual',
+  scale: meta.scale ?? null,
 
-    label: meta.label ?? null,
-    role: meta.role ?? null,
+  // New: preserve item-level metadata from upstream outputs.
+  // ScaleMapper(band/point) already outputs meta.items.
+  items: meta.items ?? null,
 
-    provenance: inheritProvenance(output),
+  // Future TagMapper can output these.
+  tags: meta.tags ?? null,
+  taggedItems: meta.taggedItems ?? null,
+
+  label: meta.label ?? null,
+  role: meta.role ?? null,
+
+  provenance: inheritProvenance(output),
   };
 }
 
@@ -836,4 +1106,16 @@ function collectInputProvenanceFromSources(parameterSources) {
 
     return [];
   });
+}
+
+function toSvgY(value, params = {}) {
+  const n = Number(value);
+
+  if (!Number.isFinite(n)) return 0;
+
+  if ((params.yDirection ?? 'up') === 'svg') {
+    return n;
+  }
+
+  return -n;
 }

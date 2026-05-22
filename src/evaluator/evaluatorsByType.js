@@ -15,6 +15,8 @@ import { evalAxisGenerator } from './generators/evalAxisGenerator.js';
 import { evalScaleMapper } from './mappers/evalScaleMapper.js';
 import { evalD3AxisGenerator } from './generators/evalD3AxisGenerator.js';
 import { evalCoordinateGroup } from './groups/evalCoordinateGroup.js';
+import { evalTextGenerator } from './generators/evalTextGenerator.js';
+import { evalPathGenerator } from './generators/evalPathGenerator.js';
 
 /**
  * Registry
@@ -36,4 +38,6 @@ export const evaluatorsByType = {
   scaleMapper: evalScaleMapper,
   d3AxisGenerator: evalD3AxisGenerator,
   coordinateGroup: evalCoordinateGroup,
+  textGenerator: evalTextGenerator,
+  pathGenerator: evalPathGenerator,
 };

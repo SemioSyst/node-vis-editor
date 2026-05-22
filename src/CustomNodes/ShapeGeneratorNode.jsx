@@ -69,7 +69,13 @@ export default function ShapeGeneratorNode({ id, data }) {
     >
         <Handle type="source" position={Position.Right} />
 
-        <NodeSection title="Shape" subtitle="Basic generation setting">
+        <NodeSection
+            nodeId={id}
+            sectionId="shape"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Shape"
+            subtitle="Basic generation setting"
+        >
         <SelectField
             label="Type"
             value={shapeType}
@@ -83,8 +89,12 @@ export default function ShapeGeneratorNode({ id, data }) {
         </NodeSection>
 
         <NodeSection
-        title="Position"
-        subtitle="Parameter inputs override fallback layout"
+            nodeId={id}
+            sectionId="position"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Position"
+            subtitle="Parameter inputs override fallback layout"
+            ports={['x', 'y']}
         >
         <PortNumberField
             handleId="x"
@@ -104,8 +114,13 @@ export default function ShapeGeneratorNode({ id, data }) {
         </NodeSection>
 
         <NodeSection
-        title="Geometry"
-        subtitle="Shape size and alignment to the generated point"
+            nodeId={id}
+            sectionId="geometry"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Geometry"
+            subtitle="Shape size and alignment to the generated point"
+            ports={['width', 'height', 'radius', 'cornerRadius']}
+            defaultCollapsed
         >
         {(shapeType === 'rect' || shapeType === 'line') && (
             <>
@@ -172,7 +187,15 @@ export default function ShapeGeneratorNode({ id, data }) {
         />
         </NodeSection>
 
-        <NodeSection title="Style" subtitle="Visual appearance">
+        <NodeSection
+            nodeId={id}
+            sectionId="style"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Style"
+            subtitle="Visual appearance"
+            ports={['fill', 'stroke', 'strokeWidth', 'opacity']}
+            defaultCollapsed
+        >
         <PortColorField
             handleId="fill"
             label="Fill"
@@ -212,8 +235,13 @@ export default function ShapeGeneratorNode({ id, data }) {
         </NodeSection>
 
         <NodeSection
-        title="Fallback Layout"
-        subtitle="Used only when x/y are not driven by inputs"
+            nodeId={id}
+            sectionId="fallbackLayout"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Fallback Layout"
+            subtitle="Used only when x/y are not driven by inputs"
+            ports={['layoutGapX', 'layoutGapY']}
+            defaultCollapsed
         >
         <SelectField
             label="Axis"
@@ -245,8 +273,13 @@ export default function ShapeGeneratorNode({ id, data }) {
         </NodeSection>
 
         <NodeSection
-        title="Advanced Inputs"
-        subtitle="Grouped inputs can take control over related parameters"
+            nodeId={id}
+            sectionId="advancedInputs"
+            sectionCollapsed={data.sectionCollapsed}
+            title="Advanced Inputs"
+            subtitle="Grouped inputs can take control over related parameters"
+            ports={['frame', 'style']}
+            defaultCollapsed
         >
         <PortStatusRow
             handleId="frame"

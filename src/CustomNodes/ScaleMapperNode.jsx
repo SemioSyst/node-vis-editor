@@ -39,6 +39,9 @@ export default function ScaleMapperNode({ id, data }) {
       />
 
       <NodeSection
+        nodeId={id}
+        sectionId="scale"
+        sectionCollapsed={data.sectionCollapsed}
         title="Scale"
         subtitle="Mapping type and domain source"
       >
@@ -68,8 +71,12 @@ export default function ScaleMapperNode({ id, data }) {
       </NodeSection>
 
       <NodeSection
+        nodeId={id}
+        sectionId="autoDomain"
+        sectionCollapsed={data.sectionCollapsed}
         title="Auto Domain"
         subtitle="How the automatic input range is expanded"
+        defaultCollapsed={isManualDomain}
       >
         <SelectField
           label="Baseline"
@@ -106,8 +113,12 @@ export default function ScaleMapperNode({ id, data }) {
       </NodeSection>
 
       <NodeSection
+        nodeId={id}
+        sectionId="manualDomain"
+        sectionCollapsed={data.sectionCollapsed}
         title="Manual Domain"
         subtitle="Used only when Domain is set to Manual"
+        defaultCollapsed={isAutoDomain}
       >
         <NumberField
           label="Min"
@@ -127,6 +138,9 @@ export default function ScaleMapperNode({ id, data }) {
       </NodeSection>
 
       <NodeSection
+        nodeId={id}
+        sectionId="range"
+        sectionCollapsed={data.sectionCollapsed}
         title="Range"
         subtitle="Output visual parameter range"
       >
@@ -145,8 +159,11 @@ export default function ScaleMapperNode({ id, data }) {
 
       {(scaleType === 'band' || scaleType === 'point') && (
         <NodeSection
-            title="Band / Point"
-            subtitle="Spacing settings for discrete scales"
+        nodeId={id}
+        sectionId="bandPoint"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Band / Point"
+        subtitle="Spacing settings for discrete scales"
         >
             {scaleType === 'band' && (
             <NumberField
@@ -183,8 +200,12 @@ export default function ScaleMapperNode({ id, data }) {
       )}
 
       <NodeSection
+        nodeId={id}
+        sectionId="options"
+        sectionCollapsed={data.sectionCollapsed}
         title="Options"
         subtitle="Value handling"
+        defaultCollapsed
       >
         <SelectField
           label="Clamp"

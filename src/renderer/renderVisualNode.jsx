@@ -9,27 +9,31 @@ function buildTransform(node) {
 
   const parts = [];
 
-  // v0.1: frame.x/y means local origin position in parent coordinate system.
-  // anchor is reserved for later resolver support.
-  const fx = frame.x ?? 0;
-  const fy = frame.y ?? 0;
+  const fx = toNumber(frame.x, 0);
+  const fy = toNumber(frame.y, 0);
   if (fx !== 0 || fy !== 0) {
     parts.push(`translate(${fx} ${fy})`);
   }
 
-  const tx = transform.x ?? 0;
-  const ty = transform.y ?? 0;
+  const tx = toNumber(transform.x, 0);
+  const ty = toNumber(transform.y, 0);
   if (tx !== 0 || ty !== 0) {
     parts.push(`translate(${tx} ${ty})`);
   }
 
-  const rotate = transform.rotate ?? 0;
+  const rotate = toNumber(transform.rotate, 0);
   if (rotate !== 0) {
-    parts.push(`rotate(${rotate})`);
+    const origin = resolveTransformOrigin(transform, frame);
+
+    if (origin) {
+      parts.push(`rotate(${rotate} ${origin.x} ${origin.y})`);
+    } else {
+      parts.push(`rotate(${rotate})`);
+    }
   }
 
-  const scaleX = transform.scaleX ?? 1;
-  const scaleY = transform.scaleY ?? 1;
+  const scaleX = toNumber(transform.scaleX, 1);
+  const scaleY = toNumber(transform.scaleY, 1);
   if (scaleX !== 1 || scaleY !== 1) {
     parts.push(`scale(${scaleX} ${scaleY})`);
   }
@@ -37,26 +41,100 @@ function buildTransform(node) {
   return parts.length ? parts.join(' ') : undefined;
 }
 
-function svgStyleFromVisualStyle(style = {}) {
-  const fill =
-    style.fill?.type === 'none'
-      ? 'none'
-      : style.fill?.color ?? style.fill ?? undefined;
+function resolveTransformOrigin(transform, frame) {
+  if (!transform.origin || transform.origin === 'local') return null;
 
-  const strokeEnabled = style.stroke?.enabled;
-  const stroke =
-    strokeEnabled === false
-      ? undefined
-      : style.stroke?.color ?? style.stroke ?? undefined;
+  const width = toNumber(frame.width, 0);
+  const height = toNumber(frame.height, 0);
 
-  const strokeWidth =
-    style.stroke?.width ?? style.strokeWidth ?? undefined;
+  if (transform.origin === 'center') {
+    return {
+      x: width / 2,
+      y: height / 2,
+    };
+  }
+
+  if (transform.origin === 'top-left') {
+    return { x: 0, y: 0 };
+  }
+
+  if (transform.origin === 'bottom-left') {
+    return { x: 0, y: height };
+  }
+
+  if (transform.origin === 'bottom-center') {
+    return { x: width / 2, y: height };
+  }
+
+  if (typeof transform.origin === 'object') {
+    return {
+      x: toNumber(transform.origin.x, 0),
+      y: toNumber(transform.origin.y, 0),
+    };
+  }
+
+  return null;
+}
+
+function getFill(style = {}, fallback = undefined) {
+  if (style.fill?.type === 'none') return 'none';
+  if (style.fill?.color) return style.fill.color;
+  if (typeof style.fill === 'string') return style.fill;
+  return fallback;
+}
+
+function getStroke(style = {}) {
+  const enabled = Boolean(style.stroke?.enabled);
+
+  if (!enabled) {
+    return {
+      stroke: 'none',
+      strokeWidth: 0,
+      strokeEnabled: false,
+    };
+  }
 
   return {
-    fill,
+    stroke: style.stroke?.color ?? style.stroke ?? '#000000',
+    strokeWidth: style.stroke?.width ?? style.strokeWidth ?? 1,
+    strokeEnabled: true,
+  };
+}
+
+function getCommonSvgStyle(style = {}) {
+  const { stroke, strokeWidth } = getStroke(style);
+
+  return {
+    fill: getFill(style),
     stroke,
     strokeWidth,
     opacity: style.opacity,
+    strokeLinecap: style.strokeLinecap,
+    strokeLinejoin: style.strokeLinejoin,
+    strokeDasharray: style.strokeDasharray,
+    vectorEffect: style.vectorEffect,
+  };
+}
+
+function getElementDataAttributes(node) {
+  return {
+    'data-node-id': node.id,
+    'data-element-type': node.elementType,
+    'data-role': node.role,
+    'data-generator-node-id': node.dataRef?.generatorNodeId,
+    'data-collection-id': node.dataRef?.collectionId,
+    'data-index': node.dataRef?.index,
+  };
+}
+
+function getGroupDataAttributes(node) {
+  return {
+    'data-node-id': node.id,
+    'data-node-type': node.nodeType,
+    'data-role': node.role ?? node.meta?.role,
+    'data-layer-id': node.meta?.layerId,
+    'data-layer-index': node.meta?.layerIndex,
+    'data-source-node-id': node.meta?.sourceNodeId,
   };
 }
 
@@ -135,98 +213,148 @@ function renderHitArea(node) {
   );
 }
 
-function renderShapeContent(node) {
+function renderElementContent(node) {
   const content = node.content ?? {};
 
-  if (content.contentType === 'legacySvg') {
-    return renderSvgElement(content.spec);
+  switch (content.contentType) {
+    case 'legacySvg':
+      return renderSvgElement(content.spec);
+
+    case 'shape':
+      return renderShapeContent(node);
+
+    case 'text':
+      return renderTextContent(node);
+
+    case 'image':
+      return renderImageContent(node);
+
+    default:
+      console.warn('[renderElementContent] Unsupported content:', content, node);
+      return null;
   }
+}
 
-  if (content.contentType === 'shape') {
-    const shape = content.shape ?? {};
-    const shapeType = shape.shapeType ?? shape.kind;
-    const styleProps = svgStyleFromVisualStyle(node.style);
+function renderShapeContent(node) {
+  const content = node.content ?? {};
+  const shape = content.shape ?? {};
+  const shapeType = shape.shapeType ?? shape.kind;
+  const styleProps = getCommonSvgStyle(node.style);
 
-    switch (shapeType) {
-      case 'circle':
-        return (
-          <circle
-            cx={shape.cx ?? 0}
-            cy={shape.cy ?? 0}
-            r={shape.r ?? 10}
-            {...styleProps}
-          />
-        );
+  switch (shapeType) {
+    case 'circle':
+      return (
+        <circle
+          cx={shape.cx ?? 0}
+          cy={shape.cy ?? 0}
+          r={shape.r ?? 10}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
 
-      case 'rect':
-        return (
-          <rect
-            x={shape.x ?? 0}
-            y={shape.y ?? 0}
-            width={shape.width ?? shape.w ?? 40}
-            height={shape.height ?? shape.h ?? 40}
-            rx={shape.rx}
-            ry={shape.ry}
-            {...styleProps}
-          />
-        );
+    case 'rect':
+      return (
+        <rect
+          x={shape.x ?? 0}
+          y={shape.y ?? 0}
+          width={shape.width ?? shape.w ?? 40}
+          height={shape.height ?? shape.h ?? 40}
+          rx={shape.rx}
+          ry={shape.ry}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
 
-      case 'line':
-        return (
-          <line
-            x1={shape.x1 ?? 0}
-            y1={shape.y1 ?? 0}
-            x2={shape.x2 ?? 100}
-            y2={shape.y2 ?? 0}
-            {...styleProps}
-          />
-        );
+    case 'line':
+      return (
+        <line
+          x1={shape.x1 ?? 0}
+          y1={shape.y1 ?? 0}
+          x2={shape.x2 ?? 100}
+          y2={shape.y2 ?? 0}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
 
-      case 'path':
-        return (
-          <path
-            d={shape.d}
-            {...styleProps}
-          />
-        );
+    case 'path':
+      return (
+        <path
+          d={shape.d ?? ''}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
 
-      default:
-        return null;
-    }
+    case 'polygon':
+      return (
+        <polygon
+          points={shape.points ?? ''}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
+
+    case 'polyline':
+      return (
+        <polyline
+          points={shape.points ?? ''}
+          {...styleProps}
+          {...getElementDataAttributes(node)}
+        />
+      );
+
+    default:
+      console.warn('[renderShapeContent] Unsupported shape type:', shapeType, node);
+      return null;
   }
+}
 
-  if (content.contentType === 'text') {
-    const style = node.style ?? {};
-    return (
-      <text
-        x={content.x ?? 0}
-        y={content.y ?? 0}
-        fontSize={content.fontSize ?? style.text?.fontSize ?? 14}
-        fontFamily={content.fontFamily ?? style.text?.fontFamily}
-        fontWeight={content.fontWeight ?? style.text?.fontWeight}
-        fill={style.fill?.color ?? style.fill ?? '#000'}
-        textAnchor={content.textAnchor}
-        dominantBaseline={content.dominantBaseline}
-      >
-        {content.text ?? ''}
-      </text>
-    );
-  }
+function renderTextContent(node) {
+  const content = node.content ?? {};
+  const style = node.style ?? {};
 
-  if (content.contentType === 'image') {
-    return (
-      <image
-        href={content.src}
-        x={content.x ?? 0}
-        y={content.y ?? 0}
-        width={content.width ?? node.frame?.width ?? 100}
-        height={content.height ?? node.frame?.height ?? 100}
-        preserveAspectRatio={content.preserveAspectRatio ?? 'xMidYMid meet'}
-      />
-    );
-  }
+  const fill = getFill(style, '#000000');
+  const { stroke, strokeWidth, strokeEnabled } = getStroke(style);
 
-  return null;
+  return (
+    <text
+      x={content.x ?? 0}
+      y={content.y ?? 0}
+      fontSize={content.fontSize ?? style.text?.fontSize ?? 14}
+      fontFamily={content.fontFamily ?? style.text?.fontFamily}
+      fontWeight={content.fontWeight ?? style.text?.fontWeight}
+      textAnchor={content.textAnchor ?? 'start'}
+      dominantBaseline={content.dominantBaseline ?? 'auto'}
+      fill={fill}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      paintOrder={strokeEnabled ? 'stroke fill' : undefined}
+      opacity={style.opacity ?? 1}
+      {...getElementDataAttributes(node)}
+    >
+      {content.text ?? ''}
+    </text>
+  );
+}
+
+function renderImageContent(node) {
+  const content = node.content ?? {};
+
+  return (
+    <image
+      href={content.src}
+      x={content.x ?? 0}
+      y={content.y ?? 0}
+      width={content.width ?? node.frame?.width ?? 100}
+      height={content.height ?? node.frame?.height ?? 100}
+      preserveAspectRatio={content.preserveAspectRatio ?? 'xMidYMid meet'}
+      opacity={node.style?.opacity ?? 1}
+      {...getElementDataAttributes(node)}
+    />
+  );
 }
 
 function renderElementNode(node, ctx) {
@@ -235,12 +363,14 @@ function renderElementNode(node, ctx) {
 
   return (
     <g
-      key={node.id}
+      key={ctx.key ?? node.id}
       transform={transform}
+      opacity={node.opacity}
+      {...getElementDataAttributes(node)}
       {...interactionProps}
     >
       {renderHitArea(node)}
-      {renderShapeContent(node)}
+      {renderElementContent(node)}
       {(node.children ?? []).map((child, i) =>
         renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
       )}
@@ -254,9 +384,10 @@ function renderGroupLikeNode(node, ctx) {
 
   return (
     <g
-      key={node.id}
+      key={ctx.key ?? node.id}
       transform={transform}
       opacity={node.opacity}
+      {...getGroupDataAttributes(node)}
       {...interactionProps}
     >
       {renderHitArea(node)}
@@ -273,9 +404,10 @@ function renderProceduralNode(node, ctx) {
 
   return (
     <g
-      key={node.id}
+      key={ctx.key ?? node.id}
       transform={transform}
       opacity={node.opacity}
+      {...getGroupDataAttributes(node)}
       {...interactionProps}
     >
       {renderHitArea(node)}
@@ -324,4 +456,9 @@ export function renderVisualNode(node, ctx = {}) {
       console.warn('[renderVisualNode] Unsupported visual node:', node);
       return null;
   }
+}
+
+function toNumber(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
 }

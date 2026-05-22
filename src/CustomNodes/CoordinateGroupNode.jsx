@@ -10,14 +10,13 @@ import {
 } from './UI/NodeFields.jsx';
 import { useUpdateNodeData } from './UI/useUpdateNodeData.js';
 
-const ROLE_OPTIONS = [
+const LAYER_HINT_OPTIONS = [
   { value: 'auto', label: 'Auto' },
-  { value: 'axis', label: 'Axis' },
-  { value: 'marks', label: 'Marks' },
+  { value: 'reference', label: 'Reference' },
+  { value: 'main', label: 'Main Visual' },
+  { value: 'support', label: 'Support' },
   { value: 'overlay', label: 'Overlay' },
-  { value: 'annotation', label: 'Annotation' },
   { value: 'background', label: 'Background' },
-  { value: 'visual', label: 'Visual' },
 ];
 
 export default function CoordinateGroupNode({ id, data }) {
@@ -114,8 +113,12 @@ export default function CoordinateGroupNode({ id, data }) {
       />
 
       <NodeSection
+        nodeId={id}
+        sectionId="layers"
+        sectionCollapsed={data.sectionCollapsed}
         title="Layers"
         subtitle="Render order: bottom to top"
+        ports={['layers']}
       >
         {layers.length === 0 && (
           <div className="node-field__note">
@@ -167,10 +170,15 @@ export default function CoordinateGroupNode({ id, data }) {
               </div>
 
               <SelectField
-                label="Role"
-                value={layer.role ?? 'auto'}
-                onChange={(v) => updateLayer(layer.id, { role: v })}
-                options={ROLE_OPTIONS}
+                label="Hint"
+                value={layer.layerHint ?? layer.role ?? 'auto'}
+                onChange={(v) =>
+                  updateLayer(layer.id, {
+                    layerHint: v,
+                    role: v, // backward compatibility with existing saved nodes
+                  })
+                }
+                options={LAYER_HINT_OPTIONS}
               />
 
               <SelectField
@@ -230,6 +238,9 @@ function reconcileUiLayers(existingLayers, connectedSources) {
         label: layer.label ?? source?.label ?? layer.sourceNodeId,
         sourceHandle: source?.sourceHandle ?? layer.sourceHandle ?? null,
         edgeId: source?.edgeId ?? layer.edgeId ?? null,
+
+        layerHint: layer.layerHint ?? layer.role ?? 'auto',
+        role: layer.layerHint ?? layer.role ?? 'auto',
       };
     });
 
@@ -244,6 +255,7 @@ function reconcileUiLayers(existingLayers, connectedSources) {
       edgeId: source.edgeId ?? null,
       label: source.label ?? source.sourceNodeId,
       role: 'auto',
+      layerHint: 'auto',
       visible: true,
       locked: false,
       opacity: 1,

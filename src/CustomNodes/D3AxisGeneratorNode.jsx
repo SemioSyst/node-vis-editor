@@ -48,7 +48,14 @@ export default function D3AxisGeneratorNode({ id, data }) {
     >
       <Handle type="source" position={Position.Right} />
 
-      <NodeSection title="Axis System" subtitle="Axis mode and scale type">
+      <NodeSection
+        nodeId={id}
+        sectionId="axisSystem"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Axis System"
+        subtitle="Axis mode and scale type"
+        ports={['xScale', 'yScale']}
+      >
         <SelectField
           label="Mode"
           value={axisMode}
@@ -98,8 +105,12 @@ export default function D3AxisGeneratorNode({ id, data }) {
       </NodeSection>
 
       <NodeSection
+        nodeId={id}
+        sectionId="scaleInputs"
+        sectionCollapsed={data.sectionCollapsed}
         title="Scale Inputs"
         subtitle="Optional scale metadata from ScaleMapper"
+        ports={['xScale', 'yScale']}
       >
         {showX && (
           <PortStatusRow
@@ -120,7 +131,15 @@ export default function D3AxisGeneratorNode({ id, data }) {
         )}
       </NodeSection>
 
-      <NodeSection title="Plot Size" subtitle="Local coordinate space size">
+      <NodeSection
+        nodeId={id}
+        sectionId="plotSize"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Plot Size"
+        subtitle="Local coordinate space size"
+        ports={['xScale', 'yScale']}
+        defaultCollapsed
+      >
         <NumberField
           label="Width"
           value={data.plotWidth ?? 200}
@@ -142,8 +161,13 @@ export default function D3AxisGeneratorNode({ id, data }) {
 
       {showX && (
         <NodeSection
-            title="X Domain"
-            subtitle={xIsDiscrete ? 'Horizontal category domain' : 'Horizontal numeric range'}
+        nodeId={id}
+        sectionId="xDomain"
+        sectionCollapsed={data.sectionCollapsed}
+        title="X Domain"
+        subtitle={xIsDiscrete ? 'Horizontal category domain' : 'Horizontal numeric range'}
+        ports={['xScale']}
+        defaultCollapsed
         >
             {xIsDiscrete ? (
             <>
@@ -213,8 +237,13 @@ export default function D3AxisGeneratorNode({ id, data }) {
 
       {showY && (
         <NodeSection
-            title="Y Domain"
-            subtitle={yIsDiscrete ? 'Vertical category domain' : 'Vertical numeric range'}
+        nodeId={id}
+        sectionId="yDomain"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Y Domain"
+        subtitle={yIsDiscrete ? 'Vertical category domain' : 'Vertical numeric range'}
+        ports={['yScale']}
+        defaultCollapsed
         >
             {yIsDiscrete ? (
             <>
@@ -282,7 +311,14 @@ export default function D3AxisGeneratorNode({ id, data }) {
         </NodeSection>
       )}
 
-      <NodeSection title="Tick & Label" subtitle="D3 axis tick display">
+      <NodeSection
+        nodeId={id}
+        sectionId="tickLabel"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Tick & Label"
+        subtitle="D3 axis tick display"
+        defaultCollapsed
+      >
         <NumberField
           label="Decimals"
           value={data.decimalPlaces ?? 0}
@@ -314,7 +350,14 @@ export default function D3AxisGeneratorNode({ id, data }) {
       </NodeSection>
 
       {axisMode === 'xy' && (
-        <NodeSection title="Origin" subtitle="Shared origin marker for continuous 2D axes">
+        <NodeSection
+        nodeId={id}
+        sectionId="origin"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Origin"
+        subtitle="Shared origin marker for continuous 2D axes"
+        defaultCollapsed
+        >
           <NumberField
             label="Marker R"
             value={data.originMarkerRadius ?? 3}
@@ -332,7 +375,14 @@ export default function D3AxisGeneratorNode({ id, data }) {
         </NodeSection>
       )}
 
-      <NodeSection title="Display" subtitle="Axis component visibility">
+      <NodeSection
+        nodeId={id}
+        sectionId="display"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Display"
+        subtitle="Axis component visibility"
+        defaultCollapsed
+      >
         <SelectField
           label="Domain Line"
           value={String(data.showDomainLine ?? true)}
@@ -364,7 +414,14 @@ export default function D3AxisGeneratorNode({ id, data }) {
         />
       </NodeSection>
 
-      <NodeSection title="Style" subtitle="Axis line, tick and label appearance">
+      <NodeSection
+        nodeId={id}
+        sectionId="style"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Style"
+        subtitle="Axis line, tick and label appearance"
+        defaultCollapsed
+      >
         <ColorField
           label="Stroke"
           value={data.strokeColor ?? '#000000'}

@@ -28,15 +28,22 @@ export function evalCoordinateGroup(ctx) {
     layerInputs: visualInputs,
   });
 
-  const axisLayers = resolvedLayers.filter((layer) => layer.role === 'axis');
-  const markLayers = resolvedLayers.filter((layer) => layer.role === 'marks');
+  const coordinateReferenceLayers = resolvedLayers.filter((layer) =>
+    isCoordinateReferenceOutput(layer.input?.value)
+  );
 
-  const primaryAxisLayer = axisLayers[0] ?? findFirstAxisLayer(resolvedLayers);
+  const dataDrivenLayers = resolvedLayers.filter((layer) =>
+    isDataDrivenVisualOutput(layer.input?.value)
+  );
+
+  const primaryAxisLayer =
+    coordinateReferenceLayers[0] ?? findFirstAxisLayer(resolvedLayers);
+
   const primaryAxisOutput = primaryAxisLayer?.input?.value ?? null;
   const coordinateSystem = extractCoordinateSystem(primaryAxisOutput);
 
-  const scaleMatches = compareAllMarkLayers({
-    markLayers,
+  const scaleMatches = compareAllCandidateLayers({
+    candidateLayers: dataDrivenLayers,
     coordinateSystem,
   });
 
@@ -95,12 +102,22 @@ export function evalCoordinateGroup(ctx) {
           index,
           id: layer.id,
           sourceNodeId: layer.sourceNodeId,
-          role: layer.role,
+
+          // User-facing hint only. Do not treat this as the main binding logic.
+          layerHint: layer.layerHint ?? layer.role ?? 'auto',
+
+          inferredKind: inferLayerKind(layer.input?.value),
+
           visible: layer.visible,
           opacity: layer.opacity,
           x: layer.x,
           y: layer.y,
         })),
+
+        bindingContext: makeBindingContext({
+          ctx,
+          resolvedLayers,
+        }),
 
         coordinateSystem,
         scaleMatches,
@@ -125,10 +142,29 @@ export function evalCoordinateGroup(ctx) {
         index,
         id: layer.id,
         sourceNodeId: layer.sourceNodeId,
-        role: layer.role,
+
+        // User-facing hint only.
+        layerHint: layer.layerHint ?? layer.role ?? 'auto',
+
+        inferredKind: inferLayerKind(layer.input?.value),
+
         label: layer.label,
         outputRole: layer.input?.value?.meta?.outputRole ?? null,
+
+        visible: layer.visible !== false,
+        opacity: layer.opacity,
+        x: layer.x,
+        y: layer.y,
+
+        hasCoordinateSystem: Boolean(extractCoordinateSystem(layer.input?.value)),
+        hasParameterSources: Boolean(extractParameterSources(layer.input?.value)),
+        hasElementLineage: hasElementLevelLineage(layer.input?.value?.root),
       })),
+
+      bindingContext: makeBindingContext({
+        ctx,
+        resolvedLayers,
+      }),
 
       coordinateSystem,
       scaleMatches,
@@ -151,15 +187,21 @@ function reconcileLayers({ layerConfigs, layerInputs }) {
     .filter((config) => connectedSourceIds.has(config.sourceNodeId))
     .map((config) => {
       const input = inputsBySource.get(config.sourceNodeId);
-      const inferredRole = inferLayerRole(input.value);
+      const inferredKind = inferLayerKind(input.value);
+      const layerHint = config.layerHint ?? config.role ?? 'auto';
 
       return {
         id: config.id ?? `layer-${config.sourceNodeId}`,
         sourceNodeId: config.sourceNodeId,
         label: config.label ?? config.sourceNodeId,
-        role: config.role && config.role !== 'auto'
-          ? config.role
-          : inferredRole,
+
+        // Keep old role field for backward compatibility,
+        // but do not use it as core logic.
+        role: layerHint,
+        layerHint,
+
+        inferredKind,
+
         visible: config.visible ?? true,
         opacity: toNumber(config.opacity, 1),
         x: toNumber(config.x, 0),
@@ -176,7 +218,9 @@ function reconcileLayers({ layerConfigs, layerInputs }) {
       id: `layer-${input.from}`,
       sourceNodeId: input.from,
       label: input.from,
-      role: inferLayerRole(input.value),
+      role: 'auto',
+      layerHint: 'auto',
+      inferredKind: inferLayerKind(input.value),
       visible: true,
       opacity: 1,
       x: 0,
@@ -187,42 +231,15 @@ function reconcileLayers({ layerConfigs, layerInputs }) {
   return [...kept, ...added];
 }
 
-function inferLayerRole(output) {
-  const outputRole = output?.meta?.outputRole;
-  const rootRole = output?.root?.meta?.role;
-  const tags = output?.root?.meta?.tags ?? [];
-
-  if (
-    outputRole === 'axis-system' ||
-    outputRole === 'axis' ||
-    rootRole === 'axis-system' ||
-    rootRole === 'axis' ||
-    tags.includes('axis')
-  ) {
-    return 'axis';
-  }
-
-  if (
-    outputRole === 'generated-visual-collection' ||
-    rootRole === 'generated-shapes' ||
-    output?.meta?.parameterSources ||
-    output?.root?.meta?.parameterSources
-  ) {
-    return 'marks';
-  }
-
-  if (tags.includes('annotation') || tags.includes('text')) {
-    return 'annotation';
-  }
-
-  return 'visual';
-}
-
 function makeLayerWrapper({ ctx, layer, index }) {
+  const sourceOutput = layer.input.value;
+
   const root = prefixVisualNodeIds(
-    layer.input.value.root,
+    sourceOutput.root,
     `${ctx.nodeId}-${layer.id}`
   );
+
+  const inferredKind = inferLayerKind(sourceOutput);
 
   return {
     nodeType: 'layer',
@@ -251,11 +268,28 @@ function makeLayerWrapper({ ctx, layer, index }) {
     children: [root],
 
     meta: {
-      role: layer.role,
       sourceNodeId: layer.sourceNodeId,
       layerId: layer.id,
       layerIndex: index,
-      wrappedOutputRole: layer.input.value.meta?.outputRole ?? null,
+
+      // User-facing hint only.
+      layerHint: layer.layerHint ?? layer.role ?? 'auto',
+
+      // Structure-based classification for future binding logic.
+      inferredKind,
+
+      wrappedOutputRole: sourceOutput.meta?.outputRole ?? null,
+      wrappedLabel: sourceOutput.meta?.label ?? null,
+
+      coordinateSystem: extractCoordinateSystem(sourceOutput),
+      parameterSources: extractParameterSources(sourceOutput),
+
+      sourceMeta: {
+        sourceNodeId: sourceOutput.meta?.sourceNodeId ?? null,
+        outputRole: sourceOutput.meta?.outputRole ?? null,
+        label: sourceOutput.meta?.label ?? null,
+        warnings: sourceOutput.meta?.warnings ?? [],
+      },
     },
   };
 }
@@ -263,9 +297,18 @@ function makeLayerWrapper({ ctx, layer, index }) {
 function prefixVisualNodeIds(node, prefix) {
   if (!node || typeof node !== 'object') return node;
 
+  const originalId = node.id ?? null;
+
   return {
     ...node,
-    id: node.id ? `${prefix}-${node.id}` : prefix,
+    id: originalId ? `${prefix}-${originalId}` : prefix,
+
+    meta: {
+      ...(node.meta ?? {}),
+      originalId,
+      prefixedBy: prefix,
+    },
+
     children: Array.isArray(node.children)
       ? node.children.map((child, index) =>
           prefixVisualNodeIds(child, `${prefix}-${index}`)
@@ -288,7 +331,7 @@ function extractCoordinateSystem(output) {
   );
 }
 
-function compareAllMarkLayers({ markLayers, coordinateSystem }) {
+function compareAllCandidateLayers({ candidateLayers, coordinateSystem }) {
   const result = {};
 
   if (!coordinateSystem) {
@@ -299,17 +342,20 @@ function compareAllMarkLayers({ markLayers, coordinateSystem }) {
     };
   }
 
-  markLayers.forEach((layer) => {
+  candidateLayers.forEach((layer) => {
     const parameterSources = extractParameterSources(layer.input?.value);
 
     result[layer.id] = {
       sourceNodeId: layer.sourceNodeId,
-      role: layer.role,
+      layerHint: layer.layerHint ?? layer.role ?? 'auto',
+      inferredKind: inferLayerKind(layer.input?.value),
+
       x: compareAxisAndMarksScale({
         axisDimension: coordinateSystem.x,
         marksParameterSource: parameterSources?.x,
         dimension: 'x',
       }),
+
       y: compareAxisAndMarksScale({
         axisDimension: coordinateSystem.y,
         marksParameterSource: parameterSources?.y,
@@ -330,6 +376,90 @@ function extractParameterSources(output) {
     output?.root?.meta?.parameterSources ??
     null
   );
+}
+
+function isCoordinateReferenceOutput(output) {
+  return Boolean(
+    output?.meta?.coordinateSystem ||
+    output?.meta?.tickSummary ||
+    output?.root?.meta?.coordinateSystem
+  );
+}
+
+function isDataDrivenVisualOutput(output) {
+  if (!output || output.outputType !== 'visual') return false;
+
+  if (isCoordinateReferenceOutput(output)) return false;
+
+  return Boolean(
+    output?.meta?.parameterSources ||
+    output?.root?.meta?.parameterSources ||
+    hasElementLevelLineage(output?.root)
+  );
+}
+
+function hasElementLevelLineage(node) {
+  if (!node) return false;
+
+  if (
+    node?.dataRef?.parameterLineage ||
+    node?.meta?.parameterLineage
+  ) {
+    return true;
+  }
+
+  return Array.isArray(node.children)
+    ? node.children.some(hasElementLevelLineage)
+    : false;
+}
+
+function inferLayerKind(output) {
+  if (isCoordinateReferenceOutput(output)) return 'coordinate-reference';
+  if (isDataDrivenVisualOutput(output)) return 'data-driven-visual';
+  if (output?.outputType === 'visual') return 'visual';
+  return 'unknown';
+}
+
+function makeBindingContext({ ctx, resolvedLayers }) {
+  const layers = resolvedLayers.map((layer, index) => {
+    const output = layer.input?.value;
+
+    return {
+      index,
+      id: layer.id,
+      sourceNodeId: layer.sourceNodeId,
+      label: layer.label,
+
+      layerHint: layer.layerHint ?? layer.role ?? 'auto',
+      inferredKind: inferLayerKind(output),
+
+      visible: layer.visible !== false,
+      opacity: layer.opacity,
+      x: layer.x,
+      y: layer.y,
+
+      hasCoordinateSystem: Boolean(extractCoordinateSystem(output)),
+      hasParameterSources: Boolean(extractParameterSources(output)),
+      hasElementLineage: hasElementLevelLineage(output?.root),
+
+      outputRole: output?.meta?.outputRole ?? null,
+      outputLabel: output?.meta?.label ?? null,
+    };
+  });
+
+  return {
+    coordinateGroupId: `${ctx.nodeId}-coordinate-group`,
+
+    layers,
+
+    coordinateReferenceLayerIds: layers
+      .filter((layer) => layer.inferredKind === 'coordinate-reference')
+      .map((layer) => layer.id),
+
+    dataDrivenLayerIds: layers
+      .filter((layer) => layer.inferredKind === 'data-driven-visual')
+      .map((layer) => layer.id),
+  };
 }
 
 function compareAxisAndMarksScale({

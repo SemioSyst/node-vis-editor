@@ -91,28 +91,43 @@ export function PortTextField({
   label,
   value,
   onChange,
-  placeholder,
   state = 'normal',
   note,
+  placeholder,
+  disabled = false,
 }) {
+  const isDisabled = disabled || state === 'controlled' || state === 'inactive';
+
   return (
-    <PortFieldShell
-      handleId={handleId}
-      label={label}
-      state={state}
-      note={note}
+    <div
+      className={[
+        'port-field',
+        state !== 'normal' ? `port-field--${state}` : '',
+      ].join(' ')}
     >
-      {({ disabled }) => (
-        <input
-          className="node-input nodrag"
-          type="text"
-          value={value ?? ''}
-          placeholder={placeholder}
-          disabled={disabled}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      )}
-    </PortFieldShell>
+      <Handle
+        type="target"
+        id={handleId}
+        position={Position.Left}
+        className={[
+          'port-field__handle',
+          state !== 'normal' ? `port-field__handle--${state}` : '',
+        ].join(' ')}
+      />
+
+      <label className="port-field__label">{label}</label>
+
+      <input
+        className="node-input port-field__control nodrag"
+        type="text"
+        value={value}
+        placeholder={placeholder}
+        disabled={isDisabled}
+        onChange={(e) => onChange(e.target.value)}
+      />
+
+      {note && <span className="port-field__note">{note}</span>}
+    </div>
   );
 }
 
