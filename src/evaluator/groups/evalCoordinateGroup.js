@@ -110,8 +110,12 @@ export function evalCoordinateGroup(ctx) {
 
           visible: layer.visible,
           opacity: layer.opacity,
-          x: layer.x,
-          y: layer.y,
+
+          x: toNumber(layer.x, 0),
+          y: toNumber(layer.y, 0),
+
+          svgX: toNumber(layer.x, 0),
+          svgY: toSvgY(layer.y, p),
         })),
 
         bindingContext: makeBindingContext({
@@ -153,8 +157,12 @@ export function evalCoordinateGroup(ctx) {
 
         visible: layer.visible !== false,
         opacity: layer.opacity,
-        x: layer.x,
-        y: layer.y,
+
+        x: toNumber(layer.x, 0),
+        y: toNumber(layer.y, 0),
+
+        svgX: toNumber(layer.x, 0),
+        svgY: toSvgY(layer.y, p),
 
         hasCoordinateSystem: Boolean(extractCoordinateSystem(layer.input?.value)),
         hasParameterSources: Boolean(extractParameterSources(layer.input?.value)),
@@ -241,13 +249,23 @@ function makeLayerWrapper({ ctx, layer, index }) {
 
   const inferredKind = inferLayerKind(sourceOutput);
 
+  const layerX = toNumber(layer.x, 0);
+
+  // User-facing y offset.
+  // Positive means upward.
+  const layerUserY = toNumber(layer.y, 0);
+
+  // SVG-space y offset used by renderer.
+  // Positive SVG y goes downward, so convert here.
+  const layerSvgY = toSvgY(layerUserY, ctx.params);
+
   return {
     nodeType: 'layer',
     id: `${ctx.nodeId}-${layer.id}`,
 
     frame: {
-      x: toNumber(layer.x, 0),
-      y: toNumber(layer.y, 0),
+      x: layerX,
+      y: layerSvgY,
       alignX: 'left',
       alignY: 'top',
     },
@@ -271,6 +289,13 @@ function makeLayerWrapper({ ctx, layer, index }) {
       sourceNodeId: layer.sourceNodeId,
       layerId: layer.id,
       layerIndex: index,
+
+      layerOffset: {
+        x: layerX,
+        y: layerUserY,
+        svgX: layerX,
+        svgY: layerSvgY,
+      },
 
       // User-facing hint only.
       layerHint: layer.layerHint ?? layer.role ?? 'auto',
@@ -435,8 +460,12 @@ function makeBindingContext({ ctx, resolvedLayers }) {
 
       visible: layer.visible !== false,
       opacity: layer.opacity,
-      x: layer.x,
-      y: layer.y,
+
+      x: toNumber(layer.x, 0),
+      y: toNumber(layer.y, 0),
+
+      svgX: toNumber(layer.x, 0),
+      svgY: toSvgY(layer.y, ctx.params),
 
       hasCoordinateSystem: Boolean(extractCoordinateSystem(output)),
       hasParameterSources: Boolean(extractParameterSources(output)),
@@ -665,6 +694,20 @@ function approxNullable(a, b) {
 function toNumber(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function toSvgY(value, params = {}) {
+  const n = Number(value);
+
+  if (!Number.isFinite(n)) return 0;
+
+  // Default user-facing coordinate system:
+  // positive y means upward.
+  if ((params.yDirection ?? 'up') === 'svg') {
+    return n;
+  }
+
+  return -n;
 }
 
 function clamp(value, min, max) {

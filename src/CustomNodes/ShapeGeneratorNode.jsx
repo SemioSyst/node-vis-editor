@@ -16,10 +16,10 @@ export default function ShapeGeneratorNode({ id, data }) {
     const update = useUpdateNodeData(id);
 
     const shapeType = data.shapeType ?? 'rect';
-    const layoutAxis = data.layoutAxis ?? 'x';
+    const layoutMode = data.layoutMode ?? legacyLayoutAxisToMode(data.layoutAxis ?? 'auto');
 
-    const gapXDisabled = layoutAxis !== 'x';
-    const gapYDisabled = layoutAxis !== 'y';
+    const gapXDisabled = layoutMode === 'linearY';
+    const gapYDisabled = layoutMode === 'linearX';
 
     const { isConnected } = useNodeInputStates(id);
 
@@ -49,16 +49,16 @@ export default function ShapeGeneratorNode({ id, data }) {
     };
 
     const getLayoutGapState = (handleId) => {
-    if (handleId === 'layoutGapX' && layoutAxis !== 'x') {
-        return 'inactive';
-    }
+        if (handleId === 'layoutGapX' && gapXDisabled) {
+            return 'inactive';
+        }
 
-    if (handleId === 'layoutGapY' && layoutAxis !== 'y') {
-        return 'inactive';
-    }
+        if (handleId === 'layoutGapY' && gapYDisabled) {
+            return 'inactive';
+        }
 
-    return getParamState(handleId);
-    };
+        return getParamState(handleId);
+        };
 
   return (
     <NodeShell
@@ -244,12 +244,14 @@ export default function ShapeGeneratorNode({ id, data }) {
             defaultCollapsed
         >
         <SelectField
-            label="Axis"
-            value={layoutAxis}
-            onChange={(v) => update({ layoutAxis: v })}
+            label="Mode"
+            value={layoutMode}
+            onChange={(v) => update({ layoutMode: v })}
             options={[
-            { value: 'x', label: 'X axis' },
-            { value: 'y', label: 'Y axis' },
+                { value: 'auto', label: 'Auto' },
+                { value: 'linearX', label: 'Linear X' },
+                { value: 'linearY', label: 'Linear Y' },
+                { value: 'matrixGrid', label: 'Matrix Grid' },
             ]}
         />
 
@@ -259,7 +261,7 @@ export default function ShapeGeneratorNode({ id, data }) {
             value={data.layoutGapX ?? 18}
             onChange={(v) => update({ layoutGapX: v })}
             state={getLayoutGapState('layoutGapX')}
-            note={layoutAxis !== 'x' ? 'inactive' : undefined}
+            note={gapXDisabled ? 'inactive' : undefined}
         />
 
         <PortNumberField
@@ -268,7 +270,28 @@ export default function ShapeGeneratorNode({ id, data }) {
             value={data.layoutGapY ?? 18}
             onChange={(v) => update({ layoutGapY: v })}
             state={getLayoutGapState('layoutGapY')}
-            note={layoutAxis !== 'y' ? 'inactive' : undefined}
+            note={gapYDisabled ? 'inactive' : undefined}
+        />
+
+        <SelectField
+            label="Rows"
+            value={data.matrixRowDirection ?? 'down'}
+            onChange={(v) => update({ matrixRowDirection: v })}
+            disabled={layoutMode === 'linearX' || layoutMode === 'linearY'}
+            state={
+                layoutMode === 'linearX' || layoutMode === 'linearY'
+                ? 'inactive'
+                : 'normal'
+            }
+            note={
+                layoutMode === 'linearX' || layoutMode === 'linearY'
+                ? 'grid only'
+                : undefined
+            }
+            options={[
+                { value: 'down', label: 'Down' },
+                { value: 'up', label: 'Up' },
+            ]}
         />
         </NodeSection>
 
@@ -308,4 +331,13 @@ function getDefaultAlignY(shapeType) {
   if (shapeType === 'circle') return 'center';
   if (shapeType === 'rect') return 'bottom';
   return 'top';
+}
+
+function legacyLayoutAxisToMode(axis) {
+  if (axis === 'x') return 'linearX';
+  if (axis === 'y') return 'linearY';
+  if (axis === 'linearX') return 'linearX';
+  if (axis === 'linearY') return 'linearY';
+  if (axis === 'matrixGrid') return 'matrixGrid';
+  return 'auto';
 }

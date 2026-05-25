@@ -77,20 +77,26 @@ export function evalPathGenerator(ctx) {
     }),
   };
 
-  const resolved = resolvePath({
+  const matrixContext = detectPathMatrixContext(streams, warnings);
+  const resolvedPaths = resolvePaths({
     pathMode,
     params: p,
     streams,
     warnings,
+    matrixContext,
   });
 
-  const child = makePathElement({
-    ctx,
-    pathMode,
-    resolved,
-    streams,
-    parameterSources,
-  });
+  const children = resolvedPaths.map((resolved, pathIndex) =>
+    makePathElement({
+      ctx,
+      pathMode,
+      resolved,
+      streams,
+      parameterSources,
+      pathIndex,
+      matrixContext,
+    })
+  );
 
   const inputProvenance = collectInputProvenanceFromSources(parameterSources);
 
@@ -99,11 +105,12 @@ export function evalPathGenerator(ctx) {
     role: 'path-generator',
     outputType: 'visual',
     label: 'Path Generator Output',
-    transform: {
-      type: 'generate-path',
-      pathMode,
-      pointCount: resolved.points.length,
-      closed: resolved.closed,
+      transform: {
+        type: 'generate-path',
+        pathMode,
+      count: resolvedPaths.length,
+      pointCount: resolvedPaths[0]?.points.length ?? 0,
+      closed: resolvedPaths[0]?.closed ?? false,
     },
   });
 
@@ -126,7 +133,7 @@ export function evalPathGenerator(ctx) {
       interaction: null,
       bindings: [],
 
-      children: [child],
+      children,
 
       meta: {
         role: 'generated-path',
@@ -134,7 +141,7 @@ export function evalPathGenerator(ctx) {
         sourceNodeId: ctx.nodeId,
 
         parameterSources,
-        geometrySummary: resolved.geometrySummary,
+        geometrySummary: resolvedPaths.map((resolved) => resolved.geometrySummary),
       },
     },
 
@@ -144,9 +151,19 @@ export function evalPathGenerator(ctx) {
       outputRole: 'generated-path-collection',
       warnings,
 
-      resolvedCount: 1,
+      resolvedCount: resolvedPaths.length,
       pathMode,
-      pointCount: resolved.points.length,
+      pointCount: resolvedPaths.reduce((sum, resolved) => sum + resolved.points.length, 0),
+      matrixContext: matrixContext
+        ? {
+            rows: matrixContext.rows,
+            cols: matrixContext.cols,
+            flatCount: matrixContext.flatCount,
+            sourceHandle: matrixContext.sourceHandle,
+            rowLabels: matrixContext.rowLabels ?? null,
+            colLabels: matrixContext.colLabels ?? null,
+          }
+        : null,
 
       provenance: [
         ...inputProvenance,
@@ -154,16 +171,17 @@ export function evalPathGenerator(ctx) {
       ],
 
       parameterSources,
-      geometrySummary: resolved.geometrySummary,
+      geometrySummary: resolvedPaths.map((resolved) => resolved.geometrySummary),
     },
   };
 }
 
-function resolvePath({
+function resolvePaths({
   pathMode,
   params,
   streams,
   warnings,
+  matrixContext,
 }) {
   if (pathMode === 'freeformPath') {
     const pathData = String(
@@ -177,7 +195,7 @@ function resolvePath({
       pathMode,
     });
 
-    return {
+    return [{
       pathMode,
       d: pathData,
       closed: false,
@@ -192,87 +210,110 @@ function resolvePath({
         bounds: null,
         anchors: {},
       },
-    };
+    }];
   }
 
-  const points = resolvePoints({
-    streams,
-    params,
-  });
+  const rowCount = matrixContext ? matrixContext.rows : 1;
+  const result = [];
 
-  if (points.length < 2) {
-    warnings.push('PathGenerator needs at least two valid points.');
-  }
+  for (let pathIndex = 0; pathIndex < rowCount; pathIndex += 1) {
+    const points = resolvePoints({
+      streams,
+      params,
+      matrixContext,
+      pathIndex,
+    });
 
-  const curve = getCurve(params.curveType ?? 'linear');
+    if (points.length < 2) {
+      warnings.push('PathGenerator needs at least two valid points.');
+    }
 
-  const lineGenerator = d3Line()
-    .x((point) => point.x)
-    .y((point) => point.y)
-    .defined((point) =>
-      Number.isFinite(point.x) && Number.isFinite(point.y)
-    )
-    .curve(curve);
+    const curve = getCurve(params.curveType ?? 'linear');
 
-  let d = lineGenerator(points) ?? '';
+    const lineGenerator = d3Line()
+      .x((point) => point.x)
+      .y((point) => point.y)
+      .defined((point) =>
+        Number.isFinite(point.x) && Number.isFinite(point.y)
+      )
+      .curve(curve);
 
-  const closed = pathMode === 'polygonPath';
+    let d = lineGenerator(points) ?? '';
 
-  if (closed && d && !d.trim().endsWith('Z')) {
-    d = `${d}Z`;
-  }
+    const closed = pathMode === 'polygonPath';
 
-  const style = resolveStyle({
-    params,
-    streams,
-    index: 0,
-    pathMode,
-  });
+    if (closed && d && !d.trim().endsWith('Z')) {
+      d = `${d}Z`;
+    }
 
-  const bounds = getPointBounds(points);
-  const anchors = makePathAnchors(points, bounds);
-
-  return {
-    pathMode,
-    d,
-    closed,
-    points,
-    anchors,
-    style,
-    geometrySummary: {
+    const style = resolveStyle({
+      params,
+      streams,
+      index: pathIndex,
       pathMode,
-      pathData: d,
+    });
+
+    const bounds = getPointBounds(points);
+    const anchors = makePathAnchors(points, bounds);
+
+    result.push({
+      pathMode,
+      d,
       closed,
-      pointCount: points.length,
-      bounds,
+      points,
       anchors,
-      curveType: params.curveType ?? 'linear',
-      sampleCount: Math.max(2, Math.round(toNumber(params.sampleCount ?? 32, 32))),
-    },
-  };
+      style,
+      geometrySummary: {
+        pathIndex,
+        rowIndex: matrixContext ? pathIndex : null,
+        pathMode,
+        pathData: d,
+        closed,
+        pointCount: points.length,
+        bounds,
+        anchors,
+        curveType: params.curveType ?? 'linear',
+        sampleCount: Math.max(2, Math.round(toNumber(params.sampleCount ?? 32, 32))),
+      },
+    });
+  }
+
+  return result;
 }
 
 function resolvePoints({
   streams,
   params,
+  matrixContext,
+  pathIndex = 0,
 }) {
   const xLength = getStreamLength(streams.x);
   const yLength = getStreamLength(streams.y);
-  const count = Math.max(xLength, yLength, 2);
+  const count = matrixContext ? matrixContext.cols : Math.max(xLength, yLength, 2);
 
   const points = [];
 
-  for (let index = 0; index < count; index += 1) {
-    const fallbackX = index * 40;
+  for (let colIndex = 0; colIndex < count; colIndex += 1) {
+    const index = matrixContext
+      ? pathIndex * matrixContext.cols + colIndex
+      : colIndex;
+    const pointContext = matrixContext
+      ? makePathPointContext({
+          matrixContext,
+          rowIndex: pathIndex,
+          colIndex,
+        })
+      : null;
+    const fallbackX = colIndex * 40;
     const fallbackY = 0;
 
     const x = toNumber(
-      getStreamValue(streams.x, index, params.defaultX ?? fallbackX),
+      getStreamValueForPathPoint(streams.x, index, params.defaultX ?? fallbackX, pointContext),
       fallbackX
     );
 
     const userY = toNumber(
-      getStreamValue(streams.y, index, params.defaultY ?? fallbackY),
+      getStreamValueForPathPoint(streams.y, index, params.defaultY ?? fallbackY, pointContext),
       fallbackY
     );
 
@@ -282,6 +323,11 @@ function resolvePoints({
 
     points.push({
       index,
+      flatIndex: pointContext?.flatIndex ?? index,
+      rowIndex: pointContext?.rowIndex ?? null,
+      colIndex: pointContext?.colIndex ?? null,
+      matrixItem: pointContext?.matrixItem ?? null,
+      matrixContext: pointContext?.matrix ?? null,
 
       // SVG-space coordinates used to draw the path.
       x,
@@ -294,6 +340,153 @@ function resolvePoints({
   }
 
   return points;
+}
+
+function detectPathMatrixContext(streams, warnings) {
+  const xMatrix = streams.x?.matrix;
+  const yMatrix = streams.y?.matrix;
+
+  if (!xMatrix && !yMatrix) {
+    const styleMatrix = ['fill', 'stroke', 'strokeWidth', 'opacity', 'style']
+      .find((handleId) => streams?.[handleId]?.matrix);
+
+    if (styleMatrix) {
+      warnings.push(
+        `Matrix input on "${styleMatrix}" does not determine PathGenerator path count in this version. Connect matrix data to x or y to generate row-wise paths.`
+      );
+    }
+
+    return null;
+  }
+
+  const primaryHandle = yMatrix ? 'y' : 'x';
+  const primaryMatrix = yMatrix ?? xMatrix;
+
+  if (
+    xMatrix &&
+    yMatrix &&
+    (xMatrix.rows !== yMatrix.rows || xMatrix.cols !== yMatrix.cols)
+  ) {
+    warnings.push(
+      `Matrix shape mismatch: "x" is ${xMatrix.rows}x${xMatrix.cols}, but "y" is ${yMatrix.rows}x${yMatrix.cols}. Using "${primaryHandle}" as primary path matrix context.`
+    );
+  }
+
+  return {
+    ...primaryMatrix,
+    sourceHandle: primaryHandle,
+  };
+}
+
+function makePathPointContext({
+  matrixContext,
+  rowIndex,
+  colIndex,
+}) {
+  const flatIndex = rowIndex * matrixContext.cols + colIndex;
+  const matrixItem =
+    matrixContext.items?.[flatIndex] ??
+    {
+      flatIndex,
+      index: flatIndex,
+      rowIndex,
+      colIndex,
+      rowLabel: matrixContext.rowLabels?.[rowIndex] ?? null,
+      colLabel: matrixContext.colLabels?.[colIndex] ?? null,
+      value: matrixContext.values?.[flatIndex],
+      tags: null,
+    };
+
+  return {
+    flatIndex: matrixItem.flatIndex ?? flatIndex,
+    rowIndex: matrixItem.rowIndex ?? rowIndex,
+    colIndex: matrixItem.colIndex ?? colIndex,
+    matrixItem,
+    matrixContext: {
+      rows: matrixContext.rows,
+      cols: matrixContext.cols,
+      flatCount: matrixContext.flatCount,
+      rowLabels: matrixContext.rowLabels ?? null,
+      colLabels: matrixContext.colLabels ?? null,
+      sourceHandle: matrixContext.sourceHandle,
+    },
+    matrix: {
+      rows: matrixContext.rows,
+      cols: matrixContext.cols,
+      flatCount: matrixContext.flatCount,
+      rowLabels: matrixContext.rowLabels ?? null,
+      colLabels: matrixContext.colLabels ?? null,
+      sourceHandle: matrixContext.sourceHandle,
+    },
+  };
+}
+
+function getStreamValueForPathPoint(stream, index, fallback, pointContext) {
+  if (!stream) return fallback;
+
+  if (stream.kind === 'array') {
+    if (stream.values.length === 0) return fallback;
+
+    const resolvedIndex = resolvePathArrayIndex({
+      stream,
+      index,
+      pointContext,
+    });
+
+    if (resolvedIndex != null && resolvedIndex < stream.values.length) {
+      return stream.values[resolvedIndex];
+    }
+
+    return fallback;
+  }
+
+  if (stream.kind === 'scalar') {
+    return stream.value;
+  }
+
+  return fallback;
+}
+
+function resolvePathArrayIndex({
+  stream,
+  index,
+  pointContext,
+}) {
+  if (!stream || stream.kind !== 'array') return null;
+
+  const matrix = pointContext?.matrixContext ?? pointContext?.matrix;
+
+  if (!matrix) {
+    return index < stream.values.length ? index : null;
+  }
+
+  if (stream.matrix) {
+    return pointContext.flatIndex < stream.values.length
+      ? pointContext.flatIndex
+      : null;
+  }
+
+  if (stream.handleId === 'x' && stream.values.length === matrix.cols) {
+    return pointContext.colIndex;
+  }
+
+  if (stream.handleId === 'y' && stream.values.length === matrix.rows) {
+    return pointContext.rowIndex;
+  }
+
+  if (stream.values.length === matrix.flatCount) {
+    return pointContext.flatIndex;
+  }
+
+  if (stream.values.length === matrix.cols) {
+    return pointContext.colIndex;
+  }
+
+  if (stream.values.length === matrix.rows) {
+    return pointContext.rowIndex;
+  }
+
+  return index < stream.values.length ? index : null;
 }
 
 function resolveStyle({
@@ -350,9 +543,11 @@ function makePathElement({
   resolved,
   streams,
   parameterSources,
+  pathIndex = 0,
+  matrixContext,
 }) {
   const parameterLineage = makeElementParameterLineage({
-    index: 0,
+    index: pathIndex,
     streams,
     parameterSources,
     resolved,
@@ -365,7 +560,7 @@ function makePathElement({
   });
 
   const inheritedTags = collectElementTags({
-    index: 0,
+    index: pathIndex,
     parameterLineage,
     parameterSources,
   });
@@ -374,14 +569,26 @@ function makePathElement({
 
   return {
     nodeType: 'element',
-    id: `${ctx.nodeId}-${pathMode}-0`,
+    id: `${ctx.nodeId}-${pathMode}-${pathIndex}`,
 
     // Technical role only. Binding should rely on lineage/tags/context.
     role: 'path',
     tags: ['path', pathMode],
 
     dataRef: {
-      index: 0,
+      index: pathIndex,
+      pathIndex,
+      rowIndex: matrixContext ? pathIndex : null,
+      matrixContext: matrixContext
+        ? {
+            rows: matrixContext.rows,
+            cols: matrixContext.cols,
+            flatCount: matrixContext.flatCount,
+            rowLabels: matrixContext.rowLabels ?? null,
+            colLabels: matrixContext.colLabels ?? null,
+            sourceHandle: matrixContext.sourceHandle,
+          }
+        : null,
       collectionId: `${ctx.nodeId}-path-collection`,
       generatorNodeId: ctx.nodeId,
 
@@ -457,7 +664,19 @@ function makePathElement({
 
     meta: {
       sourceNodeId: ctx.nodeId,
-      elementIndex: 0,
+      elementIndex: pathIndex,
+      pathIndex,
+      rowIndex: matrixContext ? pathIndex : null,
+      matrixContext: matrixContext
+        ? {
+            rows: matrixContext.rows,
+            cols: matrixContext.cols,
+            flatCount: matrixContext.flatCount,
+            rowLabels: matrixContext.rowLabels ?? null,
+            colLabels: matrixContext.colLabels ?? null,
+            sourceHandle: matrixContext.sourceHandle,
+          }
+        : null,
       collectionId: `${ctx.nodeId}-path-collection`,
       generatorNodeId: ctx.nodeId,
 
@@ -478,8 +697,32 @@ function makePointLineage({
   streams,
   parameterSources,
 }) {
-  return points.map((point) => ({
+  return points.map((point) => {
+    const xLineage = makeSingleParamLineage({
+      handleId: 'x',
+      index: point.index,
+      stream: streams.x,
+      source: parameterSources.x,
+      resolvedValue: point.x,
+      pointContext: point,
+    });
+
+    const yLineage = makeSingleParamLineage({
+      handleId: 'y',
+      index: point.index,
+      stream: streams.y,
+      source: parameterSources.y,
+      resolvedValue: point.y,
+      pointContext: point,
+    });
+
+    return {
   index: point.index,
+  flatIndex: point.flatIndex ?? point.index,
+  rowIndex: point.rowIndex ?? null,
+  colIndex: point.colIndex ?? null,
+  matrixItem: point.matrixItem ?? null,
+  matrixContext: point.matrixContext ?? null,
 
   // SVG-space point used by the rendered path.
   x: point.x,
@@ -489,39 +732,15 @@ function makePointLineage({
   userX: point.userX ?? point.x,
   userY: point.userY ?? -point.y,
 
-    xLineage: makeSingleParamLineage({
-      handleId: 'x',
-      index: point.index,
-      stream: streams.x,
-      source: parameterSources.x,
-      resolvedValue: point.x,
-    }),
+    xLineage,
+    yLineage,
 
-    yLineage: makeSingleParamLineage({
-      handleId: 'y',
-      index: point.index,
-      stream: streams.y,
-      source: parameterSources.y,
-      resolvedValue: point.y,
-    }),
-
-    tags: collectTagsFromLineages([
-      makeSingleParamLineage({
-        handleId: 'x',
-        index: point.index,
-        stream: streams.x,
-        source: parameterSources.x,
-        resolvedValue: point.x,
-      }),
-      makeSingleParamLineage({
-        handleId: 'y',
-        index: point.index,
-        stream: streams.y,
-        source: parameterSources.y,
-        resolvedValue: point.y,
-      }),
-    ]),
-  }));
+    tags: mergeTagObjects(
+      collectTagsFromLineages([xLineage, yLineage]),
+      point.matrixItem?.tags
+    ),
+  };
+  });
 }
 
 function collectPointTags(pointLineage) {
@@ -603,6 +822,7 @@ function makeParamStream({
       connected: false,
       kind: 'scalar',
       value: fallback,
+      length: 1,
       source: null,
     };
   }
@@ -615,6 +835,7 @@ function makeParamStream({
       connected: false,
       kind: 'scalar',
       value: fallback,
+      length: 1,
       source: null,
     };
   }
@@ -625,6 +846,8 @@ function makeParamStream({
       connected: true,
       kind: 'array',
       values: normalized.values,
+      length: normalized.values.length,
+      matrix: normalized.matrix ?? null,
       source: input,
     };
   }
@@ -634,6 +857,7 @@ function makeParamStream({
     connected: true,
     kind: 'scalar',
     value: normalized.value,
+    length: 1,
     source: input,
   };
 }
@@ -650,16 +874,21 @@ function makeGroupedInputStream({
       handleId,
       connected: false,
       kind: 'missing',
+      length: 0,
       source: null,
     };
   }
 
   if (Array.isArray(output.values)) {
+    const matrix = normalizeOutputToMatrix(output);
+
     return {
       handleId,
       connected: true,
       kind: 'array',
-      values: output.values,
+      values: matrix?.values ?? output.values,
+      length: matrix?.values?.length ?? output.values.length,
+      matrix,
       source: input,
     };
   }
@@ -670,6 +899,7 @@ function makeGroupedInputStream({
       connected: true,
       kind: 'scalar',
       value: output.value,
+      length: 1,
       source: input,
     };
   }
@@ -679,11 +909,22 @@ function makeGroupedInputStream({
     connected: true,
     kind: 'scalar',
     value: output,
+    length: 1,
     source: input,
   };
 }
 
 function normalizeOutputToStreamValues(output, kind) {
+  const matrix = normalizeOutputToMatrix(output);
+
+  if (matrix) {
+    return {
+      kind: 'array',
+      values: matrix.values.map((value) => normalizeValue(value, kind)),
+      matrix,
+    };
+  }
+
   if (Array.isArray(output.values)) {
     return {
       kind: 'array',
@@ -699,6 +940,184 @@ function normalizeOutputToStreamValues(output, kind) {
   }
 
   return null;
+}
+
+function normalizeOutputToMatrix(output) {
+  if (!output) return null;
+
+  if (output.outputType === 'data' && output.dataType === 'matrix') {
+    return normalizeMatrixInput({
+      rawValue: output.values,
+      meta: output.meta ?? {},
+    });
+  }
+
+  if (output.outputType === 'parameter' && output.parameterType === 'matrix') {
+    return normalizeMatrixInput({
+      rawValue: output.values,
+      meta: output.meta ?? {},
+    });
+  }
+
+  if (
+    Array.isArray(output.values) &&
+    output.meta?.matrix &&
+    Number.isFinite(Number(output.meta.matrix.rows)) &&
+    Number.isFinite(Number(output.meta.matrix.cols))
+  ) {
+    return normalizeMatrixInput({
+      rawValue: output.values,
+      meta: output.meta ?? {},
+    });
+  }
+
+  return null;
+}
+
+function normalizeMatrixInput({ rawValue, meta = {} }) {
+  if (isNestedArray(rawValue)) {
+    return normalizeNestedMatrix({
+      values2D: rawValue,
+      meta,
+    });
+  }
+
+  if (
+    Array.isArray(rawValue) &&
+    meta?.matrix &&
+    Number.isFinite(Number(meta.matrix.rows)) &&
+    Number.isFinite(Number(meta.matrix.cols))
+  ) {
+    return normalizeFlatMatrix({
+      values: rawValue,
+      meta,
+    });
+  }
+
+  return null;
+}
+
+function isNestedArray(value) {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.some((item) => Array.isArray(item))
+  );
+}
+
+function normalizeNestedMatrix({ values2D, meta = {} }) {
+  const rows = values2D.length;
+  const cols = Math.max(
+    0,
+    ...values2D.map((row) => (Array.isArray(row) ? row.length : 0))
+  );
+
+  const rowLabels = meta.matrix?.rowLabels ?? null;
+  const colLabels = meta.matrix?.colLabels ?? null;
+
+  const values = [];
+  const items = [];
+
+  values2D.forEach((row, rowIndex) => {
+    if (!Array.isArray(row)) return;
+
+    row.forEach((value, colIndex) => {
+      const flatIndex = values.length;
+
+      values.push(value);
+      items.push({
+        flatIndex,
+        index: flatIndex,
+        rowIndex,
+        colIndex,
+        rowLabel: rowLabels?.[rowIndex] ?? null,
+        colLabel: colLabels?.[colIndex] ?? null,
+        value,
+        tags: getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+      });
+    });
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix?.order ?? 'row-major',
+  };
+}
+
+function normalizeFlatMatrix({ values, meta = {} }) {
+  const rows = Number(meta.matrix.rows);
+  const cols = Number(meta.matrix.cols);
+  const rowLabels = meta.matrix.rowLabels ?? null;
+  const colLabels = meta.matrix.colLabels ?? null;
+  const matrixItems = meta.matrixItems ?? meta.mappedItems ?? meta.items ?? null;
+
+  const items = values.map((value, flatIndex) => {
+    const existing = Array.isArray(matrixItems) ? matrixItems[flatIndex] : null;
+    const rowIndex = existing?.rowIndex ?? Math.floor(flatIndex / cols);
+    const colIndex = existing?.colIndex ?? flatIndex % cols;
+
+    return {
+      flatIndex,
+      index: flatIndex,
+      rowIndex,
+      colIndex,
+      rowLabel: existing?.rowLabel ?? rowLabels?.[rowIndex] ?? null,
+      colLabel: existing?.colLabel ?? colLabels?.[colIndex] ?? null,
+      value: existing?.value ?? value,
+      rawValue: existing?.rawValue ?? value,
+      mappedValue: existing?.mappedValue ?? null,
+      tags:
+        existing?.tags ??
+        getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+    };
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix.order ?? 'row-major',
+  };
+}
+
+function getMatrixItemTags({ meta, flatIndex, rowIndex, colIndex }) {
+  const taggedItems = meta?.taggedItems;
+
+  if (Array.isArray(taggedItems)) {
+    const byFlat = taggedItems.find((item) =>
+      item.flatIndex === flatIndex || item.index === flatIndex
+    );
+
+    if (byFlat?.tags) return byFlat.tags;
+
+    const byRowCol = taggedItems.find((item) =>
+      item.rowIndex === rowIndex && item.colIndex === colIndex
+    );
+
+    if (byRowCol?.tags) return byRowCol.tags;
+  }
+
+  return meta?.tags ?? null;
 }
 
 function normalizeValue(value, kind) {
@@ -783,6 +1202,8 @@ function makeParameterSourceSummary({
 
     items: meta.items ?? null,
     mappedItems: meta.mappedItems ?? null,
+    matrix: meta.matrix ?? null,
+    matrixItems: meta.matrixItems ?? null,
 
     tags: meta.tags ?? null,
     taggedItems: meta.taggedItems ?? null,
@@ -850,6 +1271,7 @@ function makeSingleParamLineage({
   stream,
   source,
   resolvedValue,
+  pointContext = null,
 }) {
   const base = {
     handleId,
@@ -875,6 +1297,8 @@ function makeSingleParamLineage({
     rawValue: null,
     scaleItem: null,
     mappedItem: null,
+    matrixRole: null,
+    matrixItem: null,
     tags: null,
 
     provenance: source?.provenance ?? [],
@@ -896,11 +1320,24 @@ function makeSingleParamLineage({
   }
 
   if (stream.kind === 'array') {
-    const safeIndex = clampIndex(index, stream.values.length);
+    const safeIndex = pointContext?.matrixContext
+      ? resolvePathArrayIndex({
+          stream,
+          index,
+          pointContext,
+        })
+      : clampIndex(index, stream.values.length);
     const rawValue =
       safeIndex == null
         ? null
         : stream.values[safeIndex];
+    const matrixItem = pointContext?.matrixContext
+      ? getMatrixItemForPathLineage({
+          stream,
+          resolvedIndex: safeIndex,
+          pointContext,
+        })
+      : null;
 
     return {
       ...base,
@@ -908,9 +1345,18 @@ function makeSingleParamLineage({
       sourceIndex: safeIndex,
       rawValue,
 
+      matrixRole: inferPathMatrixRole({
+        stream,
+        resolvedIndex: safeIndex,
+        pointContext,
+      }),
+      matrixItem,
       scaleItem: getScaleItemForIndex(source, safeIndex),
       mappedItem: getMappedItemForIndex(source, safeIndex),
-      tags: getTagsForIndex(source, safeIndex),
+      tags: mergeTagObjects(
+        getTagsForIndex(source, safeIndex),
+        matrixItem?.tags
+      ),
     };
   }
 
@@ -921,6 +1367,46 @@ function clampIndex(index, length) {
   if (!Number.isFinite(length) || length <= 0) return null;
   if (index < length) return index;
   return null;
+}
+
+function inferPathMatrixRole({
+  stream,
+  resolvedIndex,
+  pointContext,
+}) {
+  if (!pointContext?.matrixContext || resolvedIndex == null) return null;
+
+  if (stream?.matrix) return 'cell';
+
+  const matrix = pointContext.matrixContext;
+
+  if (resolvedIndex === pointContext.flatIndex && stream.values.length === matrix.flatCount) {
+    return 'cell';
+  }
+
+  if (resolvedIndex === pointContext.colIndex && stream.values.length === matrix.cols) {
+    return 'column';
+  }
+
+  if (resolvedIndex === pointContext.rowIndex && stream.values.length === matrix.rows) {
+    return 'row';
+  }
+
+  return null;
+}
+
+function getMatrixItemForPathLineage({
+  stream,
+  resolvedIndex,
+  pointContext,
+}) {
+  if (!pointContext?.matrixContext || resolvedIndex == null) return null;
+
+  if (stream?.matrix) {
+    return stream.matrix.items?.[resolvedIndex] ?? null;
+  }
+
+  return pointContext.matrixItem ?? null;
 }
 
 function getScaleItemForIndex(source, index) {
@@ -994,6 +1480,7 @@ function collectElementTags({
     mergeTagsInto(merged, lineage?.tags);
     mergeTagsInto(merged, lineage?.scaleItem?.tags);
     mergeTagsInto(merged, lineage?.mappedItem?.tags);
+    mergeTagsInto(merged, lineage?.matrixItem?.tags);
   });
 
   Object.values(parameterSources ?? {}).forEach((source) => {
@@ -1011,6 +1498,7 @@ function collectTagsFromLineages(lineages) {
     mergeTagsInto(merged, lineage?.tags);
     mergeTagsInto(merged, lineage?.scaleItem?.tags);
     mergeTagsInto(merged, lineage?.mappedItem?.tags);
+    mergeTagsInto(merged, lineage?.matrixItem?.tags);
   });
 
   return Object.keys(merged).length > 0 ? merged : null;
@@ -1072,4 +1560,26 @@ function toSvgY(value, params = {}) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function mergeTagObjects(...tagObjects) {
+  const merged = {};
+
+  tagObjects.forEach((tags) => {
+    if (!tags || typeof tags !== 'object') return;
+
+    Object.entries(tags).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+
+      if (Array.isArray(value)) {
+        const existing = Array.isArray(merged[key]) ? merged[key] : [];
+        merged[key] = [...new Set([...existing, ...value])];
+        return;
+      }
+
+      merged[key] = value;
+    });
+  });
+
+  return Object.keys(merged).length > 0 ? merged : null;
 }

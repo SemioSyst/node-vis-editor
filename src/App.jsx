@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { 
   ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, 
-  Controls, Background, Panel, BackgroundVariant, useViewport,
+  Controls, Background, Panel, BackgroundVariant, useViewport, useReactFlow,
 } from '@xyflow/react';
 // Import custom nodes
 import PreviewNode from './CustomNodes/PreviewNode.jsx';
@@ -19,6 +19,9 @@ import D3AxisGeneratorNode from './CustomNodes/D3AxisGeneratorNode.jsx';
 import CoordinateGroupNode from './CustomNodes/CoordinateGroupNode.jsx';
 import TextGeneratorNode from './CustomNodes/TextGeneratorNode.jsx';
 import PathGeneratorNode from './CustomNodes/PathGeneratorNode.jsx';
+import TagMapperNode from './CustomNodes/TagMapperNode.jsx';
+import DataInspectorNode from './CustomNodes/DataInspectorNode.jsx';
+import ColourMapperNode from './CustomNodes/ColourMapperNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -44,6 +47,9 @@ const NODE_LIBRARY = [
   { type: 'coordinateGroup', label: 'Coordinate Group', defaultData: { } },
   { type: 'textGenerator', label: 'Text Generator', defaultData: { } },
   { type: 'pathGenerator', label: 'Path Generator', defaultData: { } },
+  { type: 'tagMapper', label: 'Tag Mapper', defaultData: { } },
+  { type: 'dataInspector', label: 'Data Inspector', defaultData: { } },
+  { type: 'colourMapper', label: 'Colour Mapper', defaultData: { } },
 ];
 
 //Define custom node types
@@ -63,6 +69,9 @@ const nodeTypes = {
   coordinateGroup: CoordinateGroupNode,
   textGenerator: TextGeneratorNode,
   pathGenerator: PathGeneratorNode,
+  tagMapper: TagMapperNode,
+  dataInspector: DataInspectorNode,
+  colourMapper: ColourMapperNode,
 };
 
 //Initial Nodes and Edges
@@ -311,6 +320,7 @@ const initialEdges = [
 
 //Main App Component
 export default function App() {
+  const flowWrapperRef = useRef(null);
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
  
@@ -328,23 +338,21 @@ export default function App() {
   );
 
   // --- Node addition logic ---
-  const nextIdRef = useMemo(() => ({ n: 1 }), []); // simple ref to keep track of next node id for demo purposes
+  const nextIdRef = useRef(1); // simple ref to keep track of next node id for demo purposes
   // Function to add a new node of a given type to the canvas
-  const addNode = useCallback((nodeType) => {
+  const addNode = useCallback((nodeType, position) => {
     const entry = NODE_LIBRARY.find((x) => x.type === nodeType);
     if (!entry) return;
     // Generate a unique id for the new node
-    const id = `${nodeType}-${nextIdRef.n++}`;
-
-    // For demo purposes, new nodes are added with a random offset from the center.
-    const pos = { x: 0 + (Math.random() * 80 - 40), y: 0 + (Math.random() * 80 - 40) };
+    const id = `${nodeType}-${nextIdRef.current++}`;
 
     setNodes((prev) => [
       ...prev,
       {
         id,
         type: entry.type,
-        position: pos,
+        position: position ?? { x: 0, y: 0 },
+        origin: [0.5, 0.5],
         data: { ...(entry.defaultData ?? {}) },
       },
     ]);
@@ -397,7 +405,7 @@ export default function App() {
 
  
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div ref={flowWrapperRef} style={{ width: '100vw', height: '100vh' }}>
       <GraphIRContext.Provider value={graphIR}>
         <OutputsProvider>
           <ReactFlow
@@ -409,27 +417,7 @@ export default function App() {
             nodeTypes={nodeTypes}
             fitView
           >
-            <Panel position="bottom-center">
-              <div style={{ display: 'flex', gap: 8, padding: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 10 }}>
-                {NODE_LIBRARY.map((n) => (
-                  <button
-                    key={n.type}
-                    onClick={() => addNode(n.type)}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: 6,
-                      border: '1px solid #555',
-                      background: '#222',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      fontSize: 12,
-                    }}
-                  >
-                    + {n.label}
-                  </button>
-                ))}
-              </div>
-            </Panel>
+            <AddNodePanel addNode={addNode} flowWrapperRef={flowWrapperRef} />
             <Panel position="top-right">
               <RunEvaluatorButton evaluator={evaluator} graphIR={graphIR} topo={topo} nodes={nodes} />
             </Panel>
@@ -440,6 +428,43 @@ export default function App() {
         </OutputsProvider>
       </GraphIRContext.Provider>
     </div>
+  );
+}
+
+function AddNodePanel({ addNode, flowWrapperRef }) {
+  const { screenToFlowPosition } = useReactFlow();
+
+  const addNodeAtViewportCenter = useCallback((nodeType) => {
+    const bounds = flowWrapperRef.current?.getBoundingClientRect();
+    const screenCenter = bounds
+      ? { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 }
+      : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    addNode(nodeType, screenToFlowPosition(screenCenter));
+  }, [addNode, flowWrapperRef, screenToFlowPosition]);
+
+  return (
+    <Panel position="bottom-center">
+      <div style={{ display: 'flex', gap: 8, padding: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 10 }}>
+        {NODE_LIBRARY.map((n) => (
+          <button
+            key={n.type}
+            onClick={() => addNodeAtViewportCenter(n.type)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: 6,
+              border: '1px solid #555',
+              background: '#222',
+              color: '#fff',
+              cursor: 'pointer',
+              fontSize: 12,
+            }}
+          >
+            + {n.label}
+          </button>
+        ))}
+      </div>
+    </Panel>
   );
 }
 

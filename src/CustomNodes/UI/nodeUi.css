@@ -698,3 +698,51 @@ select.node-input {
 .node-section {
   border-top-width: 1px;
 }
+
+/* ---------- Stacked port field for long text inputs ---------- */
+
+.port-field--stacked {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 4px 6px;
+  align-items: start;
+  width: 100%;
+}
+
+.port-field--stacked .port-field__handle-slot {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+
+.port-field--stacked .port-field__label-wrap {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.port-field--stacked .port-field__control--full {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  width: 100%;
+}
+
+.port-textarea {
+  width: 100%;
+  min-height: 64px;
+  max-height: 140px;
+  overflow: auto;
+  resize: vertical;
+  line-height: 1.35;
+  font-family: inherit;
+}
+
+.port-field--controlled .port-textarea::placeholder {
+  color: #9db7ff;
+  opacity: 0.85;
+}
+
+.port-field--inactive .port-textarea::placeholder {
+  color: #777;
+}

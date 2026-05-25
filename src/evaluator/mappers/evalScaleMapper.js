@@ -260,6 +260,8 @@ export function evalScaleMapper(ctx) {
       // Per-index mapping summary.
       // This is useful for downstream generators to preserve item-level lineage.
       mappedItems,
+      matrix: inputInfo.matrix ?? null,
+      matrixItems: inputInfo.matrix ? mappedItems : inputInfo.matrixItems ?? null,
 
       // Pass-through tags from upstream data/parameter outputs.
       tags: inputInfo.tags ?? null,
@@ -286,6 +288,10 @@ function normalizeInputValues(output, { scaleType }) {
   const isDiscreteScale = isDiscreteScaleType(scaleType);
 
   if (output.outputType === 'data') {
+    if (output.dataType === 'matrix') {
+      return normalizeMatrixValues(output, { isDiscreteScale });
+    }
+
     if (output.dataType === 'number') {
       const rawValues = [output.value];
 
@@ -332,6 +338,10 @@ function normalizeInputValues(output, { scaleType }) {
   }
 
   if (output.outputType === 'parameter') {
+    if (output.parameterType === 'matrix') {
+      return normalizeMatrixValues(output, { isDiscreteScale });
+    }
+
     if ('value' in output) {
       const rawValues = [output.value];
 
@@ -718,18 +728,27 @@ function makeMappedItems({
     const scaleItem = Array.isArray(d3ScaleInfo.items)
       ? d3ScaleInfo.items[index] ?? null
       : null;
+    const matrixItem = Array.isArray(inputInfo.matrixItems)
+      ? inputInfo.matrixItems[index] ?? null
+      : null;
 
     const tags =
       getTagsForIndexFromInputInfo(inputInfo, index) ??
+      matrixItem?.tags ??
       scaleItem?.tags ??
       null;
 
     return {
       index,
+      flatIndex: matrixItem?.flatIndex ?? index,
+      rowIndex: matrixItem?.rowIndex ?? null,
+      colIndex: matrixItem?.colIndex ?? null,
+      rowLabel: matrixItem?.rowLabel ?? null,
+      colLabel: matrixItem?.colLabel ?? null,
 
       // rawValue is what came from the upstream output before normalization.
       // For category scales this is usually the original category label.
-      rawValue: inputInfo.rawValues?.[index] ?? value,
+      rawValue: matrixItem?.rawValue ?? inputInfo.rawValues?.[index] ?? value,
 
       // inputValue is the value actually passed into the D3 scale.
       inputValue: value,
@@ -756,4 +775,203 @@ function getTagsForIndexFromInputInfo(inputInfo, index) {
   }
 
   return inputInfo?.tags ?? null;
+}
+
+function normalizeMatrixValues(output, { isDiscreteScale }) {
+  const meta = output.meta ?? {};
+  const normalized = normalizeMatrixInput({
+    rawValue: output.values ?? [],
+    meta,
+  });
+
+  if (!normalized) return null;
+
+  const rawValues = normalized.values;
+  const values = isDiscreteScale
+    ? rawValues
+        .map((v) => String(v).trim())
+        .filter((v) => v.length > 0)
+    : rawValues
+        .map((v) => Number(v))
+        .filter(Number.isFinite);
+
+  const matrixItems = values.map((value, index) => {
+    const item = normalized.items?.[index] ?? {};
+
+    return {
+      index,
+      flatIndex: item.flatIndex ?? index,
+      rowIndex: item.rowIndex ?? Math.floor(index / normalized.cols),
+      colIndex: item.colIndex ?? index % normalized.cols,
+      rowLabel: item.rowLabel ?? normalized.rowLabels?.[item.rowIndex] ?? null,
+      colLabel: item.colLabel ?? normalized.colLabels?.[item.colIndex] ?? null,
+      rawValue: item.rawValue ?? item.value ?? rawValues[index],
+      inputValue: value,
+      mappedValue: null,
+      tags: item.tags ?? null,
+    };
+  });
+
+  return {
+    kind: 'matrix',
+    values,
+    rawValues,
+    valueType: isDiscreteScale ? 'category' : 'number',
+    sourceNodeId: meta.sourceNodeId,
+    tags: meta.tags ?? null,
+    taggedItems: meta.taggedItems ?? null,
+    inputMeta: meta,
+    matrix: {
+      rows: normalized.rows,
+      cols: normalized.cols,
+      order: normalized.order ?? 'row-major',
+      rowLabels: normalized.rowLabels ?? null,
+      colLabels: normalized.colLabels ?? null,
+    },
+    matrixItems,
+  };
+}
+
+function normalizeMatrixInput({ rawValue, meta = {} }) {
+  if (isNestedArray(rawValue)) {
+    return normalizeNestedMatrix({
+      values2D: rawValue,
+      meta,
+    });
+  }
+
+  if (
+    Array.isArray(rawValue) &&
+    meta?.matrix &&
+    Number.isFinite(Number(meta.matrix.rows)) &&
+    Number.isFinite(Number(meta.matrix.cols))
+  ) {
+    return normalizeFlatMatrix({
+      values: rawValue,
+      meta,
+    });
+  }
+
+  return null;
+}
+
+function isNestedArray(value) {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.some((item) => Array.isArray(item))
+  );
+}
+
+function normalizeNestedMatrix({ values2D, meta = {} }) {
+  const rows = values2D.length;
+  const cols = Math.max(
+    0,
+    ...values2D.map((row) => (Array.isArray(row) ? row.length : 0))
+  );
+  const rowLabels = meta.matrix?.rowLabels ?? null;
+  const colLabels = meta.matrix?.colLabels ?? null;
+  const values = [];
+  const items = [];
+
+  values2D.forEach((row, rowIndex) => {
+    if (!Array.isArray(row)) return;
+
+    row.forEach((value, colIndex) => {
+      const flatIndex = values.length;
+
+      values.push(value);
+      items.push({
+        index: flatIndex,
+        flatIndex,
+        rowIndex,
+        colIndex,
+        rowLabel: rowLabels?.[rowIndex] ?? null,
+        colLabel: colLabels?.[colIndex] ?? null,
+        value,
+        rawValue: value,
+        tags: getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+      });
+    });
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix?.order ?? 'row-major',
+  };
+}
+
+function normalizeFlatMatrix({ values, meta = {} }) {
+  const rows = Number(meta.matrix.rows);
+  const cols = Number(meta.matrix.cols);
+  const rowLabels = meta.matrix.rowLabels ?? null;
+  const colLabels = meta.matrix.colLabels ?? null;
+  const matrixItems = meta.matrixItems ?? meta.mappedItems ?? meta.items ?? null;
+
+  const items = values.map((value, flatIndex) => {
+    const existing = Array.isArray(matrixItems) ? matrixItems[flatIndex] : null;
+    const rowIndex = existing?.rowIndex ?? Math.floor(flatIndex / cols);
+    const colIndex = existing?.colIndex ?? flatIndex % cols;
+
+    return {
+      index: flatIndex,
+      flatIndex,
+      rowIndex,
+      colIndex,
+      rowLabel: existing?.rowLabel ?? rowLabels?.[rowIndex] ?? null,
+      colLabel: existing?.colLabel ?? colLabels?.[colIndex] ?? null,
+      value: existing?.value ?? value,
+      rawValue: existing?.rawValue ?? value,
+      tags:
+        existing?.tags ??
+        getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+    };
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix.order ?? 'row-major',
+  };
+}
+
+function getMatrixItemTags({ meta, flatIndex, rowIndex, colIndex }) {
+  const taggedItems = meta?.taggedItems;
+
+  if (Array.isArray(taggedItems)) {
+    const byFlat = taggedItems.find((item) =>
+      item.flatIndex === flatIndex || item.index === flatIndex
+    );
+
+    if (byFlat?.tags) return byFlat.tags;
+
+    const byRowCol = taggedItems.find((item) =>
+      item.rowIndex === rowIndex && item.colIndex === colIndex
+    );
+
+    if (byRowCol?.tags) return byRowCol.tags;
+  }
+
+  return meta?.tags ?? null;
 }

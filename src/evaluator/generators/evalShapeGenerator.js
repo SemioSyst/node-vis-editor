@@ -22,6 +22,42 @@ const STYLE_HANDLES = [
   'opacity',
 ];
 
+const LAYOUT_HANDLES = [
+  'layoutGapX',
+  'layoutGapY',
+];
+
+const MATRIX_PRIMARY_HANDLE_ORDER = [
+  'x',
+  'y',
+  'width',
+  'height',
+  'radius',
+  'cornerRadius',
+  'fill',
+  'opacity',
+  'strokeWidth',
+  'stroke',
+];
+
+const MATRIX_ARRAY_RESOLVE_ORDER = {
+  x: ['cell', 'column', 'row'],
+  y: ['cell', 'row', 'column'],
+
+  width: ['cell', 'column', 'row'],
+  height: ['cell', 'row', 'column'],
+
+  radius: ['cell', 'row', 'column'],
+  cornerRadius: ['cell', 'row', 'column'],
+
+  fill: ['cell', 'row', 'column'],
+  stroke: ['cell', 'row', 'column'],
+  strokeWidth: ['cell', 'row', 'column'],
+  opacity: ['cell', 'row', 'column'],
+
+  default: ['cell', 'row', 'column'],
+};
+
 export function evalShapeGenerator(ctx) {
   const params = ctx.params ?? {};
   const warnings = [];
@@ -34,20 +70,22 @@ export function evalShapeGenerator(ctx) {
   const hasStyleInput = hasHandleInput(inputsByHandle, 'style');
 
   const parameterSources = collectParameterSources(inputsByHandle, [
-  'x',
-  'y',
-  'width',
-  'height',
-  'radius',
-  'cornerRadius',
-  'alignX',
-  'alignY',
-  'fill',
-  'stroke',
-  'strokeWidth',
-  'opacity',
-  'frame',
-  'style',
+    'x',
+    'y',
+    'width',
+    'height',
+    'radius',
+    'cornerRadius',
+    'alignX',
+    'alignY',
+    'fill',
+    'stroke',
+    'strokeWidth',
+    'opacity',
+    'layoutGapX',
+    'layoutGapY',
+    'frame',
+    'style',
   ]);
 
   const streams = buildParamStreams({
@@ -59,11 +97,25 @@ export function evalShapeGenerator(ctx) {
     warnings,
   });
 
-  const count = inferElementCount(streams, warnings);
+  const matrixContext = detectMatrixContext(streams, warnings);
+  const layoutMode = getLayoutMode(params);
+
+  if (layoutMode === 'matrixGrid' && !matrixContext) {
+    warnings.push(
+      'Matrix Grid layout selected but no matrix input is connected. Falling back to Linear X layout.'
+    );
+  }
+
+  const count = inferElementCount(streams, warnings, matrixContext);
 
   const children = [];
 
   for (let index = 0; index < count; index++) {
+    const elementContext = makeElementContext({
+      index,
+      matrixContext,
+    });
+
     const resolved = resolveElementParams({
       index,
       shapeType,
@@ -71,6 +123,7 @@ export function evalShapeGenerator(ctx) {
       streams,
       hasFrameInput,
       hasStyleInput,
+      elementContext,
     });
 
     children.push(makeShapeElement({
@@ -80,6 +133,7 @@ export function evalShapeGenerator(ctx) {
       resolved,
       streams,
       parameterSources,
+      elementContext,
     }));
   }
 
@@ -124,15 +178,21 @@ export function evalShapeGenerator(ctx) {
         tags: ['shape-generator', shapeType],
         sourceNodeId: ctx.nodeId,
 
-        layout: {
-            type: 'linear',
-            axis: params.layoutAxis ?? 'x',
-            gapX: params.layoutGapX ?? 18,
-            gapY: params.layoutGapY ?? 18,
-        },
+        layout: makeLayoutMeta({
+          params,
+          matrixContext,
+        }),
 
         resolved: {
-            count,
+          count,
+          matrix: matrixContext
+            ? {
+                rows: matrixContext.rows,
+                cols: matrixContext.cols,
+                flatCount: matrixContext.flatCount,
+                sourceHandle: matrixContext.sourceHandle,
+              }
+            : null,
         },
 
         parameterSources,
@@ -145,6 +205,17 @@ export function evalShapeGenerator(ctx) {
         outputRole: 'generated-visual-collection',
         warnings,
         resolvedCount: count,
+
+        matrixContext: matrixContext
+        ? {
+            rows: matrixContext.rows,
+            cols: matrixContext.cols,
+            flatCount: matrixContext.flatCount,
+            sourceHandle: matrixContext.sourceHandle,
+            rowLabels: matrixContext.rowLabels ?? null,
+            colLabels: matrixContext.colLabels ?? null,
+          }
+        : null,
 
         provenance: [
             ...inputProvenance,
@@ -248,6 +319,16 @@ function buildParamStreams({
     }
   }
 
+  // Layout inputs.
+  // These do not normally decide element count, but can drive fallback layout spacing.
+  for (const handle of LAYOUT_HANDLES) {
+    const output = getFirstInputValue(inputsByHandle, handle);
+
+    if (output) {
+      streams[handle] = makeStreamFromOutput(output, handle, 'layout', warnings);
+    }
+  }
+
   // Data input can still help infer count if connected.
   const dataOutput = getFirstInputValue(inputsByHandle, 'data');
   if (dataOutput) {
@@ -273,14 +354,11 @@ function makeStreamFromOutput(output, targetHandle, role, warnings) {
     return makeMissingStream(targetHandle, role);
   }
 
-  // Field set: target handle extracts matching field.
-  // Example:
-  // fieldSetType: 'frame', fields: { x: [...], y: [...] }
   if (output.outputType === 'parameter' && output.fields) {
     const fieldValue = output.fields[targetHandle];
 
     if (fieldValue !== undefined) {
-      return makeStreamFromRawValue(fieldValue, targetHandle, role);
+      return makeStreamFromRawValue(fieldValue, targetHandle, role, output.meta ?? {});
     }
 
     warnings.push(`Input for "${targetHandle}" has fields but no field named "${targetHandle}".`);
@@ -288,12 +366,16 @@ function makeStreamFromOutput(output, targetHandle, role, warnings) {
   }
 
   if (output.outputType === 'data') {
+    if (output.dataType === 'matrix') {
+      return makeStreamFromRawValue(output.values, targetHandle, role, output.meta ?? {});
+    }
+
     if (output.dataType === 'array') {
-      return makeStreamFromRawValue(output.values, targetHandle, role);
+      return makeStreamFromRawValue(output.values, targetHandle, role, output.meta ?? {});
     }
 
     if (output.dataType === 'number') {
-      return makeStreamFromRawValue(output.value, targetHandle, role);
+      return makeStreamFromRawValue(output.value, targetHandle, role, output.meta ?? {});
     }
 
     warnings.push(`Data input for "${targetHandle}" has unsupported dataType "${output.dataType}".`);
@@ -301,12 +383,16 @@ function makeStreamFromOutput(output, targetHandle, role, warnings) {
   }
 
   if (output.outputType === 'parameter') {
+    if (output.parameterType === 'matrix') {
+      return makeStreamFromRawValue(output.values, targetHandle, role, output.meta ?? {});
+    }
+
     if ('values' in output) {
-      return makeStreamFromRawValue(output.values, targetHandle, role);
+      return makeStreamFromRawValue(output.values, targetHandle, role, output.meta ?? {});
     }
 
     if ('value' in output) {
-      return makeStreamFromRawValue(output.value, targetHandle, role);
+      return makeStreamFromRawValue(output.value, targetHandle, role, output.meta ?? {});
     }
 
     warnings.push(`Parameter input for "${targetHandle}" has no value or values.`);
@@ -338,9 +424,26 @@ function extractFieldSet(output, expectedFieldSetType) {
   return null;
 }
 
-function makeStreamFromRawValue(rawValue, handleId, role) {
+function makeStreamFromRawValue(rawValue, handleId, role, meta = {}) {
   if (rawValue === undefined || rawValue === null) {
     return makeMissingStream(handleId, role);
+  }
+
+  const matrix = normalizeMatrixInput({
+    rawValue,
+    meta,
+  });
+
+  if (matrix) {
+    return {
+      handleId,
+      role,
+      kind: 'array',
+      values: matrix.values,
+      length: matrix.values.length,
+      connected: true,
+      matrix,
+    };
   }
 
   if (Array.isArray(rawValue)) {
@@ -374,14 +477,180 @@ function makeMissingStream(handleId, role) {
   };
 }
 
+function normalizeMatrixInput({ rawValue, meta = {} }) {
+  if (isNestedArray(rawValue)) {
+    return normalizeNestedMatrix({
+      values2D: rawValue,
+      meta,
+    });
+  }
+
+  if (
+    Array.isArray(rawValue) &&
+    meta?.matrix &&
+    Number.isFinite(Number(meta.matrix.rows)) &&
+    Number.isFinite(Number(meta.matrix.cols))
+  ) {
+    return normalizeFlatMatrix({
+      values: rawValue,
+      meta,
+    });
+  }
+
+  return null;
+}
+
+function isNestedArray(value) {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.some((item) => Array.isArray(item))
+  );
+}
+
+function normalizeNestedMatrix({ values2D, meta = {} }) {
+  const rows = values2D.length;
+  const cols = Math.max(
+    0,
+    ...values2D.map((row) => (Array.isArray(row) ? row.length : 0))
+  );
+
+  const rowLabels = meta.matrix?.rowLabels ?? null;
+  const colLabels = meta.matrix?.colLabels ?? null;
+
+  const values = [];
+  const items = [];
+
+  values2D.forEach((row, rowIndex) => {
+    if (!Array.isArray(row)) return;
+
+    row.forEach((value, colIndex) => {
+      const flatIndex = values.length;
+
+      const baseItem = {
+        flatIndex,
+        index: flatIndex,
+        rowIndex,
+        colIndex,
+        rowLabel: rowLabels?.[rowIndex] ?? null,
+        colLabel: colLabels?.[colIndex] ?? null,
+        value,
+        tags: getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+      };
+
+      values.push(value);
+      items.push(baseItem);
+    });
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix?.order ?? 'row-major',
+  };
+}
+
+function normalizeFlatMatrix({ values, meta = {} }) {
+  const rows = Number(meta.matrix.rows);
+  const cols = Number(meta.matrix.cols);
+
+  const rowLabels = meta.matrix.rowLabels ?? null;
+  const colLabels = meta.matrix.colLabels ?? null;
+
+  const matrixItems =
+    meta.matrixItems ??
+    meta.mappedItems ??
+    meta.items ??
+    null;
+
+  const items = values.map((value, flatIndex) => {
+    const existing = Array.isArray(matrixItems) ? matrixItems[flatIndex] : null;
+
+    const rowIndex =
+      existing?.rowIndex ??
+      Math.floor(flatIndex / cols);
+
+    const colIndex =
+      existing?.colIndex ??
+      flatIndex % cols;
+
+    return {
+      flatIndex,
+      index: flatIndex,
+      rowIndex,
+      colIndex,
+      rowLabel: existing?.rowLabel ?? rowLabels?.[rowIndex] ?? null,
+      colLabel: existing?.colLabel ?? colLabels?.[colIndex] ?? null,
+      value: existing?.value ?? value,
+      rawValue: existing?.rawValue ?? value,
+      mappedValue: existing?.mappedValue ?? null,
+      tags:
+        existing?.tags ??
+        getMatrixItemTags({
+          meta,
+          flatIndex,
+          rowIndex,
+          colIndex,
+        }),
+    };
+  });
+
+  return {
+    rows,
+    cols,
+    flatCount: values.length,
+    values,
+    items,
+    rowLabels,
+    colLabels,
+    order: meta.matrix.order ?? 'row-major',
+  };
+}
+
+function getMatrixItemTags({ meta, flatIndex, rowIndex, colIndex }) {
+  const taggedItems = meta?.taggedItems;
+
+  if (Array.isArray(taggedItems)) {
+    const byFlat = taggedItems.find((item) =>
+      item.flatIndex === flatIndex || item.index === flatIndex
+    );
+
+    if (byFlat?.tags) return byFlat.tags;
+
+    const byRowCol = taggedItems.find((item) =>
+      item.rowIndex === rowIndex && item.colIndex === colIndex
+    );
+
+    if (byRowCol?.tags) return byRowCol.tags;
+  }
+
+  return meta?.tags ?? null;
+}
+
 /**
- * Count rule v0.1:
+ * Count rule v0.2:
  * 1. Structural arrays decide count by shortest length.
  * 2. If no structural arrays, data array can decide count.
  * 3. Style arrays do not decide count by themselves.
  * 4. Otherwise count = 1.
+ * 5. If matrix context is provided, use its flatCount.
+ * 
  */
-function inferElementCount(streams, warnings) {
+function inferElementCount(streams, warnings, matrixContext = null) {
+  if (matrixContext) {
+    return matrixContext.flatCount;
+  }
+
   const structuralArrays = Object.values(streams).filter(
     (s) => s?.role === 'structural' && s.kind === 'array'
   );
@@ -407,98 +676,228 @@ function inferElementCount(streams, warnings) {
   return 1;
 }
 
+function detectMatrixContext(streams, warnings) {
+  for (const handleId of MATRIX_PRIMARY_HANDLE_ORDER) {
+    const stream = streams?.[handleId];
+
+    if (stream?.matrix) {
+      warnMatrixShapeMismatches({
+        primaryHandle: handleId,
+        primaryMatrix: stream.matrix,
+        streams,
+        warnings,
+      });
+
+      return {
+        ...stream.matrix,
+        sourceHandle: handleId,
+      };
+    }
+  }
+
+  const anyMatrixEntry = Object.entries(streams ?? {}).find(([, stream]) => stream?.matrix);
+
+  if (!anyMatrixEntry) return null;
+
+  const [handleId, stream] = anyMatrixEntry;
+
+  warnMatrixShapeMismatches({
+    primaryHandle: handleId,
+    primaryMatrix: stream.matrix,
+    streams,
+    warnings,
+  });
+
+  return {
+    ...stream.matrix,
+    sourceHandle: handleId,
+  };
+}
+
+function warnMatrixShapeMismatches({
+  primaryHandle,
+  primaryMatrix,
+  streams,
+  warnings,
+}) {
+  Object.entries(streams ?? {}).forEach(([handleId, stream]) => {
+    if (!stream?.matrix) return;
+    if (handleId === primaryHandle) return;
+
+    if (
+      stream.matrix.rows !== primaryMatrix.rows ||
+      stream.matrix.cols !== primaryMatrix.cols
+    ) {
+      warnings.push(
+        `Matrix shape mismatch: "${primaryHandle}" is ${primaryMatrix.rows}x${primaryMatrix.cols}, but "${handleId}" is ${stream.matrix.rows}x${stream.matrix.cols}. Using "${primaryHandle}" as primary matrix context.`
+      );
+    }
+  });
+}
+
+function makeElementContext({ index, matrixContext }) {
+  if (!matrixContext) {
+    return {
+      index,
+      flatIndex: index,
+      rowIndex: null,
+      colIndex: null,
+      matrixItem: null,
+      matrix: null,
+    };
+  }
+
+  const fallbackRowIndex = Math.floor(index / matrixContext.cols);
+  const fallbackColIndex = index % matrixContext.cols;
+
+  const matrixItem =
+    matrixContext.items?.[index] ??
+    {
+      flatIndex: index,
+      index,
+      rowIndex: fallbackRowIndex,
+      colIndex: fallbackColIndex,
+      rowLabel: matrixContext.rowLabels?.[fallbackRowIndex] ?? null,
+      colLabel: matrixContext.colLabels?.[fallbackColIndex] ?? null,
+      value: matrixContext.values?.[index],
+      tags: null,
+    };
+
+  return {
+    index,
+    flatIndex: matrixItem.flatIndex ?? index,
+    rowIndex: matrixItem.rowIndex ?? fallbackRowIndex,
+    colIndex: matrixItem.colIndex ?? fallbackColIndex,
+    matrixItem,
+
+    matrix: {
+      rows: matrixContext.rows,
+      cols: matrixContext.cols,
+      flatCount: matrixContext.flatCount,
+      rowLabels: matrixContext.rowLabels ?? null,
+      colLabels: matrixContext.colLabels ?? null,
+      sourceHandle: matrixContext.sourceHandle,
+    },
+  };
+}
+
 function resolveElementParams({
   index,
   shapeType,
   params,
   streams,
+  elementContext,
 }) {
-  const layoutPoint = resolveLocalLayoutPoint(index, params, streams);
+  const layoutPoint = resolveLocalLayoutPoint(index, params, streams, elementContext);
 
   const x = resolveParam({
+    handleId: 'x',
     stream: streams.x,
     index,
     fallback: layoutPoint.x ?? params.defaultX ?? 0,
     repeatStyle: false,
+    elementContext,
   });
 
   const userY = resolveParam({
+    handleId: 'y',
     stream: streams.y,
     index,
     fallback: layoutPoint.y ?? params.defaultY ?? 0,
     repeatStyle: false,
+    elementContext,
   });
 
   const y = toSvgY(userY, params);
 
   const width = resolveParam({
+    handleId: 'width',
     stream: streams.width,
     index,
     fallback: params.defaultWidth ?? 12,
     repeatStyle: false,
+    elementContext,
   });
 
   const height = resolveParam({
+    handleId: 'height',
     stream: streams.height,
     index,
     fallback: params.defaultHeight ?? 40,
     repeatStyle: false,
+    elementContext,
   });
 
   const radius = resolveParam({
+    handleId: 'radius',
     stream: streams.radius,
     index,
     fallback: params.defaultRadius ?? 8,
     repeatStyle: false,
+    elementContext,
   });
 
   const cornerRadius = resolveParam({
+    handleId: 'cornerRadius',
     stream: streams.cornerRadius,
     index,
     fallback: params.cornerRadius ?? 0,
     repeatStyle: false,
+    elementContext,
   });
 
   const alignX = resolveParam({
+    handleId: 'alignX',
     stream: streams.alignX,
     index,
     fallback: params.alignX ?? getDefaultAlignX(shapeType),
     repeatStyle: false,
+    elementContext,
   });
 
   const alignY = resolveParam({
+    handleId: 'alignY',
     stream: streams.alignY,
     index,
     fallback: params.alignY ?? getDefaultAlignY(shapeType),
     repeatStyle: false,
+    elementContext,
   });
 
   const fill = resolveParam({
+    handleId: 'fill',
     stream: streams.fill,
     index,
     fallback: params.fillColor ?? '#5b78ff',
     repeatStyle: true,
+    elementContext,
   });
 
   const stroke = resolveParam({
+    handleId: 'stroke',
     stream: streams.stroke,
     index,
     fallback: params.strokeColor ?? '#000000',
     repeatStyle: true,
+    elementContext,
   });
 
   const strokeWidth = resolveParam({
+    handleId: 'strokeWidth',
     stream: streams.strokeWidth,
     index,
     fallback: params.strokeWidth ?? 2,
     repeatStyle: true,
+    elementContext,
   });
 
   const opacity = resolveParam({
+    handleId: 'opacity',
     stream: streams.opacity,
     index,
     fallback: params.opacity ?? 1,
     repeatStyle: true,
+    elementContext,
   });
 
   return {
@@ -520,14 +919,28 @@ function resolveElementParams({
   };
 }
 
-function resolveParam({ stream, index, fallback, repeatStyle }) {
+function resolveParam({
+  handleId,
+  stream,
+  index,
+  fallback,
+  repeatStyle,
+  elementContext,
+}) {
   if (!stream || stream.kind === 'missing') return fallback;
 
   if (stream.kind === 'scalar') return stream.value;
 
   if (stream.kind === 'array') {
-    if (index < stream.values.length) {
-      return stream.values[index];
+    const resolvedIndex = resolveArrayIndexForContext({
+      handleId,
+      stream,
+      index,
+      elementContext,
+    });
+
+    if (resolvedIndex != null && resolvedIndex < stream.values.length) {
+      return stream.values[resolvedIndex];
     }
 
     if (repeatStyle && stream.values.length > 0) {
@@ -540,29 +953,97 @@ function resolveParam({ stream, index, fallback, repeatStyle }) {
   return fallback;
 }
 
-function resolveLocalLayoutPoint(index, params, streams) {
+function resolveArrayIndexForContext({
+  handleId,
+  stream,
+  index,
+  elementContext,
+}) {
+  if (!stream || stream.kind !== 'array') return null;
+
+  if (!elementContext?.matrix) {
+    return index < stream.values.length ? index : null;
+  }
+
+  const matrix = elementContext.matrix;
+  const preferences =
+    MATRIX_ARRAY_RESOLVE_ORDER[handleId] ??
+    MATRIX_ARRAY_RESOLVE_ORDER.default;
+
+  // A stream that is itself a matrix is always cell-wise.
+  if (stream.matrix) {
+    return elementContext.flatIndex < stream.values.length
+      ? elementContext.flatIndex
+      : null;
+  }
+
+  for (const preference of preferences) {
+    if (preference === 'cell' && stream.values.length === matrix.flatCount) {
+      return elementContext.flatIndex;
+    }
+
+    if (preference === 'column' && stream.values.length === matrix.cols) {
+      return elementContext.colIndex;
+    }
+
+    if (preference === 'row' && stream.values.length === matrix.rows) {
+      return elementContext.rowIndex;
+    }
+  }
+
+  return index < stream.values.length ? index : null;
+}
+
+function resolveLocalLayoutPoint(index, params, streams, elementContext) {
   const hasXInput = streams.x?.connected;
   const hasYInput = streams.y?.connected;
 
-  // If both x and y are driven, layout should not affect position.
-  if (hasXInput && hasYInput) {
-    return { x: params.defaultX ?? 0, y: params.defaultY ?? 0 };
-  }
-
-  const axis = params.layoutAxis ?? 'x';
-  const gapX = Number(params.layoutGapX ?? 6);
-  const gapY = Number(params.layoutGapY ?? 6);
+  const gapX = getLayoutGapValue(streams.layoutGapX, params.layoutGapX ?? 18);
+  const gapY = getLayoutGapValue(streams.layoutGapY, params.layoutGapY ?? 18);
 
   const fallbackX = Number(params.defaultX ?? 0);
   const fallbackY = Number(params.defaultY ?? 0);
 
-  if (axis === 'y') {
+  const layoutMode = getLayoutMode(params);
+
+  if (
+    elementContext?.matrix &&
+    (layoutMode === 'auto' || layoutMode === 'matrixGrid')
+  ) {
+    const colIndex = elementContext.colIndex ?? 0;
+    const rowIndex = elementContext.rowIndex ?? 0;
+
+    const matrixX = colIndex * gapX;
+
+    // Matrix fallback layout is table-like by default:
+    // row 0 at top, later rows go downward.
+    //
+    // Since user-facing y is upward-positive, downward means negative userY.
+    const rowDirection = getMatrixRowDirection(params);
+    const matrixUserY =
+      rowDirection === 'up'
+        ? rowIndex * gapY
+        : -rowIndex * gapY;
+
+    return {
+      x: hasXInput ? fallbackX : matrixX,
+      y: hasYInput ? fallbackY : matrixUserY,
+    };
+  }
+
+  // If both x and y are driven, layout should not affect position.
+  if (hasXInput && hasYInput) {
+    return { x: fallbackX, y: fallbackY };
+  }
+
+  if (layoutMode === 'linearY') {
     return {
       x: hasXInput ? fallbackX : 0,
       y: hasYInput ? fallbackY : index * gapY,
     };
   }
 
+  // auto / linearX / matrixGrid-without-matrix all fall back to linear X.
   return {
     x: hasXInput ? fallbackX : index * gapX,
     y: hasYInput ? fallbackY : 0,
@@ -576,6 +1057,7 @@ function makeShapeElement({
   resolved,
   streams,
   parameterSources,
+  elementContext,
 }) {
   const frame = makeFrame({ shapeType, resolved });
   const content = makeContent({ shapeType, resolved });
@@ -585,6 +1067,7 @@ function makeShapeElement({
     streams,
     parameterSources,
     resolved,
+    elementContext,
   });
 
   const inheritedTags = collectElementTags({
@@ -604,6 +1087,12 @@ function makeShapeElement({
 
     dataRef: {
       index,
+      flatIndex: elementContext?.flatIndex ?? index,
+      rowIndex: elementContext?.rowIndex ?? null,
+      colIndex: elementContext?.colIndex ?? null,
+      matrixItem: elementContext?.matrixItem ?? null,
+      matrixContext: elementContext?.matrix ?? null,
+
       collectionId: `${ctx.nodeId}-collection`,
       generatorNodeId: ctx.nodeId,
 
@@ -658,6 +1147,8 @@ function makeShapeElement({
       elementIndex: index,
       collectionId: `${ctx.nodeId}-collection`,
       generatorNodeId: ctx.nodeId,
+      matrixContext: elementContext?.matrix ?? null,
+      matrixItem: elementContext?.matrixItem ?? null,
 
       // Duplicate a lightweight copy in meta so future selectors do not need
       // to know whether to read dataRef or meta first.
@@ -855,6 +1346,7 @@ function makeElementParameterLineage({
   streams,
   parameterSources,
   resolved,
+  elementContext,
 }) {
   const handles = [
     'x',
@@ -885,6 +1377,7 @@ function makeElementParameterLineage({
       stream,
       source,
       resolvedValue: resolved?.[handleId],
+      elementContext,
     });
   });
 
@@ -897,6 +1390,7 @@ function makeSingleParamLineage({
   stream,
   source,
   resolvedValue,
+  elementContext,
 }) {
   const base = {
     handleId,
@@ -925,6 +1419,11 @@ function makeSingleParamLineage({
 
     rawValue: null,
     scaleItem: null,
+    mappedItem: null,
+
+    matrixRole: null,
+    matrixItem: null,
+
     tags: null,
 
     provenance: source?.provenance ?? [],
@@ -946,28 +1445,125 @@ function makeSingleParamLineage({
   }
 
   if (stream.kind === 'array') {
-    const safeIndex = clampIndex(index, stream.values.length);
+    const resolvedIndex = resolveArrayIndexForContext({
+      handleId,
+      stream,
+      index,
+      elementContext,
+    });
+
     const rawValue =
-      safeIndex == null
+      resolvedIndex == null
         ? null
-        : stream.values[safeIndex];
+        : stream.values[resolvedIndex];
+
+    const matrixRole = inferMatrixRoleForResolvedIndex({
+      stream,
+      resolvedIndex,
+      elementContext,
+    });
+
+    const matrixItem = getMatrixItemForResolvedIndex({
+      stream,
+      resolvedIndex,
+      elementContext,
+    });
 
     return {
       ...base,
       valueSource: source ? 'connected-array' : 'local-array',
-      sourceIndex: safeIndex,
+      sourceIndex: resolvedIndex,
       rawValue,
 
-      // For band / point ScaleMapper this can contain category/start/center/end.
-      // For linear scales it will usually be null.
-      scaleItem: getScaleItemForIndex(source, safeIndex),
+      matrixRole,
+      matrixItem,
 
-      // Future TagMapper can expose meta.taggedItems or meta.items tags here.
-      tags: getTagsForIndex(source, safeIndex),
+      scaleItem: getScaleItemForIndex(source, resolvedIndex),
+      mappedItem: getMappedItemForIndex(source, resolvedIndex),
+
+      tags: mergeTagObjects(
+        getTagsForIndex(source, resolvedIndex),
+        matrixItem?.tags
+      ),
     };
   }
 
   return base;
+}
+
+function inferMatrixRoleForResolvedIndex({
+  stream,
+  resolvedIndex,
+  elementContext,
+}) {
+  if (!elementContext?.matrix || resolvedIndex == null) return null;
+
+  if (stream?.matrix) return 'cell';
+
+  const matrix = elementContext.matrix;
+
+  if (resolvedIndex === elementContext.flatIndex && stream.values.length === matrix.flatCount) {
+    return 'cell';
+  }
+
+  if (resolvedIndex === elementContext.colIndex && stream.values.length === matrix.cols) {
+    return 'column';
+  }
+
+  if (resolvedIndex === elementContext.rowIndex && stream.values.length === matrix.rows) {
+    return 'row';
+  }
+
+  return null;
+}
+
+function getMatrixItemForResolvedIndex({
+  stream,
+  resolvedIndex,
+  elementContext,
+}) {
+  if (!elementContext?.matrix || resolvedIndex == null) return null;
+
+  if (stream?.matrix) {
+    return stream.matrix.items?.[resolvedIndex] ?? null;
+  }
+
+  return elementContext.matrixItem ?? null;
+}
+
+function getMappedItemForIndex(source, index) {
+  if (!source || index == null) return null;
+
+  const mappedItems =
+    source.mappedItems ??
+    source.meta?.mappedItems ??
+    null;
+
+  if (!Array.isArray(mappedItems)) return null;
+
+  return mappedItems[index] ?? null;
+}
+
+function mergeTagObjects(...tagObjects) {
+  const merged = {};
+
+  tagObjects.forEach((tags) => {
+    if (!tags || typeof tags !== 'object') return;
+
+    Object.entries(tags).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+
+      if (Array.isArray(value)) {
+        const existing = Array.isArray(merged[key]) ? merged[key] : [];
+        merged[key] = [...new Set([...existing, ...value])];
+        return;
+      }
+
+      merged[key] = value;
+    });
+  });
+
+  return Object.keys(merged).length > 0 ? merged : null;
 }
 
 function clampIndex(index, length) {
@@ -1002,6 +1598,15 @@ function getTagsForIndex(source, index) {
     return taggedItems[index]?.tags ?? null;
   }
 
+  const mappedItems =
+    source.mappedItems ??
+    source.meta?.mappedItems ??
+    null;
+
+  if (Array.isArray(mappedItems)) {
+    return mappedItems[index]?.tags ?? null;
+  }
+
   const items =
     source.items ??
     source.meta?.items ??
@@ -1024,6 +1629,8 @@ function collectElementTags({
   Object.values(parameterLineage ?? {}).forEach((lineage) => {
     mergeTagsInto(merged, lineage?.tags);
     mergeTagsInto(merged, lineage?.scaleItem?.tags);
+    mergeTagsInto(merged, lineage?.mappedItem?.tags);
+    mergeTagsInto(merged, lineage?.matrixItem?.tags);
   });
 
   Object.values(parameterSources ?? {}).forEach((source) => {
@@ -1070,11 +1677,12 @@ function makeParameterSourceSummary({ handleId, input, output }) {
   parameterSpace: meta.scale ? 'scaled-visual' : 'visual',
   scale: meta.scale ?? null,
 
-  // New: preserve item-level metadata from upstream outputs.
-  // ScaleMapper(band/point) already outputs meta.items.
   items: meta.items ?? null,
+  mappedItems: meta.mappedItems ?? null,
 
-  // Future TagMapper can output these.
+  matrix: meta.matrix ?? null,
+  matrixItems: meta.matrixItems ?? null,
+
   tags: meta.tags ?? null,
   taggedItems: meta.taggedItems ?? null,
 
@@ -1118,4 +1726,76 @@ function toSvgY(value, params = {}) {
   }
 
   return -n;
+}
+
+function getLayoutMode(params = {}) {
+  const raw = params.layoutMode ?? params.layoutAxis ?? 'auto';
+
+  if (raw === 'x') return 'linearX';
+  if (raw === 'y') return 'linearY';
+
+  if (raw === 'linearX') return 'linearX';
+  if (raw === 'linearY') return 'linearY';
+  if (raw === 'matrixGrid') return 'matrixGrid';
+
+  return 'auto';
+}
+
+function getMatrixRowDirection(params = {}) {
+  const raw = params.matrixRowDirection ?? 'down';
+
+  return raw === 'up' ? 'up' : 'down';
+}
+
+function getLayoutGapValue(stream, fallback) {
+  if (!stream || stream.kind === 'missing') {
+    return Number(fallback ?? 18);
+  }
+
+  if (stream.kind === 'scalar') {
+    return Number(stream.value ?? fallback ?? 18);
+  }
+
+  if (stream.kind === 'array' && stream.values.length > 0) {
+    return Number(stream.values[0] ?? fallback ?? 18);
+  }
+
+  return Number(fallback ?? 18);
+}
+
+function makeLayoutMeta({ params, matrixContext }) {
+  const layoutMode = getLayoutMode(params);
+
+  const usesMatrixGrid = Boolean(
+    matrixContext &&
+    (layoutMode === 'auto' || layoutMode === 'matrixGrid')
+  );
+
+  return {
+    type: usesMatrixGrid ? 'matrix-grid' : 'linear',
+    mode: layoutMode,
+
+    axis:
+      usesMatrixGrid
+        ? null
+        : layoutMode === 'linearY'
+          ? 'y'
+          : 'x',
+
+    gapX: Number(params.layoutGapX ?? 18),
+    gapY: Number(params.layoutGapY ?? 18),
+
+    matrixRowDirection: usesMatrixGrid
+      ? getMatrixRowDirection(params)
+      : null,
+
+    matrix: matrixContext
+      ? {
+          rows: matrixContext.rows,
+          cols: matrixContext.cols,
+          flatCount: matrixContext.flatCount,
+          sourceHandle: matrixContext.sourceHandle,
+        }
+      : null,
+  };
 }

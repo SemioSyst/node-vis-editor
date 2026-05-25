@@ -2,8 +2,10 @@
 
 export function evalSimpleDataInput(ctx) {
   const p = ctx.params ?? {};
-  const mode = p.dataMode ?? 'array';
-  const rawText = p.rawText ?? getDefaultText(mode);
+
+  const requestedMode = normalizeMode(p.dataMode ?? 'auto');
+  const rawText = p.rawText ?? getDefaultText(requestedMode);
+  const mode = detectDataMode(rawText, requestedMode);
 
   if (mode === 'number') {
     const value = parseNumber(rawText);
@@ -13,28 +15,53 @@ export function evalSimpleDataInput(ctx) {
       version: '0.1',
       dataType: 'number',
       value,
+
       meta: {
         sourceNodeId: ctx.nodeId,
         label: 'Simple Number',
         valueType: 'number',
         rawText,
+
+        requestedMode,
+        resolvedMode: mode,
       },
     };
   }
 
-  if (mode === 'table') {
-    const table = parseCsvTable(rawText);
+  if (mode === 'matrix') {
+    const matrix = parseBracketMatrix(rawText);
 
     return {
       outputType: 'data',
       version: '0.1',
-      dataType: 'table',
-      columns: table.columns,
-      rows: table.rows,
+      dataType: 'matrix',
+
+      values: matrix.values,
+
       meta: {
         sourceNodeId: ctx.nodeId,
-        label: 'Simple Table',
+        label: 'Simple Matrix',
+
+        valueType: matrix.valueType,
         rawText,
+        rawRows: matrix.rawRows,
+
+        requestedMode,
+        resolvedMode: mode,
+
+        warnings: matrix.warnings,
+
+        matrix: {
+          rows: matrix.rows,
+          cols: matrix.cols,
+          order: 'row-major',
+
+          // Reserved for future TagMapper / MatrixLabelMapper.
+          rowLabels: null,
+          colLabels: null,
+        },
+
+        matrixItems: matrix.matrixItems,
       },
     };
   }
@@ -45,21 +72,81 @@ export function evalSimpleDataInput(ctx) {
     outputType: 'data',
     version: '0.1',
     dataType: 'array',
+
     values: array.values,
+
     meta: {
       sourceNodeId: ctx.nodeId,
       label: 'Simple Array',
+
       valueType: array.valueType,
       rawItems: array.rawItems,
       rawText,
+
+      requestedMode,
+      resolvedMode: mode,
+
+      warnings: array.warnings ?? [],
     },
   };
 }
 
+function normalizeMode(mode) {
+  // Old saved nodes may still use table.
+  // For now, table is treated as matrix.
+  if (mode === 'table') return 'matrix';
+
+  if (mode === 'number') return 'number';
+  if (mode === 'array') return 'array';
+  if (mode === 'matrix') return 'matrix';
+
+  return 'auto';
+}
+
+function detectDataMode(rawText, requestedMode = 'auto') {
+  const normalizedRequestedMode = normalizeMode(requestedMode);
+
+  if (normalizedRequestedMode !== 'auto') {
+    return normalizedRequestedMode;
+  }
+
+  const raw = String(rawText ?? '').trim();
+
+  if (!raw) return 'array';
+
+  // Bracket matrix:
+  // [[10,20],[30,40]]
+  // [[A,B],[C,D]]
+  if (/^\s*\[\s*\[/.test(raw)) {
+    return 'matrix';
+  }
+
+  // Bracket array:
+  // [10,20,30]
+  if (/^\s*\[/.test(raw)) {
+    return 'array';
+  }
+
+  // Comma/newline separated values are treated as array.
+  if (raw.includes(',') || raw.includes('\n')) {
+    return 'array';
+  }
+
+  if (Number.isFinite(Number(raw))) {
+    return 'number';
+  }
+
+  return 'array';
+}
+
 function getDefaultText(mode) {
   if (mode === 'number') return '42';
-  if (mode === 'table') return 'name,value\nA,20\nB,45\nC,70\nD,35';
-  return '20,45,70,35';
+
+  if (mode === 'matrix') {
+    return '[[10,20,30],[25,15,45],[5,30,20]]';
+  }
+
+  return '[20,45,70,35]';
 }
 
 function parseNumber(text) {
@@ -67,92 +154,304 @@ function parseNumber(text) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Array                                                                       */
+/* -------------------------------------------------------------------------- */
+
 function parseAutoArray(text) {
-  const rawItems = String(text)
+  const warnings = [];
+  const raw = String(text ?? '').trim();
+
+  if (!raw) {
+    return {
+      values: [],
+      rawItems: [],
+      valueType: 'empty',
+      warnings,
+    };
+  }
+
+  // Preferred array format:
+  // [20,45,70,35]
+  if (raw.startsWith('[') && raw.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(raw);
+
+      if (Array.isArray(parsed) && !parsed.some(Array.isArray)) {
+        return normalizeArrayItems(parsed, warnings);
+      }
+
+      if (Array.isArray(parsed) && parsed.some(Array.isArray)) {
+        warnings.push(
+          'Nested array input was parsed as a flat array. Auto mode would treat this as Matrix.'
+        );
+
+        return normalizeArrayItems(parsed.flat(), warnings);
+      }
+    } catch {
+      const relaxed = splitRelaxedRow(raw.slice(1, -1));
+
+      if (relaxed.length > 0) {
+        return normalizeArrayItems(relaxed, warnings);
+      }
+    }
+  }
+
+  // Backward compatible input:
+  // 20,45,70,35
+  const rawItems = raw
     .split(/[\n,]+/)
     .map((s) => s.trim())
     .filter(Boolean);
 
+  return normalizeArrayItems(rawItems, warnings);
+}
+
+function normalizeArrayItems(rawItems, warnings = []) {
   if (!rawItems.length) {
     return {
       values: [],
       rawItems: [],
       valueType: 'empty',
+      warnings,
     };
   }
 
-  const numericValues = rawItems.map((item) => Number(item));
+  const normalizedRawItems = rawItems.map((item) => String(item).trim());
+
+  const numericValues = normalizedRawItems.map((item) => Number(item));
   const allNumbers = numericValues.every((n) => Number.isFinite(n));
 
   if (allNumbers) {
     return {
       values: numericValues,
-      rawItems,
+      rawItems: normalizedRawItems,
       valueType: 'number',
+      warnings,
     };
   }
 
   return {
-    values: rawItems,
-    rawItems,
+    values: normalizedRawItems.map((item) => stripSimpleQuotes(item)),
+    rawItems: normalizedRawItems,
     valueType: 'string',
+    warnings,
   };
 }
 
-function parseCsvTable(text) {
-  const lines = String(text)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
+/* -------------------------------------------------------------------------- */
+/* Matrix                                                                      */
+/* -------------------------------------------------------------------------- */
 
-  if (lines.length === 0) {
-    return { columns: [], rows: [] };
+function parseBracketMatrix(text) {
+  const warnings = [];
+  const raw = String(text ?? '').trim();
+
+  if (!raw) {
+    return makeEmptyMatrixResult(warnings);
   }
 
-  const headers = splitCsvLine(lines[0]).map((h) => h.trim());
+  let parsedRows = null;
 
-  const rows = lines.slice(1).map((line) => {
-    const cells = splitCsvLine(line);
-    const row = {};
+  // Preferred strict JSON format:
+  // [[10,20,30],[25,15,45],[5,30,20]]
+  // [["A","B"],["C","D"]]
+  try {
+    const parsed = JSON.parse(raw);
 
-    headers.forEach((header, index) => {
-      row[header] = inferValue(cells[index]);
-    });
+    if (Array.isArray(parsed) && parsed.every((row) => Array.isArray(row))) {
+      parsedRows = parsed;
+    } else if (Array.isArray(parsed)) {
+      // If user enters [1,2,3] in matrix mode, treat as one matrix row.
+      parsedRows = [parsed];
+      warnings.push('Flat array input was treated as a single-row matrix.');
+    }
+  } catch {
+    // Fallback to relaxed bracket parser below.
+  }
 
-    return row;
+  // Relaxed format:
+  // [[A,B,C],[D,E,F]]
+  // [[10,20,30],[25,15,45]]
+  if (!parsedRows) {
+    parsedRows = parseRelaxedBracketRows(raw);
+
+    if (!parsedRows) {
+      warnings.push(
+        'Matrix input should use bracket format, for example [[10,20,30],[25,15,45]].'
+      );
+
+      return makeEmptyMatrixResult(warnings);
+    }
+  }
+
+  const rawRows = parsedRows.map((row) =>
+    row.map((cell) => String(cell ?? '').trim())
+  );
+
+  const rows = rawRows.length;
+  const cols = Math.max(0, ...rawRows.map((row) => row.length));
+
+  const rowLengths = rawRows.map((row) => row.length);
+  const hasRaggedRows = rowLengths.some((length) => length !== cols);
+
+  if (hasRaggedRows) {
+    warnings.push(
+      `Matrix rows have different lengths (${rowLengths.join(', ')}). Missing cells are filled with null.`
+    );
+  }
+
+  const rectangularRawRows = rawRows.map((row) => {
+    const next = [...row];
+
+    while (next.length < cols) {
+      next.push('');
+    }
+
+    return next;
   });
 
-  const columns = headers.map((key) => ({
-    key,
-    type: inferColumnType(rows.map((row) => row[key])),
-  }));
+  const values = rectangularRawRows.map((row) =>
+    row.map((cell) => inferMatrixValue(cell))
+  );
 
-  return { columns, rows };
+  const flatValues = values.flat();
+  const nonEmptyValues = flatValues.filter(
+    (value) => value !== null && value !== ''
+  );
+
+  const allNumbers =
+    nonEmptyValues.length > 0 &&
+    nonEmptyValues.every(
+      (value) => typeof value === 'number' && Number.isFinite(value)
+    );
+
+  const valueType = allNumbers
+    ? 'number'
+    : nonEmptyValues.length === 0
+      ? 'empty'
+      : 'mixed';
+
+  const matrixItems = [];
+
+  values.forEach((row, rowIndex) => {
+    row.forEach((value, colIndex) => {
+      const flatIndex = rowIndex * cols + colIndex;
+
+      matrixItems.push({
+        index: flatIndex,
+        flatIndex,
+
+        rowIndex,
+        colIndex,
+
+        rowLabel: null,
+        colLabel: null,
+
+        value,
+        rawValue: rectangularRawRows[rowIndex]?.[colIndex] ?? '',
+
+        tags: null,
+      });
+    });
+  });
+
+  return {
+    values,
+    rows,
+    cols,
+    rawRows: rectangularRawRows,
+    valueType,
+    matrixItems,
+    warnings,
+  };
 }
 
-function splitCsvLine(line) {
-  // Simple CSV split for demo use.
-  // Later we can replace this with a robust CSV parser.
-  return String(line).split(',').map((cell) => cell.trim());
+function makeEmptyMatrixResult(warnings = []) {
+  return {
+    values: [],
+    rows: 0,
+    cols: 0,
+    rawRows: [],
+    valueType: 'empty',
+    matrixItems: [],
+    warnings,
+  };
 }
 
-function inferValue(value) {
+function parseRelaxedBracketRows(raw) {
+  const text = String(raw ?? '').trim();
+
+  if (!text.startsWith('[') || !text.endsWith(']')) {
+    return null;
+  }
+
+  // Remove outer brackets.
+  const inner = text.slice(1, -1).trim();
+
+  if (!inner) return [];
+
+  const rows = [];
+  let depth = 0;
+  let current = '';
+
+  for (let i = 0; i < inner.length; i += 1) {
+    const char = inner[i];
+
+    if (char === '[') {
+      if (depth > 0) current += char;
+      depth += 1;
+      continue;
+    }
+
+    if (char === ']') {
+      depth -= 1;
+
+      if (depth === 0) {
+        rows.push(current);
+        current = '';
+        continue;
+      }
+
+      current += char;
+      continue;
+    }
+
+    if (depth > 0) {
+      current += char;
+    }
+  }
+
+  if (!rows.length) {
+    // Treat [1,2,3] as one row.
+    return [splitRelaxedRow(inner)];
+  }
+
+  return rows.map(splitRelaxedRow);
+}
+
+function splitRelaxedRow(rowText) {
+  return String(rowText)
+    .split(',')
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0);
+}
+
+function inferMatrixValue(value) {
   const trimmed = String(value ?? '').trim();
-  const n = Number(trimmed);
 
-  if (trimmed !== '' && Number.isFinite(n)) {
+  if (trimmed === '') return null;
+
+  const unquoted = stripSimpleQuotes(trimmed);
+  const n = Number(unquoted);
+
+  if (Number.isFinite(n)) {
     return n;
   }
 
-  return trimmed;
+  return unquoted;
 }
 
-function inferColumnType(values) {
-  const valid = values.filter((v) => v !== '' && v !== null && v !== undefined);
-
-  if (valid.length === 0) return 'unknown';
-
-  const allNumbers = valid.every((v) => typeof v === 'number' && Number.isFinite(v));
-
-  return allNumbers ? 'number' : 'string';
+function stripSimpleQuotes(value) {
+  return String(value ?? '').replace(/^['"]|['"]$/g, '');
 }

@@ -5,7 +5,6 @@ import NodeSection from './UI/NodeSection.jsx';
 import {
   SelectField,
   NumberField,
-  TextField,
 } from './UI/NodeFields.jsx';
 import {
   PortNumberField,
@@ -25,10 +24,15 @@ const FONT_WEIGHT_OPTIONS = [
   { value: '700', label: '700' },
 ];
 
-const FORMAT_OPTIONS = [
-  { value: 'plain', label: 'Plain' },
-  { value: 'number', label: 'Number' },
-  { value: 'percent', label: 'Percent' },
+const FONT_FAMILY_OPTIONS = [
+  { value: 'system-ui, sans-serif', label: 'System UI' },
+  { value: 'Inter, system-ui, sans-serif', label: 'Inter' },
+  { value: 'Arial, sans-serif', label: 'Arial' },
+  { value: 'Helvetica, Arial, sans-serif', label: 'Helvetica' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+  { value: '"Times New Roman", Times, serif', label: 'Times' },
+  { value: 'ui-monospace, SFMono-Regular, Menlo, monospace', label: 'Monospace' },
+  { value: '"Courier New", Courier, monospace', label: 'Courier' },
 ];
 
 function getPortState(isConnected) {
@@ -70,7 +74,7 @@ export default function TextGeneratorNode({ id, data }) {
         sectionId="content"
         sectionCollapsed={data.sectionCollapsed}
         title="Content"
-        subtitle="Text value and formatting"
+        subtitle="Text value"
         ports={['text']}
       >
         <PortTextField
@@ -79,38 +83,11 @@ export default function TextGeneratorNode({ id, data }) {
           value={data.defaultText ?? 'Label'}
           onChange={(v) => update({ defaultText: v })}
           state={getPortState(textControlled)}
-          note={textControlled ? 'controlled' : undefined}
+          note={textControlled ? 'input' : undefined}
           placeholder="Label"
-        />
-
-        <SelectField
-          label="Format"
-          value={data.formatMode ?? 'plain'}
-          onChange={(v) => update({ formatMode: v })}
-          options={FORMAT_OPTIONS}
-        />
-
-        <NumberField
-          label="Decimals"
-          value={data.decimalPlaces ?? 0}
-          onChange={(v) => update({ decimalPlaces: v })}
-          min={0}
-          max={6}
-          step={1}
-        />
-
-        <TextField
-          label="Prefix"
-          value={data.prefix ?? ''}
-          onChange={(v) => update({ prefix: v })}
-          placeholder=""
-        />
-
-        <TextField
-          label="Suffix"
-          value={data.suffix ?? ''}
-          onChange={(v) => update({ suffix: v })}
-          placeholder=""
+          multiline
+          rows={4}
+          controlledPlaceholder="External text input connected"
         />
       </NodeSection>
 
@@ -167,11 +144,11 @@ export default function TextGeneratorNode({ id, data }) {
           options={FONT_WEIGHT_OPTIONS}
         />
 
-        <TextField
+        <SelectField
           label="Family"
-          value={data.fontFamily ?? 'sans-serif'}
+          value={data.fontFamily ?? 'system-ui, sans-serif'}
           onChange={(v) => update({ fontFamily: v })}
-          placeholder="sans-serif"
+          options={FONT_FAMILY_OPTIONS}
         />
 
         <PortNumberField
@@ -213,6 +190,7 @@ export default function TextGeneratorNode({ id, data }) {
           onChange={(v) => update({ maxWidth: v })}
           min={0}
           step={1}
+          note="future"
         />
       </NodeSection>
 

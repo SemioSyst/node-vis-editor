@@ -15,7 +15,10 @@ export function normalizeOutput(output) {
   if (!output) return null;
 
   // New Output Spec v0.1
-  if (output.outputType === 'visual') {
+  if (
+    output.outputType === 'visual' ||
+    output.outputType === 'inspection'
+  ) {
     return output;
   }
 

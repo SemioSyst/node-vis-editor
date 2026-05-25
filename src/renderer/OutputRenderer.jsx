@@ -1,6 +1,7 @@
 // src/renderer/OutputRenderer.jsx
 
 import SvgRenderer from './SvgRenderer.jsx';
+import InspectionRenderer from './InspectionRenderer.jsx';
 import { normalizeOutput } from './normalizeOutput.js';
 import { createRenderFrame } from './viewport/createRenderFrame.js';
 import './OutputRenderer.css';
@@ -16,6 +17,17 @@ export default function OutputRenderer({
     return (
       <div className="output-renderer-empty">
         {emptyText}
+      </div>
+    );
+  }
+
+  if (normalized.outputType === 'inspection') {
+    return (
+      <div className="output-renderer-root output-renderer-root--inspection">
+        <InspectionRenderer
+          spec={normalized}
+          renderOptions={renderOptions}
+        />
       </div>
     );
   }

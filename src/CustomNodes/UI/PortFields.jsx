@@ -95,38 +95,82 @@ export function PortTextField({
   note,
   placeholder,
   disabled = false,
+
+  multiline = false,
+  rows = 3,
+  controlledPlaceholder = 'External input connected',
 }) {
-  const isDisabled = disabled || state === 'controlled' || state === 'inactive';
+  const isControlled = state === 'controlled';
+  const isInactive = state === 'inactive';
+  const isDisabled = disabled || isControlled || isInactive;
+
+  const resolvedNote =
+    note ??
+    (isControlled ? 'input' : isInactive ? 'inactive' : undefined);
+
+  const displayValue = isControlled ? '' : value ?? '';
+  const displayPlaceholder = isControlled
+    ? controlledPlaceholder
+    : placeholder;
+
+  if (!multiline) {
+    return (
+      <PortFieldShell
+        handleId={handleId}
+        label={label}
+        state={state}
+        note={resolvedNote}
+      >
+        {({ disabled }) => (
+          <input
+            className="node-input nodrag"
+            type="text"
+            value={isControlled ? '' : value ?? ''}
+            placeholder={isControlled ? controlledPlaceholder : placeholder}
+            disabled={disabled || isDisabled}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        )}
+      </PortFieldShell>
+    );
+  }
 
   return (
     <div
       className={[
         'port-field',
-        state !== 'normal' ? `port-field--${state}` : '',
+        'port-field--stacked',
+        isControlled ? 'port-field--controlled' : '',
+        isInactive ? 'port-field--inactive' : '',
       ].join(' ')}
     >
-      <Handle
-        type="target"
-        id={handleId}
-        position={Position.Left}
-        className={[
-          'port-field__handle',
-          state !== 'normal' ? `port-field__handle--${state}` : '',
-        ].join(' ')}
-      />
+      <div className="port-field__handle-slot">
+        <Handle
+          type="target"
+          id={handleId}
+          position={Position.Left}
+          className="port-field__handle"
+          isConnectable={!isInactive}
+        />
+      </div>
 
-      <label className="port-field__label">{label}</label>
+      <div className="port-field__label-wrap">
+        <div className="port-field__label">{label}</div>
+        {resolvedNote && (
+          <div className="port-field__note">{resolvedNote}</div>
+        )}
+      </div>
 
-      <input
-        className="node-input port-field__control nodrag"
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        disabled={isDisabled}
-        onChange={(e) => onChange(e.target.value)}
-      />
-
-      {note && <span className="port-field__note">{note}</span>}
+      <div className="port-field__control port-field__control--full">
+        <textarea
+          className="node-textarea port-textarea nodrag"
+          rows={rows}
+          value={displayValue}
+          placeholder={displayPlaceholder}
+          disabled={isDisabled}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
     </div>
   );
 }
