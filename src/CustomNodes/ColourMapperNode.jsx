@@ -10,6 +10,7 @@ import {
   ColorField,
 } from './UI/NodeFields.jsx';
 import { useUpdateNodeData } from './UI/useUpdateNodeData.js';
+import ColourRampPreview from './UI/ColourRampPreview.jsx';
 
 import {
   SEQUENTIAL_COLOUR_SCHEME_OPTIONS,
@@ -116,6 +117,28 @@ export default function ColourMapperNode({ id, data }) {
         )}
       </NodeSection>
 
+        <NodeSection
+        nodeId={id}
+        sectionId="colourPreview"
+        sectionCollapsed={data.sectionCollapsed}
+        title="Preview"
+        subtitle="Current colour map"
+        >
+        <ColourRampPreview
+            colourMode={colourMode}
+            sequentialScheme={data.sequentialScheme ?? 'viridis'}
+            divergingScheme={data.divergingScheme ?? 'rdBu'}
+            categoricalScheme={data.categoricalScheme ?? 'tableau10'}
+            manualColours={data.manualColours ?? '[#5b78ff,#ff7a59,#36c285,#f2c94c]'}
+            reverse={Boolean(data.reverse ?? false)}
+            domainMode={domainMode}
+            domainMin={data.domainMin ?? 0}
+            domainCenter={data.domainCenter ?? 0}
+            domainMax={data.domainMax ?? 100}
+            missingColour={data.missingColour ?? '#cccccc'}
+        />
+        </NodeSection>
+        
       {showNumericDomain && (
         <NodeSection
           nodeId={id}

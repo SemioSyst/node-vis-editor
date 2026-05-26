@@ -22,6 +22,9 @@ import PathGeneratorNode from './CustomNodes/PathGeneratorNode.jsx';
 import TagMapperNode from './CustomNodes/TagMapperNode.jsx';
 import DataInspectorNode from './CustomNodes/DataInspectorNode.jsx';
 import ColourMapperNode from './CustomNodes/ColourMapperNode.jsx';
+import HoverRuntimeBinderNode from './CustomNodes/HoverRuntimeBinderNode.jsx';
+import ElementSelectorNode from './CustomNodes/ElementSelectorNode.jsx';
+import EventTriggerNode from './CustomNodes/EventTriggerNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -34,10 +37,6 @@ import '@xyflow/react/dist/style.css';
 
 // Define the node library with default data for each node type
 const NODE_LIBRARY = [
-  { type: 'circle', label: 'Circle', defaultData: { cx: 50, cy: 50, r: 22, stroke: '#000000', strokeWidth: 2, fill: 'none' } },
-  { type: 'rect',   label: 'Rect',   defaultData: { x: 8, y: 8, w: 84, h: 84, rx: 10, ry: 10, stroke: '#000000', strokeWidth: 2, fill: 'none' } },
-  { type: 'line',   label: 'Line',   defaultData: { x1: 10, y1: 50, x2: 90, y2: 50, stroke: '#000000', strokeWidth: 2 } },
-  { type: 'group',  label: 'Group',  defaultData: { } },
   { type: 'previewNode', label: 'Preview', defaultData: { label: 'Preview' } },
   { type: 'shapeGenerator', label: 'Shape Generator', defaultData: { } },
   { type: 'simpleDataInput', label: 'Simple Data Input', defaultData: { } },
@@ -50,6 +49,9 @@ const NODE_LIBRARY = [
   { type: 'tagMapper', label: 'Tag Mapper', defaultData: { } },
   { type: 'dataInspector', label: 'Data Inspector', defaultData: { } },
   { type: 'colourMapper', label: 'Colour Mapper', defaultData: { } },
+  { type: 'hoverRuntimeBinder', label: 'Hover Runtime Binder', defaultData: { } },
+  { type: 'elementSelector', label: 'Element Selector', defaultData: { } },
+  { type: 'eventTrigger', label: 'Event Trigger', defaultData: { } },
 ];
 
 //Define custom node types
@@ -72,6 +74,9 @@ const nodeTypes = {
   tagMapper: TagMapperNode,
   dataInspector: DataInspectorNode,
   colourMapper: ColourMapperNode,
+  hoverRuntimeBinder: HoverRuntimeBinderNode,
+  elementSelector: ElementSelectorNode,
+  eventTrigger: EventTriggerNode,
 };
 
 //Initial Nodes and Edges

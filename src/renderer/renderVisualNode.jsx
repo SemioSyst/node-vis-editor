@@ -2,6 +2,10 @@
 
 import { renderSvgElement } from './renderSvgElement.jsx';
 import ProceduralRenderer from './procedural/ProceduralRenderer.jsx';
+import { makeRuntimeRefFromNode } from '../runtime/references/runtimeRefs.js';
+import { buildReactRuntimeEventProps } from '../runtime/adapters/react/runtimeEvents.js';
+import { applyRuntimeOverridesToNode } from '../runtime/overrides/runtimeOverrides.js';
+import { getRuntimeDomAttributes } from '../runtime/adapters/react/runtimeDomAttributes.js';
 
 function buildTransform(node) {
   const frame = node.frame ?? {};
@@ -117,6 +121,13 @@ function getCommonSvgStyle(style = {}) {
 }
 
 function getElementDataAttributes(node) {
+  const tags =
+    node.dataRef?.tags ??
+    node.meta?.tags ??
+    node.dataRef?.matrixItem?.tags ??
+    node.meta?.matrixItem?.tags ??
+    null;
+
   return {
     'data-node-id': node.id,
     'data-element-type': node.elementType,
@@ -124,6 +135,10 @@ function getElementDataAttributes(node) {
     'data-generator-node-id': node.dataRef?.generatorNodeId,
     'data-collection-id': node.dataRef?.collectionId,
     'data-index': node.dataRef?.index,
+    'data-flat-index': node.dataRef?.flatIndex,
+    'data-row-index': node.dataRef?.rowIndex,
+    'data-col-index': node.dataRef?.colIndex,
+    'data-tags': tags ? JSON.stringify(tags) : undefined,
   };
 }
 
@@ -361,16 +376,25 @@ function renderElementNode(node, ctx) {
   const transform = buildTransform(node);
   const interactionProps = buildInteractionProps(node);
 
+  const runtimeRef = makeRuntimeRefFromNode(node, {
+    scopeIds: ctx.runtimeScopes ?? [],
+  });
+  const runtimeProps = buildReactRuntimeEventProps(runtimeRef, ctx.runtime);
+  const renderNode = applyRuntimeOverridesToNode(node, runtimeRef, ctx.runtime);
+
   return (
     <g
       key={ctx.key ?? node.id}
       transform={transform}
       opacity={node.opacity}
-      {...getElementDataAttributes(node)}
+      {...getRuntimeDomAttributes(node, {
+        scopeIds: ctx.runtimeScopes ?? [],
+      })}
       {...interactionProps}
+      {...runtimeProps}
     >
       {renderHitArea(node)}
-      {renderElementContent(node)}
+      {renderElementContent(renderNode)}
       {(node.children ?? []).map((child, i) =>
         renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
       )}
@@ -392,7 +416,15 @@ function renderGroupLikeNode(node, ctx) {
     >
       {renderHitArea(node)}
       {(node.children ?? []).map((child, i) =>
-        renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
+        renderVisualNode(child, {
+          ...ctx,
+          key: `${node.id}-child-${i}`,
+          runtimeScopes: [
+            ...(ctx.runtimeScopes ?? []),
+            node.id,
+            node.meta?.originalId,
+          ].filter(Boolean),
+        })
       )}
     </g>
   );
@@ -420,7 +452,15 @@ function renderProceduralNode(node, ctx) {
       />
 
       {(node.children ?? []).map((child, i) =>
-        renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
+        renderVisualNode(child, {
+          ...ctx,
+          key: `${node.id}-child-${i}`,
+          runtimeScopes: [
+            ...(ctx.runtimeScopes ?? []),
+            node.id,
+            node.meta?.originalId,
+          ].filter(Boolean),
+        })
       )}
     </g>
   );

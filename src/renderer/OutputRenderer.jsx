@@ -1,9 +1,12 @@
 // src/renderer/OutputRenderer.jsx
+import { useMemo } from 'react';
 
 import SvgRenderer from './SvgRenderer.jsx';
 import InspectionRenderer from './InspectionRenderer.jsx';
 import { normalizeOutput } from './normalizeOutput.js';
 import { createRenderFrame } from './viewport/createRenderFrame.js';
+import { createVisualRuntime } from '../runtime/core/visualRuntimeStore.js';
+import { useVisualRuntimeSnapshot } from '../runtime/adapters/react/visualRuntimeReact.js';
 import './OutputRenderer.css';
 
 export default function OutputRenderer({
@@ -12,6 +15,29 @@ export default function OutputRenderer({
   renderOptions = {},
 }) {
   const normalized = normalizeOutput(output);
+
+  const runtimeSpec =
+    normalized?.outputType === 'visual'
+      ? (
+          renderOptions.runtimeSpec ??
+          normalized.runtimeSpec ??
+          normalized.meta?.runtimeSpec ??
+          null
+        )
+      : null;
+
+  const runtime = useMemo(() => {
+    if (!runtimeSpec) return null;
+
+    return createVisualRuntime({
+      runtimeSpec,
+    });
+  }, [runtimeSpec]);
+
+  // Subscribe to runtime state.
+  // The returned snapshot is not directly used here; it forces React rerender
+  // when runtime state changes.
+  useVisualRuntimeSnapshot(runtime);
 
   if (!normalized) {
     return (
@@ -53,6 +79,7 @@ export default function OutputRenderer({
             spec={normalized}
             renderFrame={renderFrame}
             renderOptions={renderOptions}
+            runtime={runtime}
           />
         </div>
       ) : (
@@ -60,6 +87,7 @@ export default function OutputRenderer({
           spec={normalized}
           renderFrame={renderFrame}
           renderOptions={renderOptions}
+          runtime={runtime}
         />
       )}
     </div>

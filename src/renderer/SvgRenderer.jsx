@@ -6,6 +6,7 @@ export default function SvgRenderer({
   spec,
   renderFrame,
   renderOptions = {},
+  runtime = null,
 }) {
   if (!spec || !renderFrame) return null;
 
@@ -21,6 +22,7 @@ export default function SvgRenderer({
         spec,
         renderFrame,
         renderOptions,
+        runtime,
       })}
     </svg>
   );

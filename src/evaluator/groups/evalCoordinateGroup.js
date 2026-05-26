@@ -3,6 +3,7 @@ import {
   inheritProvenance,
   makeProvenanceEntry,
 } from '../utils/metaUtils.js';
+import { mergeRuntimeSpecs } from '../../runtime/spec/runtimeSpecUtils.js';
 
 export function evalCoordinateGroup(ctx) {
   const p = ctx.params ?? {};
@@ -61,6 +62,12 @@ export function evalCoordinateGroup(ctx) {
     .map((input) => input.value)
     .filter(Boolean);
 
+  const runtimeSpec = mergeRuntimeSpecs(
+    inputOutputs.map((output) =>
+      output.runtimeSpec ?? output.meta?.runtimeSpec ?? null
+    )
+  );
+
   const inputProvenance = inheritProvenance(...inputOutputs);
 
   const ownProvenanceEntry = makeProvenanceEntry({
@@ -77,6 +84,8 @@ export function evalCoordinateGroup(ctx) {
   return {
     outputType: 'visual',
     version: '0.1',
+
+    runtimeSpec,
 
     root: {
       nodeType: 'collection',
@@ -97,6 +106,8 @@ export function evalCoordinateGroup(ctx) {
       meta: {
         role: 'coordinate-group',
         sourceNodeId: ctx.nodeId,
+
+        runtimeSpec,
 
         layerOrder: resolvedLayers.map((layer, index) => ({
           index,

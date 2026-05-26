@@ -20,6 +20,9 @@ import { evalPathGenerator } from './generators/evalPathGenerator.js';
 import { evalTagMapper } from './mappers/evalTagMapper.js';
 import { evalDataInspector } from './inspectors/evalDataInspector.js';
 import { evalColourMapper } from './mappers/evalColourMapper.js';
+import { evalHoverRuntimeBinder } from './interactions/evalHoverRuntimeBinder.js';
+import { evalElementSelector } from './interactions/evalElementSelector.js';
+import { evalEventTrigger } from './interactions/evalEventTrigger.js';
 
 /**
  * Registry
@@ -46,4 +49,7 @@ export const evaluatorsByType = {
   tagMapper: evalTagMapper,
   dataInspector: evalDataInspector,
   colourMapper: evalColourMapper,
+  hoverRuntimeBinder: evalHoverRuntimeBinder,
+  elementSelector: evalElementSelector,
+  eventTrigger: evalEventTrigger,
 };
