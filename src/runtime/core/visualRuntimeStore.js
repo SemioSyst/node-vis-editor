@@ -226,6 +226,23 @@ function applyStateRule({
     });
   }
 
+  if (action.type === 'toggleElementRef') {
+    const nextValue = resolveActionValue(action.value, { ref, value });
+    const currentValue = state.states?.[action.stateId];
+
+    const shouldClear =
+      currentValue?.elementId &&
+      nextValue?.elementId &&
+      currentValue.elementId === nextValue.elementId;
+
+    return setRuntimeStateValue({
+      state,
+      compiledSpec,
+      stateId: action.stateId,
+      value: shouldClear ? null : nextValue,
+    });
+  }
+
   if (action.type === 'cycleState') {
     return cycleRuntimeStateValue({
       state,

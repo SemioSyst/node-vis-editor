@@ -27,6 +27,7 @@ import ElementSelectorNode from './CustomNodes/ElementSelectorNode.jsx';
 import EventTriggerNode from './CustomNodes/EventTriggerNode.jsx';
 import StatesNode from './CustomNodes/StatesNode.jsx';
 import TransitionNode from './CustomNodes/TransitionNode.jsx';
+import InteractionEffectNode from './CustomNodes/InteractionEffectNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -34,6 +35,15 @@ import { OutputsProvider, useOutputs } from './OutputsContext.jsx';
 import { topoSort } from './topoSort.js';
 import { createEvaluator } from './evaluator/createEvaluator.js';
 import { evaluatorsByType } from './evaluator/evaluatorsByType.js';
+import {
+  createProjectSnapshot,
+  downloadProjectSnapshot,
+  readProjectFile,
+  saveProjectToLocalStorage,
+  loadProjectFromLocalStorage,
+} from './project/projectIO.js';
+import ProjectToolbar from './project/ProjectToolbar.jsx';
+import { useProjectActions } from './project/useProjectActions.js';
 
 import '@xyflow/react/dist/style.css';
 
@@ -85,6 +95,7 @@ const NODE_LIBRARY = [
   { type: 'eventTrigger', label: 'Event Trigger', defaultData: { } },
   { type: 'states', label: 'States', defaultData: { } },
   { type: 'transition', label: 'Transition', defaultData: { } },
+  { type: 'interactionEffect', label: 'Interaction Effect', defaultData: { } },
 ];
 
 //Define custom node types
@@ -112,6 +123,7 @@ const nodeTypes = {
   eventTrigger: EventTriggerNode,
   states: StatesNode,
   transition: TransitionNode,
+  interactionEffect: InteractionEffectNode,
 };
 
 //Initial Nodes and Edges
@@ -377,6 +389,18 @@ export default function App() {
     [],
   );
 
+  // --- Project saving/loading logic ---
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const projectActions = useProjectActions({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    reactFlowInstance,
+    projectName: 'node-vis-project',
+  });
+
   // --- Node addition logic ---
   const nextIdRef = useRef(1); // simple ref to keep track of next node id for demo purposes
   // Function to add a new node of a given type to the canvas
@@ -469,11 +493,25 @@ export default function App() {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
+            onInit={setReactFlowInstance}
             fitView
           >
             <AddNodePanel addNode={addNode} flowWrapperRef={flowWrapperRef} />
             <Panel position="top-right">
-              <RunEvaluatorButton evaluator={evaluator} graphIR={graphIR} topo={topo} nodes={nodes} />
+              <ProjectToolbar
+                onSaveFile={projectActions.handleSaveFile}
+                onSaveDraft={projectActions.handleSaveDraft}
+                onLoadDraft={projectActions.handleLoadDraft}
+                onLoadFile={projectActions.handleLoadFile}
+                draftAvailable={projectActions.draftAvailable}
+              >
+                <RunEvaluatorButton
+                  evaluator={evaluator}
+                  graphIR={graphIR}
+                  topo={topo}
+                  nodes={nodes}
+                />
+              </ProjectToolbar>
             </Panel>
             <Background color="#ccc" variant={BackgroundVariant.Dots}/>
             <ViewportZoomIndicator />
@@ -548,15 +586,9 @@ function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
 
   return (
     <button
+      type="button"
       onClick={onRun}
-      style={{
-        padding: '6px 10px',
-        borderRadius: 6,
-        border: '1px solid #555',
-        background: '#222',
-        color: '#fff',
-        cursor: 'pointer',
-      }}
+      className="project-toolbar__button project-toolbar__button--primary"
     >
       Run Evaluator
     </button>
@@ -573,4 +605,57 @@ function ViewportZoomIndicator() {
       </div>
     </Panel>
   );
+}
+
+function handleSaveProject() {
+  const flow = reactFlowInstance.toObject();
+
+  const snapshot = createProjectSnapshot({
+    flow,
+    name: 'test-scene',
+  });
+
+  downloadProjectSnapshot(snapshot);
+}
+
+function handleAutoSaveProject() {
+  const flow = reactFlowInstance.toObject();
+
+  const snapshot = createProjectSnapshot({
+    flow,
+    name: 'auto-save',
+  });
+
+  saveProjectToLocalStorage(snapshot);
+}
+
+async function handleLoadProjectFile(file) {
+  const snapshot = await readProjectFile(file);
+
+  const flow = snapshot.reactFlow;
+
+  setNodes(flow.nodes ?? []);
+  setEdges(flow.edges ?? []);
+
+  if (flow.viewport) {
+    requestAnimationFrame(() => {
+      reactFlowInstance.setViewport(flow.viewport);
+    });
+  }
+}
+
+function handleLoadAutoSave() {
+  const snapshot = loadProjectFromLocalStorage();
+  if (!snapshot) return;
+
+  const flow = snapshot.reactFlow;
+
+  setNodes(flow.nodes ?? []);
+  setEdges(flow.edges ?? []);
+
+  if (flow.viewport) {
+    requestAnimationFrame(() => {
+      reactFlowInstance.setViewport(flow.viewport);
+    });
+  }
 }

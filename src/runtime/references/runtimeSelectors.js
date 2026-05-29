@@ -13,6 +13,10 @@ export function matchesRuntimeSelector({
     return true;
   }
 
+  if (type === 'none') {
+    return false;
+  }
+
   if (type === 'self') {
     return stateValue?.elementId === currentRef?.elementId;
   }
@@ -25,6 +29,17 @@ export function matchesRuntimeSelector({
     return (
       stateValue?.tags?.[tagKey] != null &&
       stateValue.tags[tagKey] === currentRef?.tags?.[tagKey]
+    );
+  }
+
+  if (type === 'notSameTag') {
+    const tagKey = selector.tagKey;
+
+    if (!tagKey) return false;
+
+    return (
+      stateValue?.tags?.[tagKey] != null &&
+      currentRef?.tags?.[tagKey] !== stateValue.tags[tagKey]
     );
   }
 
@@ -53,14 +68,27 @@ export function matchesRuntimeSelector({
     return currentRef?.tags?.[tagKey] === value;
   }
 
-  if (type === 'notSameTag') {
-    const tagKey = selector.tagKey;
+  if (type === 'rowEquals') {
+    return (
+      currentRef?.rowIndex != null &&
+      currentRef.rowIndex === selector.rowIndex
+    );
+  }
 
-    if (!tagKey) return false;
+  if (type === 'columnEquals') {
+    return (
+      currentRef?.colIndex != null &&
+      currentRef.colIndex === selector.colIndex
+    );
+  }
+
+  if (type === 'indexRange') {
+    const index = currentRef?.flatIndex ?? currentRef?.index;
 
     return (
-      stateValue?.tags?.[tagKey] != null &&
-      currentRef?.tags?.[tagKey] !== stateValue.tags[tagKey]
+      index != null &&
+      index >= selector.start &&
+      index <= selector.end
     );
   }
 

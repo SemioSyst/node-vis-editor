@@ -25,6 +25,7 @@ export function compileRuntimeSpec(runtimeSpec = EMPTY_RUNTIME_SPEC) {
     states: normalizeStates(compiled.states),
     events: normalizeEvents(compiled.events),
     stateRules: normalizeStateRules(compiled.stateRules),
+    effects: normalizeEffects(compiled.effects),
     overrides: normalizeOverrides(compiled.overrides),
   };
 }
@@ -132,6 +133,13 @@ function normalizeEvents(events = []) {
 function normalizeStateRules(rules = []) {
   return rules.map((rule) => ({
     ...rule,
+  }));
+}
+
+function normalizeEffects(effects = []) {
+  return effects.map((effect) => ({
+    priority: 50,
+    ...effect,
   }));
 }
 

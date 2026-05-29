@@ -25,6 +25,7 @@ import { evalElementSelector } from './interactions/evalElementSelector.js';
 import { evalEventTrigger } from './interactions/evalEventTrigger.js';
 import { evalStates } from './interactions/evalStates.js';
 import { evalTransition } from './interactions/evalTransition.js';
+import { evalInteractionEffect } from './interactions/evalInteractionEffect.js';
 
 /**
  * Registry
@@ -56,4 +57,5 @@ export const evaluatorsByType = {
   eventTrigger: evalEventTrigger,
   states: evalStates,
   transition: evalTransition,
+  interactionEffect: evalInteractionEffect,
 };
