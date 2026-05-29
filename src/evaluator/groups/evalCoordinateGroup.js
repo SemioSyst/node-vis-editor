@@ -143,6 +143,9 @@ export function evalCoordinateGroup(ctx) {
       sourceNodeId: ctx.nodeId,
       label: 'Coordinate Group Output',
       outputRole: 'coordinate-group',
+
+      runtimeSpec,
+
       warnings: [
         ...warnings,
         ...collectScaleMatchWarnings(scaleMatches),
@@ -253,9 +256,13 @@ function reconcileLayers({ layerConfigs, layerInputs }) {
 function makeLayerWrapper({ ctx, layer, index }) {
   const sourceOutput = layer.input.value;
 
+  const sourceRootId = sourceOutput.root?.id ?? null;
+  const sourceRuntimeScopeIds = collectRuntimeScopeIds(sourceOutput);
+
   const root = prefixVisualNodeIds(
     sourceOutput.root,
-    `${ctx.nodeId}-${layer.id}`
+    `${ctx.nodeId}-${layer.id}`,
+    sourceRuntimeScopeIds
   );
 
   const inferredKind = inferLayerKind(sourceOutput);
@@ -301,6 +308,10 @@ function makeLayerWrapper({ ctx, layer, index }) {
       layerId: layer.id,
       layerIndex: index,
 
+      sourceRootId,
+      sourceVisualRootId: sourceRootId,
+      runtimeScopeIds: sourceRuntimeScopeIds,
+
       layerOffset: {
         x: layerX,
         y: layerUserY,
@@ -330,10 +341,16 @@ function makeLayerWrapper({ ctx, layer, index }) {
   };
 }
 
-function prefixVisualNodeIds(node, prefix) {
+function prefixVisualNodeIds(node, prefix, inheritedRuntimeScopeIds = []) {
   if (!node || typeof node !== 'object') return node;
 
   const originalId = node.id ?? null;
+
+  const runtimeScopeIds = uniqueTruthy([
+    ...(node.meta?.runtimeScopeIds ?? []),
+    ...inheritedRuntimeScopeIds,
+    originalId,
+  ]);
 
   return {
     ...node,
@@ -343,11 +360,17 @@ function prefixVisualNodeIds(node, prefix) {
       ...(node.meta ?? {}),
       originalId,
       prefixedBy: prefix,
+
+      runtimeScopeIds,
     },
 
     children: Array.isArray(node.children)
       ? node.children.map((child, index) =>
-          prefixVisualNodeIds(child, `${prefix}-${index}`)
+          prefixVisualNodeIds(
+            child,
+            `${prefix}-${index}`,
+            runtimeScopeIds
+          )
         )
       : node.children,
   };
@@ -723,4 +746,29 @@ function toSvgY(value, params = {}) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function collectRuntimeScopeIds(output) {
+  const runtimeSpec =
+    output?.runtimeSpec ??
+    output?.meta?.runtimeSpec ??
+    null;
+
+  return uniqueTruthy([
+    output?.root?.id,
+
+    ...(runtimeSpec?.bindings ?? [])
+      .map((binding) => binding.targetScopeId)
+      .filter(Boolean),
+
+    ...(runtimeSpec?.events ?? [])
+      .map((event) => event.sourceScopeId)
+      .filter(Boolean),
+
+    ...(output?.root?.meta?.runtimeScopeIds ?? []),
+  ]);
+}
+
+function uniqueTruthy(values) {
+  return [...new Set(values.filter(Boolean))];
 }

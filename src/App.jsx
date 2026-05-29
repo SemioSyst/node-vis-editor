@@ -25,6 +25,8 @@ import ColourMapperNode from './CustomNodes/ColourMapperNode.jsx';
 import HoverRuntimeBinderNode from './CustomNodes/HoverRuntimeBinderNode.jsx';
 import ElementSelectorNode from './CustomNodes/ElementSelectorNode.jsx';
 import EventTriggerNode from './CustomNodes/EventTriggerNode.jsx';
+import StatesNode from './CustomNodes/StatesNode.jsx';
+import TransitionNode from './CustomNodes/TransitionNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -34,6 +36,35 @@ import { createEvaluator } from './evaluator/createEvaluator.js';
 import { evaluatorsByType } from './evaluator/evaluatorsByType.js';
 
 import '@xyflow/react/dist/style.css';
+
+function createGraphCompileKey(nodes, edges) {
+  return JSON.stringify({
+    nodes: nodes.map((node) => [String(node.id), node.type ?? null]),
+    edges: edges.map((edge) => [
+      String(edge.id),
+      String(edge.source),
+      String(edge.target),
+      edge.sourceHandle ?? null,
+      edge.targetHandle ?? null,
+    ]),
+  });
+}
+
+function createGraphCompileInput(nodes, edges) {
+  return {
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle,
+    })),
+  };
+}
 
 // Define the node library with default data for each node type
 const NODE_LIBRARY = [
@@ -52,6 +83,8 @@ const NODE_LIBRARY = [
   { type: 'hoverRuntimeBinder', label: 'Hover Runtime Binder', defaultData: { } },
   { type: 'elementSelector', label: 'Element Selector', defaultData: { } },
   { type: 'eventTrigger', label: 'Event Trigger', defaultData: { } },
+  { type: 'states', label: 'States', defaultData: { } },
+  { type: 'transition', label: 'Transition', defaultData: { } },
 ];
 
 //Define custom node types
@@ -77,6 +110,8 @@ const nodeTypes = {
   hoverRuntimeBinder: HoverRuntimeBinderNode,
   elementSelector: ElementSelectorNode,
   eventTrigger: EventTriggerNode,
+  states: StatesNode,
+  transition: TransitionNode,
 };
 
 //Initial Nodes and Edges
@@ -367,7 +402,21 @@ export default function App() {
   const evaluator = useMemo(() => createEvaluator({ evaluatorsByType }), []);
 
   // --- Compile graph to IR ---
-  const graphIR = useMemo(() => compileGraph(nodes, edges), [nodes, edges]);
+  // React Flow updates node.position continuously while dragging. The compiler only
+  // needs graph structure, so keep the IR stable when visual-only node fields change.
+  const graphCompileKey = useMemo(() => createGraphCompileKey(nodes, edges), [nodes, edges]);
+  const graphCompileCacheRef = useRef({ key: null, input: null });
+  if (graphCompileCacheRef.current.key !== graphCompileKey) {
+    graphCompileCacheRef.current = {
+      key: graphCompileKey,
+      input: createGraphCompileInput(nodes, edges),
+    };
+  }
+  const graphCompileInput = graphCompileCacheRef.current.input;
+  const graphIR = useMemo(
+    () => compileGraph(graphCompileInput.nodes, graphCompileInput.edges),
+    [graphCompileInput],
+  );
   useEffect(() => {
     console.groupCollapsed(
       `[App] graphIR updated (nodes=${Object.keys(graphIR.nodesById).length}, edges=${graphIR.edges.length})`

@@ -1,4 +1,4 @@
-const DEBUG_COMPILER = true; // Set to true to enable debug logging
+const DEBUG_COMPILER = false; // Set to true to enable debug logging
 
 /**
  * Build a minimal Graph IR from React Flow nodes/edges.

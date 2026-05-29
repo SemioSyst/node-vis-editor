@@ -7,6 +7,7 @@ import { normalizeOutput } from './normalizeOutput.js';
 import { createRenderFrame } from './viewport/createRenderFrame.js';
 import { createVisualRuntime } from '../runtime/core/visualRuntimeStore.js';
 import { useVisualRuntimeSnapshot } from '../runtime/adapters/react/visualRuntimeReact.js';
+import { applyVisualStateRuntimeToOutput } from '../runtime/visualStates/applyVisualStateRuntime.js';
 import './OutputRenderer.css';
 
 export default function OutputRenderer({
@@ -35,8 +36,7 @@ export default function OutputRenderer({
   }, [runtimeSpec]);
 
   // Subscribe to runtime state.
-  // The returned snapshot is not directly used here; it forces React rerender
-  // when runtime state changes.
+  // The snapshot itself is only used to force rerender when runtime state changes.
   useVisualRuntimeSnapshot(runtime);
 
   if (!normalized) {
@@ -66,7 +66,12 @@ export default function OutputRenderer({
     );
   }
 
-  const renderFrame = createRenderFrame(normalized, renderOptions);
+  const renderedOutput = applyVisualStateRuntimeToOutput(
+    normalized,
+    runtime
+  );
+
+  const renderFrame = createRenderFrame(renderedOutput, renderOptions);
 
   return (
     <div
@@ -76,7 +81,7 @@ export default function OutputRenderer({
       {renderFrame.mode === 'actual' ? (
         <div className="output-renderer-actual-inner">
           <SvgRenderer
-            spec={normalized}
+            spec={renderedOutput}
             renderFrame={renderFrame}
             renderOptions={renderOptions}
             runtime={runtime}
@@ -84,7 +89,7 @@ export default function OutputRenderer({
         </div>
       ) : (
         <SvgRenderer
-          spec={normalized}
+          spec={renderedOutput}
           renderFrame={renderFrame}
           renderOptions={renderOptions}
           runtime={runtime}

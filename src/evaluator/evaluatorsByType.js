@@ -23,6 +23,8 @@ import { evalColourMapper } from './mappers/evalColourMapper.js';
 import { evalHoverRuntimeBinder } from './interactions/evalHoverRuntimeBinder.js';
 import { evalElementSelector } from './interactions/evalElementSelector.js';
 import { evalEventTrigger } from './interactions/evalEventTrigger.js';
+import { evalStates } from './interactions/evalStates.js';
+import { evalTransition } from './interactions/evalTransition.js';
 
 /**
  * Registry
@@ -52,4 +54,6 @@ export const evaluatorsByType = {
   hoverRuntimeBinder: evalHoverRuntimeBinder,
   elementSelector: evalElementSelector,
   eventTrigger: evalEventTrigger,
+  states: evalStates,
+  transition: evalTransition,
 };
