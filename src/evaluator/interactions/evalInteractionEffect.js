@@ -449,34 +449,49 @@ function makeStateRules({
   if (eventSummary.eventType === 'hover') {
     const enterId = eventSummary.eventIds?.enter ?? eventSummary.primaryEventId;
     const leaveId = eventSummary.eventIds?.leave ?? eventSummary.secondaryEventId;
+    const moveId = eventSummary.eventIds?.move ?? null;
 
     return [
-      ...(enterId
+        ...(enterId
+            ? [
+                {
+                id: `${ctx.nodeId}:hover-enter`,
+                eventId: enterId,
+                action: {
+                    type: 'setState',
+                    stateId,
+                    value: 'event.ref',
+                },
+                },
+            ]
+            : []),
+
+        ...(moveId
         ? [
             {
-              id: `${ctx.nodeId}:hover-enter`,
-              eventId: enterId,
-              action: {
+                id: `${ctx.nodeId}:hover-move`,
+                eventId: moveId,
+                action: {
                 type: 'setState',
                 stateId,
                 value: 'event.ref',
-              },
+                },
             },
-          ]
+            ]
         : []),
 
-      ...(leaveId
-        ? [
-            {
-              id: `${ctx.nodeId}:hover-leave`,
-              eventId: leaveId,
-              action: {
-                type: 'clearState',
-                stateId,
-              },
-            },
-          ]
-        : []),
+        ...(leaveId
+            ? [
+                {
+                id: `${ctx.nodeId}:hover-leave`,
+                eventId: leaveId,
+                action: {
+                    type: 'clearState',
+                    stateId,
+                },
+                },
+            ]
+            : []),
     ];
   }
 

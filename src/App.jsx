@@ -28,6 +28,7 @@ import EventTriggerNode from './CustomNodes/EventTriggerNode.jsx';
 import StatesNode from './CustomNodes/StatesNode.jsx';
 import TransitionNode from './CustomNodes/TransitionNode.jsx';
 import InteractionEffectNode from './CustomNodes/InteractionEffectNode.jsx';
+import PositionRuleNode from './CustomNodes/PositionRuleNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -90,12 +91,12 @@ const NODE_LIBRARY = [
   { type: 'tagMapper', label: 'Tag Mapper', defaultData: { } },
   { type: 'dataInspector', label: 'Data Inspector', defaultData: { } },
   { type: 'colourMapper', label: 'Colour Mapper', defaultData: { } },
-  { type: 'hoverRuntimeBinder', label: 'Hover Runtime Binder', defaultData: { } },
   { type: 'elementSelector', label: 'Element Selector', defaultData: { } },
   { type: 'eventTrigger', label: 'Event Trigger', defaultData: { } },
   { type: 'states', label: 'States', defaultData: { } },
   { type: 'transition', label: 'Transition', defaultData: { } },
   { type: 'interactionEffect', label: 'Interaction Effect', defaultData: { } },
+  { type: 'positionRule', label: 'Position Rule', defaultData: { } },
 ];
 
 //Define custom node types
@@ -124,6 +125,7 @@ const nodeTypes = {
   states: StatesNode,
   transition: TransitionNode,
   interactionEffect: InteractionEffectNode,
+  positionRule: PositionRuleNode,
 };
 
 //Initial Nodes and Edges

@@ -27,6 +27,7 @@ export function compileRuntimeSpec(runtimeSpec = EMPTY_RUNTIME_SPEC) {
     stateRules: normalizeStateRules(compiled.stateRules),
     effects: normalizeEffects(compiled.effects),
     overrides: normalizeOverrides(compiled.overrides),
+    layoutRules: normalizeLayoutRules(compiled.layoutRules),
   };
 }
 
@@ -150,5 +151,15 @@ function normalizeOverrides(overrides = []) {
     selector: { type: 'self' },
     patch: {},
     ...override,
+  }));
+}
+
+function normalizeLayoutRules(layoutRules = []) {
+  return layoutRules.map((rule) => ({
+    mode: 'repeat',
+    placement: 'top',
+    offset: { x: 0, y: 0 },
+    match: { method: 'repeatTemplate' },
+    ...rule,
   }));
 }

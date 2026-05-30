@@ -206,49 +206,55 @@ function makeEventBundle({
     };
   }
 
-  const enterEventId = `${ctx.nodeId}:hover-enter`;
-  const leaveEventId = `${ctx.nodeId}:hover-leave`;
+    const enterEventId = `${ctx.nodeId}:hover-enter`;
+    const moveEventId = `${ctx.nodeId}:hover-move`;
+    const leaveEventId = `${ctx.nodeId}:hover-leave`;
 
-  return {
-    primaryEventId: enterEventId,
-    secondaryEventId: leaveEventId,
+    return {
+        primaryEventId: enterEventId,
+        secondaryEventId: leaveEventId,
 
-    eventIds: {
-      enter: enterEventId,
-      leave: leaveEventId,
-    },
-
-    events: [
-      {
-        id: enterEventId,
-        event: 'pointerenter',
-
-        sourceScopeId,
-
-        selector,
-
-        cursor: useCursor ? 'pointer' : null,
-
-        emit: {
-          eventId: enterEventId,
-          value: 'event.ref',
+        eventIds: {
+            enter: enterEventId,
+            move: moveEventId,
+            leave: leaveEventId,
         },
-      },
-      {
-        id: leaveEventId,
-        event: 'pointerleave',
 
-        sourceScopeId,
-
-        selector,
-
-        emit: {
-          eventId: leaveEventId,
-          value: 'event.ref',
-        },
-      },
-    ],
-  };
+        events: [
+            {
+                id: enterEventId,
+                event: 'pointerenter',
+                sourceScopeId,
+                selector,
+                cursor: useCursor ? 'pointer' : null,
+                emit: {
+                    eventId: enterEventId,
+                    value: 'event.ref',
+                },
+            },
+            {
+                id: moveEventId,
+                event: 'pointermove',
+                sourceScopeId,
+                selector,
+                cursor: useCursor ? 'pointer' : null,
+                emit: {
+                    eventId: moveEventId,
+                    value: 'event.ref',
+                },
+            },
+            {
+                id: leaveEventId,
+                event: 'pointerleave',
+                sourceScopeId,
+                selector,
+                emit: {
+                    eventId: leaveEventId,
+                    value: 'event.ref',
+                },
+            },
+        ],
+    };
 }
 
 function makeEmptyEventSignal(ctx, warnings) {

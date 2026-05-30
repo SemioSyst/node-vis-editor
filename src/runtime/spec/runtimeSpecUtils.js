@@ -22,6 +22,7 @@ export const EMPTY_RUNTIME_SPEC = {
   // Current first useful runtime layer.
   effects: [],
   overrides: [],
+  layoutRules: [],
 
   provides: {},
   requires: {},
@@ -44,6 +45,7 @@ export function mergeRuntimeSpecs(specs = []) {
     bindings: mergeById(validSpecs.flatMap((spec) => spec.bindings ?? [])),
     effects: mergeById(validSpecs.flatMap((spec) => spec.effects ?? [])),
     overrides: mergeById(validSpecs.flatMap((spec) => spec.overrides ?? [])),
+    layoutRules: mergeById(validSpecs.flatMap((spec) => spec.layoutRules ?? [])),
 
     // Temporary compatibility with the current hover shortcut.
     hover: validSpecs.reduce((acc, spec) => {

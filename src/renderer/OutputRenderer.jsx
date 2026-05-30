@@ -8,6 +8,7 @@ import { createRenderFrame } from './viewport/createRenderFrame.js';
 import { createVisualRuntime } from '../runtime/core/visualRuntimeStore.js';
 import { useVisualRuntimeSnapshot } from '../runtime/adapters/react/visualRuntimeReact.js';
 import { applyVisualStateRuntimeToOutput } from '../runtime/visualStates/applyVisualStateRuntime.js';
+import { applyRuntimeLayoutRulesToOutput } from '../runtime/layout/applyRuntimeLayoutRules.js';
 import './OutputRenderer.css';
 
 export default function OutputRenderer({
@@ -66,8 +67,13 @@ export default function OutputRenderer({
     );
   }
 
-  const renderedOutput = applyVisualStateRuntimeToOutput(
+  const stateOutput = applyVisualStateRuntimeToOutput(
     normalized,
+    runtime
+  );
+
+  const renderedOutput = applyRuntimeLayoutRulesToOutput(
+    stateOutput,
     runtime
   );
 
