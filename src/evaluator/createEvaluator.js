@@ -105,6 +105,7 @@ export function createEvaluator({ evaluatorsByType }) {
         setOutput(id, out);
       }
     }
+    return localOutputs; // return the outputs of this run; in practice, the main source of truth for outputs will be the state managed by setOutput, but returning this can be useful for testing or if we want to batch updates in the future.
   }
 
   return { run };

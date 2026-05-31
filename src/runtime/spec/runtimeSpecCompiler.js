@@ -28,6 +28,7 @@ export function compileRuntimeSpec(runtimeSpec = EMPTY_RUNTIME_SPEC) {
     effects: normalizeEffects(compiled.effects),
     overrides: normalizeOverrides(compiled.overrides),
     layoutRules: normalizeLayoutRules(compiled.layoutRules),
+    contextSlots: normalizeContextSlots(compiled.contextSlots),
   };
 }
 
@@ -161,5 +162,15 @@ function normalizeLayoutRules(layoutRules = []) {
     offset: { x: 0, y: 0 },
     match: { method: 'repeatTemplate' },
     ...rule,
+  }));
+}
+
+function normalizeContextSlots(contextSlots = []) {
+  return contextSlots.map((slotSet) => ({
+    version: '0.1',
+    availableElements: [],
+    registeredElements: [],
+    bindings: [],
+    ...slotSet,
   }));
 }

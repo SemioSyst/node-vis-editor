@@ -29,6 +29,7 @@ import StatesNode from './CustomNodes/StatesNode.jsx';
 import TransitionNode from './CustomNodes/TransitionNode.jsx';
 import InteractionEffectNode from './CustomNodes/InteractionEffectNode.jsx';
 import PositionRuleNode from './CustomNodes/PositionRuleNode.jsx';
+import ContextSlotsNode from './CustomNodes/ContextSlotsNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -97,6 +98,7 @@ const NODE_LIBRARY = [
   { type: 'transition', label: 'Transition', defaultData: { } },
   { type: 'interactionEffect', label: 'Interaction Effect', defaultData: { } },
   { type: 'positionRule', label: 'Position Rule', defaultData: { } },
+  { type: 'contextSlots', label: 'Context Slots', defaultData: { } },
 ];
 
 //Define custom node types
@@ -126,6 +128,7 @@ const nodeTypes = {
   transition: TransitionNode,
   interactionEffect: InteractionEffectNode,
   positionRule: PositionRuleNode,
+  contextSlots: ContextSlotsNode,
 };
 
 //Initial Nodes and Edges
@@ -512,6 +515,7 @@ export default function App() {
                   graphIR={graphIR}
                   topo={topo}
                   nodes={nodes}
+                  setNodes={setNodes}
                 />
               </ProjectToolbar>
             </Panel>
@@ -563,7 +567,7 @@ function AddNodePanel({ addNode, flowWrapperRef }) {
 }
 
 // --- Below are the implementations of the evaluator and topoSort, which are imported and used in App.jsx ---
-function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
+function RunEvaluatorButton({ evaluator, graphIR, topo, nodes, setNodes }) {
   // We need access to setOutput and outputs to manage the evaluation results
   const { setOutput, outputs } = useOutputs();
 
@@ -573,16 +577,24 @@ function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
   // When the button is clicked, run the evaluator with the current graphIR and topo order
   const onRun = () => {
     console.groupCollapsed('[Evaluator] run');
+
     if (topo.hasCycle) {
       console.warn('[Evaluator] cycle detected, partial order will be used', topo.remaining);
     }
-    evaluator.run({
+
+    const outputsByNodeId = evaluator.run({
       graphIR,
       nodes,
       topo,
       setOutput,
       getOutput,
     });
+
+    syncContextSlotsNodeData({
+      outputsByNodeId,
+      setNodes,
+    });
+
     console.groupEnd();
   };
 
@@ -594,6 +606,38 @@ function RunEvaluatorButton({ evaluator, graphIR, topo, nodes }) {
     >
       Run Evaluator
     </button>
+  );
+}
+
+function syncContextSlotsNodeData({
+  outputsByNodeId,
+  setNodes,
+}) {
+  if (!outputsByNodeId || !setNodes) return;
+
+  setNodes((currentNodes) =>
+    currentNodes.map((node) => {
+      if (node.type !== 'contextSlots') return node;
+
+      const output = outputsByNodeId[String(node.id)];
+
+      const availableElements =
+        output?.meta?.availableContextElements ??
+        output?.meta?.contextSlots?.availableElements ??
+        output?.runtimeSpec?.contextSlots?.[0]?.availableElements ??
+        null;
+
+      if (!availableElements) return node;
+
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          availableElements,
+          contextSlotElements: availableElements,
+        },
+      };
+    })
   );
 }
 

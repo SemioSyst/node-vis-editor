@@ -27,6 +27,7 @@ import { evalStates } from './interactions/evalStates.js';
 import { evalTransition } from './interactions/evalTransition.js';
 import { evalInteractionEffect } from './interactions/evalInteractionEffect.js';
 import { evalPositionRule } from './interactions/evalPositionRule.js';
+import { evalContextSlots } from './interactions/evalContextSlots.js';
 
 /**
  * Registry
@@ -60,4 +61,5 @@ export const evaluatorsByType = {
   transition: evalTransition,
   interactionEffect: evalInteractionEffect,
   positionRule: evalPositionRule,
+  contextSlots: evalContextSlots,
 };

@@ -4,10 +4,17 @@ import {
   cloneVisualNode,
 } from '../interpolation/visualTreeUtils.js';
 
+import { makeRuntimeRefFromNode } from '../references/runtimeRefs.js';
+
 import {
+  applyContextSlotsToVisual,
+  makeContextFromRuntimeRef,
+} from '../context/applyContextSlots.js';
+
+import {
+  findNodeByRuntimeScope,
   findNodesMatchingSelector,
   getVisualNodeBounds,
-  findNodeByRuntimeScope,
 } from './visualBounds.js';
 
 export function applyRuntimeLayoutRulesToOutput(output, runtime) {
@@ -18,6 +25,7 @@ export function applyRuntimeLayoutRulesToOutput(output, runtime) {
   const state = runtime.getState?.();
 
   const layoutRules = spec?.layoutRules ?? [];
+  const contextSlotSets = spec?.contextSlots ?? [];
 
   if (!layoutRules.length) return output;
 
@@ -28,9 +36,10 @@ export function applyRuntimeLayoutRulesToOutput(output, runtime) {
 
   layoutRules.forEach((rule) => {
     const result = applyLayoutRule({
-      root,
-      rule,
-      runtimeState: state,
+        root,
+        rule,
+        runtimeState: state,
+        contextSlotSets,
     });
 
     if (result.applied) {
@@ -53,9 +62,10 @@ export function applyRuntimeLayoutRulesToOutput(output, runtime) {
 }
 
 function applyLayoutRule({
-  root,
-  rule,
-  runtimeState,
+    root,
+    rule,
+    runtimeState,
+    contextSlotSets,
 }) {
   const sourceNode = findNodeByRuntimeScope(
     root,
@@ -115,25 +125,31 @@ function applyLayoutRule({
     height: 0,
   };
 
-  const children =
+    const matchingContextSlotSets = findContextSlotSetsForSource({
+        sourceNode,
+        rule,
+        contextSlotSets,
+    });
+
+    const children =
     rule.mode === 'move'
-      ? [
-          makePositionedClone({
+        ? [
+            makePositionedClone({
             sourceNode,
-            sourceBounds,
             anchor: anchors[0],
             rule,
             index: 0,
-          }),
+            contextSlotSets: matchingContextSlotSets,
+            }),
         ]
-      : anchors.map((anchor, index) =>
-          makePositionedClone({
+        : anchors.map((anchor, index) =>
+            makePositionedClone({
             sourceNode,
-            sourceBounds,
             anchor,
             rule,
             index,
-          })
+            contextSlotSets: matchingContextSlotSets,
+            })
         );
 
   const nextRoot = replaceSourceWithCollection({
@@ -246,28 +262,50 @@ function resolveAnchors({
 
   return anchorNodes
     .map((node) => {
-      const bounds = getVisualNodeBounds(node);
+        const bounds = getVisualNodeBounds(node);
 
-      if (!bounds) return null;
+        if (!bounds) return null;
 
-      return {
-        type: 'selection',
-        node,
-        bounds,
-      };
+        return {
+            type: 'selection',
+            node,
+            bounds,
+            ref: makeRuntimeRefFromNode(node),
+        };
     })
     .filter(Boolean);
 }
 
 function makePositionedClone({
   sourceNode,
-  sourceBounds,
   anchor,
   rule,
   index,
+  contextSlotSets,
 }) {
+  const context = makeContextFromAnchor(anchor);
+
+  const slottedSource = applyContextSlotsToVisual(
+    sourceNode,
+    {
+      context,
+      contextSlotSets,
+    }
+  );
+
+  const sourceBounds = getVisualNodeBounds(slottedSource) ?? {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    centerX: 0,
+    centerY: 0,
+    width: 0,
+    height: 0,
+  };
+
   const clone = prefixCloneIds(
-    cloneVisualNode(sourceNode),
+    cloneVisualNode(slottedSource),
     `${rule.id}-copy-${index}`
   );
 
@@ -295,6 +333,7 @@ function makePositionedClone({
       positionedByRule: rule.id,
       anchorType: anchor.type,
       anchorIndex: index,
+      contextSlotsApplied: contextSlotSets?.length > 0,
     },
   };
 }
@@ -472,4 +511,60 @@ function prefixCloneIds(node, prefix) {
         )
       : node.children,
   };
+}
+
+function makeContextFromAnchor(anchor) {
+  const ref =
+    anchor?.ref ??
+    (anchor?.node ? makeRuntimeRefFromNode(anchor.node) : null);
+
+  if (!ref) {
+    return {
+      anchor,
+      tags: {},
+      dataRef: {},
+      sourceItems: {},
+      meta: {},
+    };
+  }
+
+  return makeContextFromRuntimeRef(ref, {
+    anchor,
+  });
+}
+
+function findContextSlotSetsForSource({
+  sourceNode,
+  rule,
+  contextSlotSets,
+}) {
+  if (!contextSlotSets?.length) return [];
+
+  const sourceScopes = collectNodeRuntimeScopes(sourceNode);
+
+  if (rule?.sourceScopeId) {
+    sourceScopes.add(rule.sourceScopeId);
+  }
+
+  return contextSlotSets.filter((slotSet) => {
+    const componentScopeId = slotSet.componentScopeId;
+
+    if (!componentScopeId) return false;
+
+    return sourceScopes.has(componentScopeId);
+  });
+}
+
+function collectNodeRuntimeScopes(node) {
+  const meta = node?.meta ?? {};
+
+  return new Set([
+    node?.id,
+    meta.originalId,
+    meta.sourceRootId,
+    meta.sourceVisualRootId,
+    meta.runtimeTargetScopeId,
+    meta.originalStateRootId,
+    ...(meta.runtimeScopeIds ?? []),
+  ].filter(Boolean));
 }

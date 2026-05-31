@@ -23,6 +23,7 @@ export const EMPTY_RUNTIME_SPEC = {
   effects: [],
   overrides: [],
   layoutRules: [],
+  contextSlots: [],
 
   provides: {},
   requires: {},
@@ -46,6 +47,7 @@ export function mergeRuntimeSpecs(specs = []) {
     effects: mergeById(validSpecs.flatMap((spec) => spec.effects ?? [])),
     overrides: mergeById(validSpecs.flatMap((spec) => spec.overrides ?? [])),
     layoutRules: mergeById(validSpecs.flatMap((spec) => spec.layoutRules ?? [])),
+    contextSlots: mergeById(validSpecs.flatMap((spec) => spec.contextSlots ?? [])),
 
     // Temporary compatibility with the current hover shortcut.
     hover: validSpecs.reduce((acc, spec) => {
