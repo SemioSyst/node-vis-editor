@@ -40,13 +40,14 @@ export function evalPositionRule(ctx) {
   const layoutRule = makeLayoutRule({
     ctx,
     params: p,
+    visualOutput,
     sourceScopeId,
     anchorType,
     selectionOutput,
     eventSummary,
     anchorStateId,
     warnings,
-  });
+    });
 
   const ruleRuntimeSpec = {
     version: '0.1',
@@ -154,6 +155,7 @@ function makeEmptyVisualOutput(ctx, warnings) {
 function makeLayoutRule({
   ctx,
   params,
+  visualOutput,
   sourceScopeId,
   anchorType,
   selectionOutput,
@@ -177,6 +179,12 @@ function makeLayoutRule({
     type: 'anchoredPosition',
 
     sourceScopeId,
+
+    // Important:
+    // Keep a snapshot of the original positioned visual.
+    // Runtime should clone this template, not whatever node happens to match
+    // sourceScopeId after CoordinateGroup / States / Position Rule wrapping.
+    sourceTemplateRoot: visualOutput.root,
 
     mode,
 

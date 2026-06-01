@@ -17,6 +17,8 @@ import {
   getVisualNodeBounds,
 } from './visualBounds.js';
 
+const DEBUG_POSITION_RULE = false;
+
 export function applyRuntimeLayoutRulesToOutput(output, runtime) {
   if (!output || output.outputType !== 'visual') return output;
   if (!runtime) return output;
@@ -67,18 +69,29 @@ function applyLayoutRule({
     runtimeState,
     contextSlotSets,
 }) {
-  const sourceNode = findNodeByRuntimeScope(
+  const sourceNode = findBestPositionRuleSourceNode(
     root,
     rule.sourceScopeId
-  );
+    );
 
-  if (!sourceNode) {
+    const sourceTemplateNode =
+    rule.sourceTemplateRoot ??
+    sourceNode;
+
+    if (!sourceNode || !sourceTemplateNode) {
     return {
-      root,
-      applied: false,
-      summary: null,
+        root,
+        applied: false,
+        summary: {
+        id: rule.id,
+        failed: true,
+        reason: 'source-node-or-template-not-found',
+        sourceScopeId: rule.sourceScopeId,
+        hasSourceNode: Boolean(sourceNode),
+        hasSourceTemplate: Boolean(sourceTemplateNode),
+        },
     };
-  }
+    }
 
   const anchors = resolveAnchors({
     root,
@@ -126,7 +139,7 @@ function applyLayoutRule({
   };
 
     const matchingContextSlotSets = findContextSlotSetsForSource({
-        sourceNode,
+        sourceNode: sourceTemplateNode,
         rule,
         contextSlotSets,
     });
@@ -135,7 +148,7 @@ function applyLayoutRule({
     rule.mode === 'move'
         ? [
             makePositionedClone({
-            sourceNode,
+            sourceNode: sourceTemplateNode,
             anchor: anchors[0],
             rule,
             index: 0,
@@ -144,7 +157,7 @@ function applyLayoutRule({
         ]
         : anchors.map((anchor, index) =>
             makePositionedClone({
-            sourceNode,
+            sourceNode: sourceTemplateNode,
             anchor,
             rule,
             index,
@@ -163,11 +176,17 @@ function applyLayoutRule({
     root: nextRoot,
     applied: true,
     summary: {
-      id: rule.id,
-      mode: rule.mode,
-      anchorType: rule.anchor?.type,
-      anchorCount: anchors.length,
-      generatedCount: children.length,
+        id: rule.id,
+        mode: rule.mode,
+        anchorType: rule.anchor?.type,
+        anchorCount: anchors.length,
+        generatedCount: children.length,
+
+        sourceScopeId: rule.sourceScopeId,
+        placeholderNodeId: sourceNode.id,
+        placeholderNodeType: sourceNode.nodeType,
+        templateNodeId: sourceTemplateNode.id,
+        templateNodeType: sourceTemplateNode.nodeType,
     },
   };
 }
@@ -293,6 +312,37 @@ function makePositionedClone({
     }
   );
 
+    debugPositionRule('clone source check', {
+    ruleId: rule.id,
+
+    templateNodeId: sourceNode.id,
+    templateNodeType: sourceNode.nodeType,
+    templateChildren: summarizeChildren(sourceNode),
+
+    context: {
+        tags: context?.tags,
+        value: context?.value,
+        rawValue: context?.rawValue,
+        dataRef: context?.dataRef,
+    },
+
+    contextSlotSets: contextSlotSets?.map((slotSet) => ({
+        id: slotSet.id,
+        componentScopeId: slotSet.componentScopeId,
+        bindingCount: slotSet.bindings?.length ?? 0,
+        bindings: slotSet.bindings?.map((binding) => ({
+        elementId: binding.elementId,
+        property: binding.property,
+        source: binding.source,
+        stateInfo: binding.stateInfo,
+        })),
+    })),
+
+    slottedSourceId: slottedSource.id,
+    slottedSourceType: slottedSource.nodeType,
+    slottedChildren: summarizeChildren(slottedSource),
+    });
+
   const sourceBounds = getVisualNodeBounds(slottedSource) ?? {
     left: 0,
     right: 0,
@@ -321,6 +371,11 @@ function makePositionedClone({
 
   return {
     ...clone,
+
+    interaction: {
+        ...(clone.interaction ?? {}),
+        pointerEvents: rule.pointerEvents ?? 'none',
+    },
 
     transform: {
       ...(clone.transform ?? {}),
@@ -551,8 +606,30 @@ function findContextSlotSetsForSource({
 
     if (!componentScopeId) return false;
 
-    return sourceScopes.has(componentScopeId);
+    if (sourceScopes.has(componentScopeId)) return true;
+
+    // Also allow matching if the slot component scope appears inside the
+    // selected source subtree. This helps when Position Rule selected a wrapper
+    // around the component root.
+    return subtreeContainsDirectScope(sourceNode, componentScopeId);
   });
+}
+
+function subtreeContainsDirectScope(node, scopeId) {
+  if (!node || !scopeId) return false;
+
+  const meta = node.meta ?? {};
+
+  if (node.id === scopeId) return true;
+  if (meta.originalId === scopeId) return true;
+  if (meta.sourceRootId === scopeId) return true;
+  if (meta.sourceVisualRootId === scopeId) return true;
+  if (meta.runtimeTargetScopeId === scopeId) return true;
+  if (meta.originalStateRootId === scopeId) return true;
+
+  return (node.children ?? []).some((child) =>
+    subtreeContainsDirectScope(child, scopeId)
+  );
 }
 
 function collectNodeRuntimeScopes(node) {
@@ -567,4 +644,103 @@ function collectNodeRuntimeScopes(node) {
     meta.originalStateRootId,
     ...(meta.runtimeScopeIds ?? []),
   ].filter(Boolean));
+}
+
+function findBestPositionRuleSourceNode(root, sourceScopeId) {
+  if (!root || !sourceScopeId) return null;
+
+  const candidates = [];
+
+  walkTreeForPositionRuleSource(root, 0, (node, depth) => {
+    const score = getPositionRuleSourceScore(node, sourceScopeId);
+
+    if (score <= 0) return;
+
+    candidates.push({
+      node,
+      score,
+      depth,
+    });
+  });
+
+  if (!candidates.length) return null;
+
+  candidates.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+
+    // If scores tie, prefer the deeper node.
+    // This avoids selecting outer CoordinateGroup wrappers when the actual
+    // component root also exists deeper in the tree.
+    return b.depth - a.depth;
+  });
+
+  return candidates[0].node;
+}
+
+function walkTreeForPositionRuleSource(node, depth, visitor) {
+  if (!node) return;
+
+  visitor(node, depth);
+
+  (node.children ?? []).forEach((child) => {
+    walkTreeForPositionRuleSource(child, depth + 1, visitor);
+  });
+}
+
+function getPositionRuleSourceScore(node, sourceScopeId) {
+  if (!node || !sourceScopeId) return 0;
+
+  const meta = node.meta ?? {};
+
+  // Best: exact current id.
+  if (node.id === sourceScopeId) return 1000;
+
+  // Very good: CoordinateGroup-prefixed node preserving original id.
+  if (meta.originalId === sourceScopeId) return 900;
+
+  // Good: explicit runtime target.
+  if (meta.runtimeTargetScopeId === sourceScopeId) return 850;
+  if (meta.originalStateRootId === sourceScopeId) return 800;
+
+  // Good but usually wrapper-level.
+  if (meta.sourceRootId === sourceScopeId) return 700;
+  if (meta.sourceVisualRootId === sourceScopeId) return 700;
+
+  // Weak fallback only.
+  // runtimeScopeIds can be inherited by ancestor wrappers or descendants,
+  // so it must never beat direct/original/source id matches.
+  if (
+    Array.isArray(meta.runtimeScopeIds) &&
+    meta.runtimeScopeIds.includes(sourceScopeId)
+  ) {
+    return 100;
+  }
+
+  return 0;
+}
+
+function summarizeChildren(node) {
+  return (node?.children ?? []).map((child) => ({
+    id: child.id,
+    originalId: child.meta?.originalId,
+    nodeType: child.nodeType,
+    contentType: child.content?.contentType,
+    shapeType: child.content?.shape?.shapeType,
+    text: child.content?.text,
+
+    childCount: child.children?.length ?? 0,
+
+    contextLocalStateApplied: child.meta?.contextLocalStateApplied,
+    contextSlotBindingApplied: child.meta?.contextSlotBindingApplied,
+    contextStateResolutionFailed: child.meta?.contextStateResolutionFailed,
+
+    activeStateKey: child.meta?.activeStateKey,
+    requestedActiveState: child.meta?.contextRequestedActiveState,
+  }));
+}
+
+function debugPositionRule(message, payload) {
+  if (!DEBUG_POSITION_RULE) return;
+
+  console.log(`[PositionRule] ${message}`, payload);
 }

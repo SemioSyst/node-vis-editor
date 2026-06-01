@@ -7,6 +7,7 @@ import {
   setRootOpacity,
 } from '../interpolation/visualTreeUtils.js';
 import { clamp01 } from '../interpolation/interpolateValues.js';
+import { resolveProgressSegment } from '../scroll/scrollProgressUtils.js';
 
 export function applyVisualStateRuntimeToOutput(output, runtime) {
   if (!output || output.outputType !== 'visual') return output;
@@ -34,6 +35,50 @@ export function applyVisualStateRuntimeToOutput(output, runtime) {
     const change = findVisualStateChange(spec, binding);
 
     if (!change) return;
+
+    const progressReplacement = makeProgressDrivenRoot({
+    spec,
+    runtimeState: state,
+    change,
+    binding,
+    });
+
+    if (progressReplacement?.root) {
+    const targetScopeId =
+        binding.targetScopeId ??
+        change.targetScopeId ??
+        null;
+
+    if (!targetScopeId) return;
+
+    const result = replaceVisualSubtree({
+        node: root,
+        targetScopeId,
+        replacementRoot: progressReplacement.root,
+    });
+
+    if (result.replaced) {
+        root = result.node;
+        changed = true;
+
+        activeVisualStates.push({
+        bindingId: binding.id,
+        changeId: change.id,
+        stateId: binding.stateId,
+        activeStateKey: progressReplacement.toStateKey,
+        targetScopeId,
+        transition: {
+            fromStateKey: progressReplacement.fromStateKey,
+            toStateKey: progressReplacement.toStateKey,
+            progress: progressReplacement.localProgress,
+            rawProgress: progressReplacement.progress,
+            mode: 'progress-driver',
+        },
+        });
+    }
+
+    return;
+    }
 
     const transitionRecord = state.transitions?.[binding.id] ?? null;
 
@@ -223,6 +268,152 @@ function makeTransitionRoot({
     transitionRecord,
     progress,
   });
+}
+
+function makeProgressDrivenRoot({
+  spec,
+  runtimeState,
+  change,
+  binding,
+}) {
+  const driver = binding.driver;
+
+  if (!driver || driver.type !== 'progress') return null;
+
+  if (driver.control && driver.control !== 'followProgress') {
+    // Step by Progress reserved for next implementation.
+    return null;
+  }
+
+  const payload = runtimeState.states?.[driver.stateId];
+
+  if (payload == null) return null;
+
+  const stateOrder =
+    driver.order ??
+    change.stateSet?.states?.map((state) => state.key) ??
+    change.visualStates?.map((state) => state.key) ??
+    [];
+
+  const segment = resolveProgressSegment({
+    payload,
+    order: stateOrder,
+  });
+
+  if (!segment) return null;
+
+  const fromState = findVisualState(change, segment.fromStateKey);
+  const toState = findVisualState(change, segment.toStateKey);
+
+  if (!fromState?.visual?.root || !toState?.visual?.root) {
+    return null;
+  }
+
+  const targetScopeId =
+    binding.targetScopeId ??
+    change.targetScopeId ??
+    null;
+
+  if (!targetScopeId) return null;
+
+  const transitionSpec = findTransitionSpec(spec, binding.transitionId);
+
+  const mode =
+    resolveTransitionExecutionMode({
+      transitionSpec,
+      hasProgressDriver: true,
+    });
+
+  const localProgress = clamp01(segment.localProgress ?? 0);
+
+  if (
+    segment.fromStateKey === segment.toStateKey ||
+    mode === 'direct'
+  ) {
+    return {
+      root: makeScopeStableRoot({
+        replacementRoot: toState.visual.root,
+        targetScopeId,
+        activeStateKey: segment.toStateKey,
+      }),
+      fromStateKey: segment.fromStateKey,
+      toStateKey: segment.toStateKey,
+      localProgress,
+      progress: segment.progress,
+    };
+  }
+
+  if (mode === 'attribute') {
+    const interpolationResult = interpolateVisualStateRoot({
+      change,
+      fromState,
+      toState,
+      targetScopeId,
+      progress: localProgress,
+      transitionSpec,
+    });
+
+    if (interpolationResult?.root) {
+      return {
+        root: {
+          ...interpolationResult.root,
+          meta: {
+            ...(interpolationResult.root.meta ?? {}),
+            runtimeTransitionMode: 'attribute',
+            runtimeProgressDriven: true,
+            runtimeInterpolatedCount: interpolationResult.interpolatedCount,
+            runtimePairCount: interpolationResult.pairCount,
+            runtimeBindingId: binding.id,
+          },
+        },
+        fromStateKey: segment.fromStateKey,
+        toStateKey: segment.toStateKey,
+        localProgress,
+        progress: segment.progress,
+      };
+    }
+  }
+
+  return {
+    root: makeCrossfadeRoot({
+      fromState,
+      toState,
+      targetScopeId,
+      transitionRecord: {
+        fromStateKey: segment.fromStateKey,
+        toStateKey: segment.toStateKey,
+        mode,
+      },
+      progress: localProgress,
+      fallbackFrom: mode === 'attribute' ? 'attribute' : null,
+    }),
+    fromStateKey: segment.fromStateKey,
+    toStateKey: segment.toStateKey,
+    localProgress,
+    progress: segment.progress,
+  };
+}
+
+function resolveTransitionExecutionMode({
+  transitionSpec,
+  hasProgressDriver,
+}) {
+  const mode =
+    transitionSpec?.executionMode ??
+    transitionSpec?.mode ??
+    'attribute';
+
+  if (!hasProgressDriver) return mode;
+
+  const control = transitionSpec?.control ?? 'auto';
+
+  if (control === 'playAnimation') {
+    // For v0.1 scroll, progress driver still follows progress unless
+    // Step by Progress is explicitly implemented later.
+    return mode;
+  }
+
+  return mode;
 }
 
 function makeCrossfadeRoot({

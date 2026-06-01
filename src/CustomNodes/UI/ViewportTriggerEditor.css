@@ -1,0 +1,52 @@
+.viewport-trigger-editor {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+
+  margin-top: 10px;
+  padding: 10px;
+
+  border: 1px solid #303030;
+  border-radius: 12px;
+  background: #141414;
+}
+
+.viewport-trigger-editor__title {
+  margin-bottom: 9px;
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.viewport-trigger-editor__body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  min-width: 0;
+  width: 100%;
+}
+
+.viewport-trigger-editor__point-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.viewport-trigger-editor__relation {
+  padding-left: 2px;
+
+  color: #8f8f8f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.viewport-trigger-editor__nested-field {
+  padding-left: 10px;
+  border-left: 2px solid rgba(111, 134, 255, 0.28);
+}

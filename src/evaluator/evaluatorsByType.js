@@ -28,6 +28,7 @@ import { evalTransition } from './interactions/evalTransition.js';
 import { evalInteractionEffect } from './interactions/evalInteractionEffect.js';
 import { evalPositionRule } from './interactions/evalPositionRule.js';
 import { evalContextSlots } from './interactions/evalContextSlots.js';
+import { evalPagePreview } from './preview/evalPagePreview.js';
 
 /**
  * Registry
@@ -62,4 +63,5 @@ export const evaluatorsByType = {
   interactionEffect: evalInteractionEffect,
   positionRule: evalPositionRule,
   contextSlots: evalContextSlots,
+  pagePreview: evalPagePreview,
 };

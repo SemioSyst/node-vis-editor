@@ -35,9 +35,9 @@ export function evalStates(ctx) {
   const eventSummary = summarizeEvent(eventOutput);
   const switchMode = resolveSwitchMode({
     requested: p.switchMode,
-    eventType: eventSummary.eventType,
+    eventSummary,
     stateCount: visualStates.length,
-  });
+    });
 
   const matchRule = makeMatchRule(p);
   const matchResult = buildElementMatches({
@@ -62,12 +62,16 @@ export function evalStates(ctx) {
     stateSet,
   });
 
-  const mergedRuntimeSpec = mergeRuntimeSpecs([
-    startState.visual.runtimeSpec,
-    startState.visual.meta?.runtimeSpec,
-    eventOutputToRuntimeSpec(eventOutput),
-    runtimeSpec,
-  ]);
+    const inputStateRuntimeSpecs = visualStates.flatMap((state) => [
+        state.visual.runtimeSpec,
+        state.visual.meta?.runtimeSpec,
+    ]);
+
+    const mergedRuntimeSpec = mergeRuntimeSpecs([
+        ...inputStateRuntimeSpecs,
+        eventOutputToRuntimeSpec(eventOutput),
+        runtimeSpec,
+    ]);
 
   const inputProvenance = [
     ...(eventOutput ? inheritProvenance(eventOutput) : []),
@@ -340,35 +344,56 @@ function summarizeEvent(eventOutput) {
     return {
       connected: false,
       eventType: 'none',
+      driverType: null,
+
       eventIds: {},
       primaryEventId: null,
       secondaryEventId: null,
       sourceScopeId: null,
       events: [],
+
+      scroll: null,
+      slider: null,
+      progressStateId: null,
     };
   }
 
   return {
     connected: true,
     eventType: eventOutput.eventType ?? 'unknown',
+    driverType: eventOutput.driverType ?? null,
+
     eventIds: eventOutput.eventIds ?? {},
     primaryEventId: eventOutput.primaryEventId ?? null,
     secondaryEventId: eventOutput.secondaryEventId ?? null,
     sourceScopeId: eventOutput.sourceScopeId ?? null,
     selector: eventOutput.selector ?? null,
     events: eventOutput.events ?? [],
+
+    scroll: eventOutput.scroll ?? null,
+    slider: eventOutput.slider ?? null,
+    progressStateId: eventOutput.progressStateId ?? null,
   };
 }
 
 function resolveSwitchMode({
   requested,
-  eventType,
+  eventSummary,
   stateCount,
 }) {
-  const allowed = getAllowedSwitchModes(eventType);
+  const eventType = eventSummary?.eventType ?? 'none';
+
+  const allowed = getAllowedSwitchModes({
+    eventType,
+    eventSummary,
+  });
 
   if (requested && allowed.includes(requested)) {
     return requested;
+  }
+
+  if (eventSummary?.driverType === 'progress') {
+    return 'followProgress';
   }
 
   if (eventType === 'click') {
@@ -382,7 +407,14 @@ function resolveSwitchMode({
   return 'none';
 }
 
-function getAllowedSwitchModes(eventType) {
+function getAllowedSwitchModes({
+  eventType,
+  eventSummary,
+}) {
+  if (eventSummary?.driverType === 'progress') {
+    return ['followProgress', 'stepByProgress'];
+  }
+
   if (eventType === 'click') {
     return ['toggle', 'next', 'previous', 'setFirst'];
   }
@@ -399,11 +431,15 @@ function eventOutputToRuntimeSpec(eventOutput) {
     return null;
   }
 
+  if (eventOutput.runtimeSpec) {
+    return eventOutput.runtimeSpec;
+  }
+
   return {
     version: '0.1',
     events: eventOutput.events ?? [],
     provides: {
-      events: Object.values(eventOutput.eventIds ?? {}).filter(Boolean),
+        events: Object.values(eventOutput.eventIds ?? {}).filter(Boolean),
     },
   };
 }
@@ -427,6 +463,12 @@ function makeStatesRuntimeSpec({
 
   const stateOrder = visualStates.map((state) => state.key);
   const startStateKey = startState.key;
+
+  const driver = makeVisualStateDriver({
+    eventSummary,
+    switchMode,
+    stateOrder,
+  });
 
   return {
     version: '0.1',
@@ -476,14 +518,15 @@ function makeStatesRuntimeSpec({
     ],
 
     bindings: [
-      {
-        id: bindingId,
-        type: 'visualStateBinding',
-        targetScopeId: startState.visual.root?.id ?? null,
-        stateId: activeStateId,
-        changeId,
-        startStateKey,
-      },
+        {
+            id: bindingId,
+            type: 'visualStateBinding',
+            targetScopeId: startState.visual.root?.id ?? null,
+            stateId: activeStateId,
+            changeId,
+            startStateKey,
+            ...(driver ? { driver } : {}),
+        },
     ],
 
     provides: {
@@ -498,6 +541,46 @@ function makeStatesRuntimeSpec({
   };
 }
 
+function makeVisualStateDriver({
+  eventSummary,
+  switchMode,
+  stateOrder,
+}) {
+  if (eventSummary.driverType !== 'progress') return null;
+
+  const progressStateId =
+    eventSummary.progressStateId ??
+    eventSummary.eventIds?.progress ??
+    eventSummary.primaryEventId;
+
+  if (!progressStateId) return null;
+
+  return {
+    type: 'progress',
+
+    control:
+      switchMode === 'stepByProgress'
+        ? 'stepByProgress'
+        : 'followProgress',
+
+    stateId: progressStateId,
+
+    eventId:
+      eventSummary.eventIds?.progress ??
+      eventSummary.primaryEventId,
+
+    order: stateOrder,
+
+    source: {
+      eventType: eventSummary.eventType,
+      driverType: eventSummary.driverType,
+    },
+
+    scroll: eventSummary.scroll ?? null,
+    slider: eventSummary.slider ?? null,
+  };
+}
+
 function makeStateRules({
   ctx,
   activeStateId,
@@ -507,6 +590,10 @@ function makeStateRules({
   startStateKey,
 }) {
   if (!eventSummary.connected) return [];
+
+  if (eventSummary.driverType === 'progress') {
+    return [];
+  }
 
   if (eventSummary.eventType === 'click') {
     const eventId = eventSummary.primaryEventId;

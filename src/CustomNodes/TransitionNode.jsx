@@ -15,6 +15,13 @@ const MODE_OPTIONS = [
   { value: 'crossfade', label: 'Crossfade' },
 ];
 
+const CONTROL_OPTIONS = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'followProgress', label: 'Follow Progress' },
+  { value: 'playAnimation', label: 'Play Animation' },
+  { value: 'stepByProgress', label: 'Step by Progress' },
+];
+
 const EASING_OPTIONS = [
   { value: 'linear', label: 'Linear' },
   { value: 'easeIn', label: 'Ease In' },
@@ -99,6 +106,13 @@ export default function TransitionNode({ id, data }) {
           value={mode}
           onChange={(v) => update({ transitionMode: v })}
           options={MODE_OPTIONS}
+        />
+
+        <SelectField
+        label="Control"
+        value={data.controlMode ?? 'auto'}
+        onChange={(v) => update({ controlMode: v })}
+        options={CONTROL_OPTIONS}
         />
 
         <NumberField

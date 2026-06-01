@@ -107,9 +107,11 @@ function applyBindingToTree({
 
   const isStateBinding = binding.property === 'state.activeState';
 
-  if (nodeMatchesBindingTarget(node, binding.elementId, {
-    strict: isStateBinding,
-  })) {
+  const matchesTarget = isStateBinding
+    ? nodeMatchesStateBindingTarget(node, binding)
+    : nodeMatchesBindingTarget(node, binding.elementId);
+
+  if (matchesTarget) {
     const value = resolveBindingValue(binding, context);
 
     const nextNode = isStateBinding
@@ -577,6 +579,49 @@ function nodeMatchesBindingTarget(node, elementId, options = {}) {
     return true;
   }
 
+  return false;
+}
+
+function nodeMatchesStateBindingTarget(node, binding) {
+  if (!node || !binding) return false;
+
+  const meta = node.meta ?? {};
+  const stateInfo = binding.stateInfo ?? {};
+
+  // Best case: Context Slots scan recorded the exact node id.
+  if (stateInfo.targetNodeId) {
+    if (node.id === stateInfo.targetNodeId) return true;
+    if (meta.originalId === stateInfo.targetNodeId) return true;
+    if (meta.runtimeTargetScopeId === stateInfo.targetNodeId) return true;
+    if (meta.originalStateRootId === stateInfo.targetNodeId) return true;
+    if (meta.sourceRootId === stateInfo.targetNodeId) return true;
+    if (meta.sourceVisualRootId === stateInfo.targetNodeId) return true;
+  }
+
+  // Next: match the visualStateBinding target scope directly.
+  if (stateInfo.targetScopeId) {
+    if (node.id === stateInfo.targetScopeId) return true;
+    if (meta.originalId === stateInfo.targetScopeId) return true;
+    if (meta.runtimeTargetScopeId === stateInfo.targetScopeId) return true;
+    if (meta.originalStateRootId === stateInfo.targetScopeId) return true;
+    if (meta.sourceRootId === stateInfo.targetScopeId) return true;
+    if (meta.sourceVisualRootId === stateInfo.targetScopeId) return true;
+  }
+
+  // Fallback: match the registered element id, but still only by direct ids.
+  if (binding.elementId) {
+    if (node.id === binding.elementId) return true;
+    if (meta.originalId === binding.elementId) return true;
+    if (meta.runtimeTargetScopeId === binding.elementId) return true;
+    if (meta.originalStateRootId === binding.elementId) return true;
+    if (meta.sourceRootId === binding.elementId) return true;
+    if (meta.sourceVisualRootId === binding.elementId) return true;
+  }
+
+  // Important:
+  // Do not use runtimeScopeIds for state.activeState.
+  // runtimeScopeIds can be inherited by wrapper groups and would make
+  // Context Slots replace the whole tooltip component instead of the mini chart.
   return false;
 }
 

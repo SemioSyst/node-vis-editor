@@ -27,6 +27,23 @@ export function createEvaluator({ evaluatorsByType }) {
     const getIncomingEdges = (nodeId) =>
       (graphIR.edges ?? []).filter((e) => String(e.target) === String(nodeId));
 
+    // Get inputs for a node, grouped by target handle
+    const resolveOutputForHandle = (output, sourceHandle) => {
+      if (!output) return output;
+
+      if (output.outputType !== 'multi') {
+        return output;
+      }
+
+      const key = sourceHandle ?? 'default';
+
+      return (
+        output.outputs?.[key] ??
+        output.outputs?.default ??
+        output
+      );
+    };
+
     /**
      * Get upstream outputs in two forms:
      * 1) list: [{ from, value, edge }]
@@ -37,12 +54,21 @@ export function createEvaluator({ evaluatorsByType }) {
       const incoming = getIncomingEdges(nodeId);
 
       // Build the list of upstream outputs with their source node and the connecting edge
+      // For each incoming edge, we find the source node's output and resolve it based on the source handle (for multi-outputs). 
+      // We also keep the raw upstream output in case the evaluator needs to inspect it directly.
       // example item: { from: 'n1', value: ..., edge: { id, source, target, sourceHandle, targetHandle } }
       const list = incoming.map((edge) => {
         const from = String(edge.source);
+        const upstreamOutput = getOutputSync(from);
+
         return {
           from,
-          value: getOutputSync(from),
+          value: resolveOutputForHandle(
+            upstreamOutput,
+            edge.sourceHandle
+          ),
+          rawValue: upstreamOutput,
+          sourceHandle: edge.sourceHandle ?? null,
           edge,
         };
       });

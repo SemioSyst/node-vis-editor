@@ -30,6 +30,7 @@ import TransitionNode from './CustomNodes/TransitionNode.jsx';
 import InteractionEffectNode from './CustomNodes/InteractionEffectNode.jsx';
 import PositionRuleNode from './CustomNodes/PositionRuleNode.jsx';
 import ContextSlotsNode from './CustomNodes/ContextSlotsNode.jsx';
+import PagePreviewNode from './CustomNodes/PagePreviewNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -80,7 +81,8 @@ function createGraphCompileInput(nodes, edges) {
 
 // Define the node library with default data for each node type
 const NODE_LIBRARY = [
-  { type: 'previewNode', label: 'Preview', defaultData: { label: 'Preview' } },
+  { type: 'previewNode', label: 'Basic Preview', defaultData: { label: 'Basic Preview' } },
+  { type: 'pagePreview', label: 'Page Preview', defaultData: { label: 'Page Preview' } },
   { type: 'shapeGenerator', label: 'Shape Generator', defaultData: { } },
   { type: 'simpleDataInput', label: 'Simple Data Input', defaultData: { } },
   { type: 'axisGenerator', label: 'Axis Generator', defaultData: { } },
@@ -129,6 +131,7 @@ const nodeTypes = {
   interactionEffect: InteractionEffectNode,
   positionRule: PositionRuleNode,
   contextSlots: ContextSlotsNode,
+  pagePreview: PagePreviewNode,
 };
 
 //Initial Nodes and Edges

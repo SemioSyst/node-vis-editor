@@ -56,12 +56,13 @@ export function evalTransition(ctx) {
     outputType: 'visual',
     label: 'Transition Visual',
     transform: {
-      type: 'attach-transition',
-      mode: transition.mode,
-      executionMode: transition.executionMode,
-      duration: transition.duration,
-      easing: transition.easing,
-      targetBindingIds: transition.targetBindingIds,
+    type: 'attach-transition',
+        mode: transition.mode,
+        executionMode: transition.executionMode,
+        control: transition.control,
+        duration: transition.duration,
+        easing: transition.easing,
+        targetBindingIds: transition.targetBindingIds,
     },
   });
 
@@ -134,7 +135,8 @@ function makeTransitionSpec({
   params,
   targetBindingIds,
 }) {
-  const mode = params.transitionMode ?? 'auto';
+    const mode = params.transitionMode ?? 'auto';
+    const control = params.controlMode ?? 'auto';
 
   return {
     id: `${ctx.nodeId}:transition`,
@@ -152,6 +154,8 @@ function makeTransitionSpec({
       mode === 'auto'
         ? 'attribute'
         : mode,
+
+    control,
 
     duration: Math.max(0, Number(params.duration ?? 600)),
 

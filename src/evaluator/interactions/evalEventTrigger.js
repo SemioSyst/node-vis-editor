@@ -30,6 +30,7 @@ export function evalEventTrigger(ctx) {
 
   const eventBundle = makeEventBundle({
     ctx,
+    params: p,
     eventType,
     sourceScopeId,
     selector,
@@ -57,19 +58,23 @@ export function evalEventTrigger(ctx) {
 
     eventType,
 
+    driverType: eventBundle.driverType ?? null,
+
     sourceVisual,
     sourceScopeId,
 
     selector,
 
     events: eventBundle.events,
+    runtimeSpec: eventBundle.runtimeSpec ?? null,
 
     eventIds: eventBundle.eventIds,
 
-    // Useful for State Change nodes:
-    // hover has start/end, click has trigger, press has down/up.
     primaryEventId: eventBundle.primaryEventId,
     secondaryEventId: eventBundle.secondaryEventId,
+
+    scroll: eventBundle.scroll ?? null,
+    progressStateId: eventBundle.progressStateId ?? null,
 
     preview: {
       sourceScopeId,
@@ -84,8 +89,12 @@ export function evalEventTrigger(ctx) {
       label: 'Event Signal',
 
       eventType,
+      driverType: eventBundle.driverType ?? null,
       sourceScopeId,
       selector,
+
+      scroll: eventBundle.scroll ?? null,
+      progressStateId: eventBundle.progressStateId ?? null,
 
       eventIds: eventBundle.eventIds,
 
@@ -117,16 +126,27 @@ function getFirstInputValue(ctx, handleId) {
 function normalizeEventType(eventType) {
   if (eventType === 'click') return 'click';
   if (eventType === 'press') return 'press';
+  if (eventType === 'scroll') return 'scroll';
   return 'hover';
 }
 
 function makeEventBundle({
   ctx,
+  params,
   eventType,
   sourceScopeId,
   selector,
   useCursor,
 }) {
+  if (eventType === 'scroll') {
+    return makeScrollEventBundle({
+      ctx,
+      params,
+      sourceScopeId,
+      selector,
+    });
+  }
+
   if (eventType === 'click') {
     const clickEventId = `${ctx.nodeId}:click`;
 
@@ -142,13 +162,9 @@ function makeEventBundle({
         {
           id: clickEventId,
           event: 'click',
-
           sourceScopeId,
-
           selector,
-
           cursor: useCursor ? 'pointer' : null,
-
           emit: {
             eventId: clickEventId,
             value: 'event.ref',
@@ -175,13 +191,9 @@ function makeEventBundle({
         {
           id: downEventId,
           event: 'pointerdown',
-
           sourceScopeId,
-
           selector,
-
           cursor: useCursor ? 'pointer' : null,
-
           emit: {
             eventId: downEventId,
             value: 'event.ref',
@@ -190,13 +202,9 @@ function makeEventBundle({
         {
           id: upEventId,
           event: 'pointerup',
-
           sourceScopeId,
-
           selector,
-
           cursor: useCursor ? 'pointer' : null,
-
           emit: {
             eventId: upEventId,
             value: 'event.ref',
@@ -206,81 +214,242 @@ function makeEventBundle({
     };
   }
 
-    const enterEventId = `${ctx.nodeId}:hover-enter`;
-    const moveEventId = `${ctx.nodeId}:hover-move`;
-    const leaveEventId = `${ctx.nodeId}:hover-leave`;
+  const enterEventId = `${ctx.nodeId}:hover-enter`;
+  const moveEventId = `${ctx.nodeId}:hover-move`;
+  const leaveEventId = `${ctx.nodeId}:hover-leave`;
 
-    return {
-        primaryEventId: enterEventId,
-        secondaryEventId: leaveEventId,
+  return {
+    primaryEventId: enterEventId,
+    secondaryEventId: leaveEventId,
 
-        eventIds: {
-            enter: enterEventId,
-            move: moveEventId,
-            leave: leaveEventId,
+    eventIds: {
+      enter: enterEventId,
+      move: moveEventId,
+      leave: leaveEventId,
+    },
+
+    events: [
+      {
+        id: enterEventId,
+        event: 'pointerenter',
+        sourceScopeId,
+        selector,
+        cursor: useCursor ? 'pointer' : null,
+        emit: {
+          eventId: enterEventId,
+          value: 'event.ref',
         },
+      },
+      {
+        id: moveEventId,
+        event: 'pointermove',
+        sourceScopeId,
+        selector,
+        cursor: useCursor ? 'pointer' : null,
+        emit: {
+          eventId: moveEventId,
+          value: 'event.ref',
+        },
+      },
+      {
+        id: leaveEventId,
+        event: 'pointerleave',
+        sourceScopeId,
+        selector,
+        emit: {
+          eventId: leaveEventId,
+          value: 'event.ref',
+        },
+      },
+    ],
+  };
+}
 
-        events: [
-            {
-                id: enterEventId,
-                event: 'pointerenter',
-                sourceScopeId,
-                selector,
-                cursor: useCursor ? 'pointer' : null,
-                emit: {
-                    eventId: enterEventId,
-                    value: 'event.ref',
-                },
-            },
-            {
-                id: moveEventId,
-                event: 'pointermove',
-                sourceScopeId,
-                selector,
-                cursor: useCursor ? 'pointer' : null,
-                emit: {
-                    eventId: moveEventId,
-                    value: 'event.ref',
-                },
-            },
-            {
-                id: leaveEventId,
-                event: 'pointerleave',
-                sourceScopeId,
-                selector,
-                emit: {
-                    eventId: leaveEventId,
-                    value: 'event.ref',
-                },
-            },
-        ],
+function makeScrollEventBundle({
+  ctx,
+  params,
+  sourceScopeId,
+  selector,
+}) {
+  const progressEventId = `${ctx.nodeId}:scroll-progress`;
+  const progressStateId = `${ctx.nodeId}:scroll-progress`;
+
+  const scroll = makeScrollSpec(params);
+
+  const eventSpec = {
+    id: progressEventId,
+    event: 'scrollProgress',
+
+    sourceScopeId,
+    selector,
+
+    scroll,
+
+    emit: {
+      eventId: progressEventId,
+      value: 'event.value',
+    },
+  };
+
+  return {
+    driverType: 'progress',
+
+    primaryEventId: progressEventId,
+    secondaryEventId: null,
+
+    progressStateId,
+
+    eventIds: {
+      progress: progressEventId,
+    },
+
+    scroll,
+
+    events: [
+      eventSpec,
+    ],
+
+    runtimeSpec: {
+      version: '0.1',
+
+      states: [
+        {
+          id: progressStateId,
+          type: 'progress',
+          initial: {
+            mode: scroll.source,
+            progress: 0,
+            rawProgress: 0,
+            fromIndex: 0,
+            toIndex: 0,
+            localProgress: 0,
+          },
+        },
+      ],
+
+      events: [
+        eventSpec,
+      ],
+
+      stateRules: [
+        {
+          id: `${ctx.nodeId}:scroll-progress-state`,
+          eventId: progressEventId,
+          action: {
+            type: 'setState',
+            stateId: progressStateId,
+            value: 'event.value',
+          },
+        },
+      ],
+
+      provides: {
+        states: [progressStateId],
+        events: [progressEventId],
+      },
+    },
+  };
+}
+
+function makeScrollSpec(params) {
+  const source = params.scrollSource ?? 'elementViewport';
+
+  if (source === 'pageSteps') {
+    return {
+      source: 'pageSteps',
+      clamp: params.scrollClamp !== false,
+
+      pageSteps: {
+        steps: normalizeScrollSteps(params.scrollSteps),
+        transitionDistance: Math.max(0, Number(params.pageTransitionDistance ?? 300)),
+        transitionAlignment: 'before',
+        clamp: params.scrollClamp !== false,
+      },
     };
+  }
+
+  return {
+    source: 'elementViewport',
+    clamp: params.scrollClamp !== false,
+
+    elementViewport: {
+      start: {
+        elementPoint: resolvePointValue({
+          value: params.scrollStartElementPoint ?? '0',
+          customPercent: params.scrollStartElementCustomPercent ?? 0,
+        }),
+        viewportPoint: resolvePointValue({
+          value: params.scrollStartViewportPoint ?? '1',
+          customPercent: params.scrollStartViewportCustomPercent ?? 100,
+        }),
+        offsetPx: Number(params.scrollStartOffsetPx ?? params.scrollStartOffset ?? 0),
+      },
+
+      end: {
+        elementPoint: resolvePointValue({
+          value: params.scrollEndElementPoint ?? '1',
+          customPercent: params.scrollEndElementCustomPercent ?? 100,
+        }),
+        viewportPoint: resolvePointValue({
+          value: params.scrollEndViewportPoint ?? '0',
+          customPercent: params.scrollEndViewportCustomPercent ?? 0,
+        }),
+        offsetPx: Number(params.scrollEndOffsetPx ?? params.scrollEndOffset ?? 0),
+      },
+
+      clamp: params.scrollClamp !== false,
+    },
+  };
+}
+
+function resolvePointValue({
+  value,
+  customPercent,
+}) {
+  if (value === 'custom') {
+    return clamp01(Number(customPercent ?? 0) / 100);
+  }
+
+  const n = Number(value);
+
+  if (!Number.isFinite(n)) return 0;
+
+  return clamp01(n);
+}
+
+function clamp01(value) {
+  const n = Number(value);
+
+  if (!Number.isFinite(n)) return 0;
+
+  return Math.max(0, Math.min(1, n));
+}
+
+function normalizeScrollSteps(steps) {
+  const list = Array.isArray(steps) && steps.length >= 2
+    ? steps
+    : [
+        { id: 'step-0', position: 0 },
+        { id: 'step-1', position: 800 },
+      ];
+
+  return list.map((step, index) => ({
+    id: step.id ?? `step-${index}`,
+    index,
+    position: Number(step.position ?? index * 800),
+  }));
 }
 
 function makeEmptyEventSignal(ctx, warnings) {
-  const ownProvenanceEntry = makeProvenanceEntry({
-    nodeId: ctx.nodeId,
-    role: 'event-trigger',
-    outputType: 'eventSignal',
-    label: 'Event Signal',
-    transform: {
-      type: 'create-event-signal',
-      status: 'no-selection-input',
-    },
-  });
-
   return {
     outputType: 'eventSignal',
     version: '0.1',
 
-    eventType: 'none',
+    eventType: 'unknown',
 
     sourceVisual: null,
     sourceScopeId: null,
-
-    selector: {
-      type: 'none',
-    },
+    selector: null,
 
     events: [],
     eventIds: {},
@@ -288,22 +457,12 @@ function makeEmptyEventSignal(ctx, warnings) {
     primaryEventId: null,
     secondaryEventId: null,
 
-    preview: {
-      sourceScopeId: null,
-      selector: { type: 'none' },
-      selectedCount: 0,
-      totalCount: 0,
-      availableTags: [],
-    },
+    preview: null,
 
     meta: {
       sourceNodeId: ctx.nodeId,
       label: 'Event Signal',
       warnings,
-
-      provenance: [
-        ownProvenanceEntry,
-      ],
     },
   };
 }

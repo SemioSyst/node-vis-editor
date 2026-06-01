@@ -1,5 +1,5 @@
 // src/renderer/OutputRenderer.jsx
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 import SvgRenderer from './SvgRenderer.jsx';
 import InspectionRenderer from './InspectionRenderer.jsx';
@@ -9,6 +9,9 @@ import { createVisualRuntime } from '../runtime/core/visualRuntimeStore.js';
 import { useVisualRuntimeSnapshot } from '../runtime/adapters/react/visualRuntimeReact.js';
 import { applyVisualStateRuntimeToOutput } from '../runtime/visualStates/applyVisualStateRuntime.js';
 import { applyRuntimeLayoutRulesToOutput } from '../runtime/layout/applyRuntimeLayoutRules.js';
+import { useRuntimeScrollEvents } from '../runtime/scroll/useRuntimeScrollEvents.js';
+import { useRuntimeSliderEvents } from '../runtime/controls/useRuntimeSliderEvents.js';
+import { applySliderRuntimeToOutput } from '../runtime/controls/applySliderRuntime.js';
 import './OutputRenderer.css';
 
 export default function OutputRenderer({
@@ -16,6 +19,8 @@ export default function OutputRenderer({
   emptyText = 'No output',
   renderOptions = {},
 }) {
+  const outputRootRef = useRef(null);
+
   const normalized = normalizeOutput(output);
 
   const runtimeSpec =
@@ -39,6 +44,19 @@ export default function OutputRenderer({
   // Subscribe to runtime state.
   // The snapshot itself is only used to force rerender when runtime state changes.
   useVisualRuntimeSnapshot(runtime);
+
+  // Register scroll-driven runtime events.
+  // This lets EventTrigger(scroll) update progress states from window scroll / viewport position.
+  useRuntimeScrollEvents({
+    runtime,
+    containerRef: outputRootRef,
+    scrollContainerRef: renderOptions.scrollContainerRef ?? null,
+  });
+
+  useRuntimeSliderEvents({
+    runtime,
+    containerRef: outputRootRef,
+  });
 
   if (!normalized) {
     return (
@@ -72,8 +90,13 @@ export default function OutputRenderer({
     runtime
   );
 
-  const renderedOutput = applyRuntimeLayoutRulesToOutput(
+  const sliderOutput = applySliderRuntimeToOutput(
     stateOutput,
+    runtime
+  );
+
+  const renderedOutput = applyRuntimeLayoutRulesToOutput(
+    sliderOutput,
     runtime
   );
 
@@ -81,6 +104,7 @@ export default function OutputRenderer({
 
   return (
     <div
+      ref={outputRootRef}
       className={`output-renderer-root output-renderer-root--${renderFrame.mode}`}
       style={{ overflow: renderFrame.overflow }}
     >

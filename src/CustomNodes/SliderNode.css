@@ -1,0 +1,38 @@
+.slider-output-row {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 34px;
+  margin-top: 8px;
+  padding: 8px 12px;
+
+  border: 1px solid #303030;
+  border-radius: 10px;
+  background: #151515;
+}
+
+.slider-output-row__text {
+  min-width: 0;
+}
+
+.slider-output-row__label {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.slider-output-row__description {
+  margin-top: 2px;
+
+  color: #9a9a9a;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.slider-output-row__handle {
+  right: -16px;
+}

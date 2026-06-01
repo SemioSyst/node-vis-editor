@@ -11,25 +11,35 @@ export function scanContextSlotElements(root, options = {}) {
 
   const result = [];
 
-  walkVisualTree(root, [], (node, path) => {
+  walkVisualTreePrunable(root, [], (node, path) => {
     const stateInfo = stateInfoByNodeId.get(node.id) ?? null;
 
-    if (!isEditableNode(node, stateInfo)) return;
+    if (!isEditableNode(node, stateInfo)) {
+      return true;
+    }
 
     const kind = getElementKind(node, stateInfo);
     const properties = getEditablePropertiesForKind(kind, node);
 
-    if (properties.length === 0) return;
+    if (properties.length > 0) {
+      result.push({
+        elementId: node.id,
+        kind,
+        displayName: makeElementDisplayName(node, kind, stateInfo),
+        detail: makeElementDetail(node, stateInfo),
+        pathLabel: makePathLabel(path),
+        properties,
+        stateInfo,
+      });
+    }
 
-    result.push({
-      elementId: node.id,
-      kind,
-      displayName: makeElementDisplayName(node, kind, stateInfo),
-      detail: makeElementDetail(node, stateInfo),
-      pathLabel: makePathLabel(path),
-      properties,
-      stateInfo,
-    });
+    // Treat stateful visual as atomic.
+    // Do not expose internal path/rect/text children.
+    if (stateInfo) {
+      return false;
+    }
+
+    return true;
   });
 
   return result;
@@ -355,4 +365,21 @@ function capitalize(value) {
   const text = String(value ?? '');
   if (!text) return text;
   return text[0].toUpperCase() + text.slice(1);
+}
+
+function walkVisualTreePrunable(node, path, visitor) {
+  if (!node) return;
+
+  const nextPath = [
+    ...path,
+    makePathSegment(node),
+  ];
+
+  const shouldVisitChildren = visitor(node, nextPath);
+
+  if (shouldVisitChildren === false) return;
+
+  (node.children ?? []).forEach((child) => {
+    walkVisualTreePrunable(child, nextPath, visitor);
+  });
 }
