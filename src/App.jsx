@@ -31,6 +31,7 @@ import InteractionEffectNode from './CustomNodes/InteractionEffectNode.jsx';
 import PositionRuleNode from './CustomNodes/PositionRuleNode.jsx';
 import ContextSlotsNode from './CustomNodes/ContextSlotsNode.jsx';
 import PagePreviewNode from './CustomNodes/PagePreviewNode.jsx';
+import SliderNode from './CustomNodes/SliderNode.jsx';
 // Import other necessary modules
 import compileGraph from './compileGraph.js';
 import { GraphIRContext } from './GraphIRContext.js';
@@ -96,6 +97,7 @@ const NODE_LIBRARY = [
   { type: 'colourMapper', label: 'Colour Mapper', defaultData: { } },
   { type: 'elementSelector', label: 'Element Selector', defaultData: { } },
   { type: 'eventTrigger', label: 'Event Trigger', defaultData: { } },
+  { type: 'slider', label: 'Slider', defaultData: { } },
   { type: 'states', label: 'States', defaultData: { } },
   { type: 'transition', label: 'Transition', defaultData: { } },
   { type: 'interactionEffect', label: 'Interaction Effect', defaultData: { } },
@@ -132,6 +134,7 @@ const nodeTypes = {
   positionRule: PositionRuleNode,
   contextSlots: ContextSlotsNode,
   pagePreview: PagePreviewNode,
+  slider: SliderNode,
 };
 
 //Initial Nodes and Edges

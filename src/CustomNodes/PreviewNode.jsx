@@ -22,18 +22,36 @@ function PreviewNode(props) {
   const { zoom } = useViewport();
   const zoomPercent = Math.round(zoom * 100);
 
-  const sourceId = useMemo(() => {
-    const upstream = graphIR.reverseAdj?.[myId] ?? [];
-    return upstream.length ? String(upstream[0]) : null;
+  const sourceEdge = useMemo(() => {
+    const edges = graphIR.edges ?? [];
+
+    const incoming = edges.find((edge) =>
+      String(edge.target) === myId
+    );
+
+    return incoming ?? null;
   }, [graphIR, myId]);
 
-  const spec = sourceId ? outputs[sourceId] : null;
+  const sourceId = sourceEdge
+    ? String(sourceEdge.source)
+    : null;
+
+  const sourceHandle = sourceEdge?.sourceHandle ?? null;
+
+  const rawSpec = sourceId ? outputs[sourceId] : null;
+
+  const spec = resolveOutputForHandle(
+    rawSpec,
+    sourceHandle
+  );
 
   const onClick = useCallback(() => {
     console.log('[PreviewNode] graphIR snapshot:', graphIR);
     console.log('[PreviewNode] sourceId:', sourceId);
-    console.log('[PreviewNode] output spec:', spec);
-  }, [graphIR, sourceId, spec]);
+    console.log('[PreviewNode] sourceHandle:', sourceHandle);
+    console.log('[PreviewNode] raw output spec:', rawSpec);
+    console.log('[PreviewNode] resolved output spec:', spec);
+  }, [graphIR, sourceId, sourceHandle, rawSpec, spec]);
 
   return (
     <div className="preview-node" onClick={onClick}>
@@ -77,16 +95,32 @@ function PreviewNode(props) {
             output={spec}
             emptyText={sourceId ? `No output from ${sourceId}` : 'No input'}
             renderOptions={{
-                mode: previewMode,
-                viewportWidth: previewWidth,
-                viewportHeight: previewHeight,
-                paddingRatio: 0.12,
-                overflow: 'auto',
+              mode: previewMode,
+              viewportWidth: previewWidth,
+              viewportHeight: previewHeight,
+              paddingRatio: 0.12,
+              overflow: 'auto',
             }}
           />
         </div>
       </ResizablePanel>
     </div>
+  );
+}
+
+function resolveOutputForHandle(output, sourceHandle) {
+  if (!output) return output;
+
+  if (output.outputType !== 'multi') {
+    return output;
+  }
+
+  const key = sourceHandle ?? 'default';
+
+  return (
+    output.outputs?.[key] ??
+    output.outputs?.default ??
+    output
   );
 }
 

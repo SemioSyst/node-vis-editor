@@ -30,9 +30,14 @@ export default function PagePreviewNode({ id, data }) {
   const visualSource = useConnectedSource(id, 'visual');
   const { outputs } = useOutputs();
 
-  const sourceOutput = visualSource
+  const rawSourceOutput = visualSource
     ? outputs[String(visualSource.sourceNodeId)]
     : null;
+
+  const sourceOutput = resolveOutputForHandle(
+    rawSourceOutput,
+    visualSource?.sourceHandle
+  );
 
   const pageHeight = Number(data.pageHeight ?? 2400);
   const viewportHeight = Number(data.viewportHeight ?? 520);
@@ -245,6 +250,22 @@ export default function PagePreviewNode({ id, data }) {
         </div>
       </ResizablePanel>
     </div>
+  );
+}
+
+function resolveOutputForHandle(output, sourceHandle) {
+  if (!output) return output;
+
+  if (output.outputType !== 'multi') {
+    return output;
+  }
+
+  const key = sourceHandle ?? 'default';
+
+  return (
+    output.outputs?.[key] ??
+    output.outputs?.default ??
+    output
   );
 }
 
