@@ -84,6 +84,14 @@ export default function SliderNode({ id, data }) {
         />
 
         <NumberField
+        label="Track Radius"
+        value={data.trackRadius ?? 3}
+        onChange={(v) => update({ trackRadius: v })}
+        min={0}
+        step={1}
+        />
+
+        <NumberField
           label="Handle R"
           value={data.handleRadius ?? 9}
           onChange={(v) => update({ handleRadius: v })}

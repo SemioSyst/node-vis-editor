@@ -308,9 +308,12 @@ function makeLayerWrapper({ ctx, layer, index }) {
       layerId: layer.id,
       layerIndex: index,
 
-      sourceRootId,
-      sourceVisualRootId: sourceRootId,
-      runtimeScopeIds: sourceRuntimeScopeIds,
+      originalId: sourceRootId,
+      runtimeScopeIds: uniqueTruthy([
+        `${ctx.nodeId}-${layer.id}`,
+        sourceRootId,
+        ...(sourceRuntimeScopeIds ?? []),
+      ]),
 
       layerOffset: {
         x: layerX,
@@ -341,36 +344,41 @@ function makeLayerWrapper({ ctx, layer, index }) {
   };
 }
 
-function prefixVisualNodeIds(node, prefix, inheritedRuntimeScopeIds = []) {
+function prefixVisualNodeIds(node, prefix) {
   if (!node || typeof node !== 'object') return node;
 
   const originalId = node.id ?? null;
-
-  const runtimeScopeIds = uniqueTruthy([
-    ...(node.meta?.runtimeScopeIds ?? []),
-    ...inheritedRuntimeScopeIds,
-    originalId,
-  ]);
+  const nextId = originalId ? `${prefix}-${originalId}` : prefix;
+  const previousMeta = node.meta ?? {};
 
   return {
     ...node,
-    id: originalId ? `${prefix}-${originalId}` : prefix,
+
+    id: nextId,
 
     meta: {
-      ...(node.meta ?? {}),
-      originalId,
+      ...previousMeta,
+
+      originalId: previousMeta.originalId ?? originalId,
       prefixedBy: prefix,
 
-      runtimeScopeIds,
+      runtimeScopeIds: uniqueTruthy([
+        nextId,
+        originalId,
+
+        previousMeta.originalId,
+        previousMeta.sourceRootId,
+        previousMeta.sourceVisualRootId,
+        previousMeta.runtimeTargetScopeId,
+        previousMeta.originalStateRootId,
+
+        ...(previousMeta.runtimeScopeIds ?? []),
+      ]),
     },
 
     children: Array.isArray(node.children)
       ? node.children.map((child, index) =>
-          prefixVisualNodeIds(
-            child,
-            `${prefix}-${index}`,
-            runtimeScopeIds
-          )
+          prefixVisualNodeIds(child, `${prefix}-${index}`)
         )
       : node.children,
   };
@@ -749,24 +757,31 @@ function clamp(value, min, max) {
 }
 
 function collectRuntimeScopeIds(output) {
-  const runtimeSpec =
-    output?.runtimeSpec ??
-    output?.meta?.runtimeSpec ??
-    null;
+  const result = [];
 
-  return uniqueTruthy([
-    output?.root?.id,
+  const visit = (node) => {
+    if (!node) return;
 
-    ...(runtimeSpec?.bindings ?? [])
-      .map((binding) => binding.targetScopeId)
-      .filter(Boolean),
+    const meta = node.meta ?? {};
 
-    ...(runtimeSpec?.events ?? [])
-      .map((event) => event.sourceScopeId)
-      .filter(Boolean),
+    result.push(
+      node.id,
+      meta.originalId,
+      meta.sourceRootId,
+      meta.sourceVisualRootId,
+      meta.runtimeTargetScopeId,
+      meta.originalStateRootId,
+      ...(meta.runtimeScopeIds ?? [])
+    );
 
-    ...(output?.root?.meta?.runtimeScopeIds ?? []),
-  ]);
+    (node.children ?? []).forEach(visit);
+  };
+
+  if (output?.root) {
+    visit(output.root);
+  }
+
+  return uniqueTruthy(result);
 }
 
 function uniqueTruthy(values) {

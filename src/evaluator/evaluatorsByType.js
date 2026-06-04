@@ -30,6 +30,7 @@ import { evalPositionRule } from './interactions/evalPositionRule.js';
 import { evalContextSlots } from './interactions/evalContextSlots.js';
 import { evalPagePreview } from './preview/evalPagePreview.js';
 import { evalSlider } from './controls/evalSlider.js';
+import { evalFinalOutput } from './export/evalFinalOutput.js';
 
 /**
  * Registry
@@ -66,4 +67,5 @@ export const evaluatorsByType = {
   contextSlots: evalContextSlots,
   pagePreview: evalPagePreview,
   slider: evalSlider,
+  finalOutput: evalFinalOutput,
 };

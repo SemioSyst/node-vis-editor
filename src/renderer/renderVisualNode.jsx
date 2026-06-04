@@ -153,6 +153,68 @@ function getGroupDataAttributes(node) {
   };
 }
 
+function getElementRuntimeScopeList(node, extraScopeIds = []) {
+  const meta = node.meta ?? {};
+
+  return uniqueTruthy([
+    ...(extraScopeIds ?? []),
+
+    node.id,
+    meta.originalId,
+    meta.sourceRootId,
+    meta.sourceVisualRootId,
+    meta.runtimeTargetScopeId,
+    meta.originalStateRootId,
+
+    ...(meta.runtimeScopeIds ?? []),
+  ]);
+}
+
+function getGroupDomRuntimeScopeList(node, extraScopeIds = []) {
+  const meta = node.meta ?? {};
+
+  return uniqueTruthy([
+    ...(extraScopeIds ?? []),
+
+    node.id,
+    meta.originalId,
+    meta.sourceRootId,
+    meta.sourceVisualRootId,
+    meta.runtimeTargetScopeId,
+    meta.originalStateRootId,
+
+    // Important:
+    // Do NOT include meta.runtimeScopeIds for group DOM attributes.
+    // CoordinateGroup layer wrappers may collect child scopes.
+    // If we expose those on the wrapper DOM node, hover / click events can
+    // accidentally use the wrapper as the event source instead of the real element.
+  ]);
+}
+
+function getInheritedRuntimeScopes(node, extraScopeIds = []) {
+  const meta = node.meta ?? {};
+
+  return uniqueTruthy([
+    ...(extraScopeIds ?? []),
+
+    node.id,
+    meta.originalId,
+    meta.sourceRootId,
+    meta.sourceVisualRootId,
+    meta.runtimeTargetScopeId,
+    meta.originalStateRootId,
+
+    // Important:
+    // Children should inherit only the direct parent identity.
+    // Do not pass parent.meta.runtimeScopeIds down, because those can include
+    // sibling / descendant scopes collected by CoordinateGroup.
+  ]);
+}
+
+function uniqueTruthy(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
 function buildInteractionProps(node) {
   const interaction = node.interaction;
   if (!interaction) return {};
@@ -376,27 +438,50 @@ function renderElementNode(node, ctx) {
   const transform = buildTransform(node);
   const interactionProps = buildInteractionProps(node);
 
+  const runtimeScopes = getElementRuntimeScopeList(
+    node,
+    ctx.runtimeScopes ?? []
+  );
+
   const runtimeRef = makeRuntimeRefFromNode(node, {
-    scopeIds: ctx.runtimeScopes ?? [],
+    scopeIds: runtimeScopes,
   });
-  const runtimeProps = buildReactRuntimeEventProps(runtimeRef, ctx.runtime);
-  const renderNode = applyRuntimeOverridesToNode(node, runtimeRef, ctx.runtime);
+
+  const runtimeProps = buildReactRuntimeEventProps(
+    runtimeRef,
+    ctx.runtime
+  );
+
+  const renderNode = applyRuntimeOverridesToNode(
+    node,
+    runtimeRef,
+    ctx.runtime
+  );
+
+  const childRuntimeScopes = getInheritedRuntimeScopes(
+    node,
+    ctx.runtimeScopes ?? []
+  );
 
   return (
     <g
       key={ctx.key ?? node.id}
-      transform={transform}
-      opacity={node.opacity}
-      {...getRuntimeDomAttributes(node, {
-        scopeIds: ctx.runtimeScopes ?? [],
+      transform={buildTransform(renderNode) ?? transform}
+      opacity={renderNode.opacity ?? node.opacity}
+      {...getRuntimeDomAttributes(renderNode, {
+        scopeIds: runtimeScopes,
       })}
       {...interactionProps}
       {...runtimeProps}
     >
-      {renderHitArea(node)}
+      {renderHitArea(renderNode)}
       {renderElementContent(renderNode)}
-      {(node.children ?? []).map((child, i) =>
-        renderVisualNode(child, { ...ctx, key: `${node.id}-child-${i}` })
+      {(renderNode.children ?? []).map((child, i) =>
+        renderVisualNode(child, {
+          ...ctx,
+          key: `${node.id}-child-${i}`,
+          runtimeScopes: childRuntimeScopes,
+        })
       )}
     </g>
   );
@@ -406,24 +491,43 @@ function renderGroupLikeNode(node, ctx) {
   const transform = buildTransform(node);
   const interactionProps = buildInteractionProps(node);
 
+  const groupDomScopes = getGroupDomRuntimeScopeList(
+    node,
+    ctx.runtimeScopes ?? []
+  );
+
+  const runtimeRef = makeRuntimeRefFromNode(node, {
+    scopeIds: groupDomScopes,
+  });
+
+  const renderNode = applyRuntimeOverridesToNode(
+    node,
+    runtimeRef,
+    ctx.runtime
+  );
+
+  const childRuntimeScopes = getInheritedRuntimeScopes(
+    node,
+    ctx.runtimeScopes ?? []
+  );
+
   return (
     <g
       key={ctx.key ?? node.id}
-      transform={transform}
-      opacity={node.opacity}
-      {...getGroupDataAttributes(node)}
+      transform={buildTransform(renderNode) ?? transform}
+      opacity={renderNode.opacity ?? node.opacity}
+      {...getGroupDataAttributes(renderNode)}
+      {...getRuntimeDomAttributes(renderNode, {
+        scopeIds: groupDomScopes,
+      })}
       {...interactionProps}
     >
-      {renderHitArea(node)}
-      {(node.children ?? []).map((child, i) =>
+      {renderHitArea(renderNode)}
+      {(renderNode.children ?? []).map((child, i) =>
         renderVisualNode(child, {
           ...ctx,
           key: `${node.id}-child-${i}`,
-          runtimeScopes: [
-            ...(ctx.runtimeScopes ?? []),
-            node.id,
-            node.meta?.originalId,
-          ].filter(Boolean),
+          runtimeScopes: childRuntimeScopes,
         })
       )}
     </g>
@@ -434,32 +538,51 @@ function renderProceduralNode(node, ctx) {
   const transform = buildTransform(node);
   const interactionProps = buildInteractionProps(node);
 
+  const groupDomScopes = getGroupDomRuntimeScopeList(
+    node,
+    ctx.runtimeScopes ?? []
+  );
+
+  const runtimeRef = makeRuntimeRefFromNode(node, {
+    scopeIds: groupDomScopes,
+  });
+
+  const renderNode = applyRuntimeOverridesToNode(
+    node,
+    runtimeRef,
+    ctx.runtime
+  );
+
+  const childRuntimeScopes = getInheritedRuntimeScopes(
+    node,
+    ctx.runtimeScopes ?? []
+  );
+
   return (
     <g
       key={ctx.key ?? node.id}
-      transform={transform}
-      opacity={node.opacity}
-      {...getGroupDataAttributes(node)}
+      transform={buildTransform(renderNode) ?? transform}
+      opacity={renderNode.opacity ?? node.opacity}
+      {...getGroupDataAttributes(renderNode)}
+      {...getRuntimeDomAttributes(renderNode, {
+        scopeIds: groupDomScopes,
+      })}
       {...interactionProps}
     >
-      {renderHitArea(node)}
+      {renderHitArea(renderNode)}
 
       <ProceduralRenderer
-        node={node}
+        node={renderNode}
         renderFrame={ctx.renderFrame}
         renderOptions={ctx.renderOptions}
         ctx={ctx}
       />
 
-      {(node.children ?? []).map((child, i) =>
+      {(renderNode.children ?? []).map((child, i) =>
         renderVisualNode(child, {
           ...ctx,
           key: `${node.id}-child-${i}`,
-          runtimeScopes: [
-            ...(ctx.runtimeScopes ?? []),
-            node.id,
-            node.meta?.originalId,
-          ].filter(Boolean),
+          runtimeScopes: childRuntimeScopes,
         })
       )}
     </g>
@@ -502,3 +625,4 @@ function toNumber(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
+

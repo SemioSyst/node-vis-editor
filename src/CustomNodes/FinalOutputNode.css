@@ -1,0 +1,28 @@
+.final-output-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  margin-top: 10px;
+}
+
+.final-output-summary__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  background: #101010;
+  border: 1px solid #252525;
+
+  color: #bdbdbd;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.final-output-summary__item strong {
+  color: #ffffff;
+  font-size: 12px;
+}

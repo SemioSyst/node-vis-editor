@@ -40,10 +40,10 @@ function attachSliderEvent({
   if (!container) return null;
 
   const slider = eventSpec.slider ?? {};
-  const hitElement = findElementByRuntimeScope(
-    container,
-    slider.hitScopeId ?? eventSpec.sourceScopeId
-  );
+  const hitElement =
+    findElementByRuntimeScope(container, slider.hitScopeId) ??
+    findElementByRuntimeScope(container, eventSpec.sourceScopeId) ??
+    findElementByRuntimeScope(container, slider.rootScopeId);
 
   if (!hitElement) return null;
 
@@ -51,39 +51,44 @@ function attachSliderEvent({
     evt.preventDefault();
     evt.stopPropagation();
 
+    const dragRect = hitElement.getBoundingClientRect();
+
     updateFromPointer({
-      runtime,
-      eventSpec,
-      evt,
-      dragging: true,
+        runtime,
+        eventSpec,
+        evt,
+        dragging: true,
+        dragRect,
     });
 
     const onPointerMove = (moveEvt) => {
-      moveEvt.preventDefault();
+        moveEvt.preventDefault();
 
-      updateFromPointer({
+        updateFromPointer({
         runtime,
         eventSpec,
         evt: moveEvt,
         dragging: true,
-      });
+        dragRect,
+        });
     };
 
     const onPointerUp = (upEvt) => {
-      updateFromPointer({
+        updateFromPointer({
         runtime,
         eventSpec,
         evt: upEvt,
         dragging: false,
-      });
+        dragRect,
+        });
 
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
     };
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
-  };
+    };
 
   hitElement.addEventListener('pointerdown', onPointerDown);
 
@@ -100,13 +105,11 @@ function updateFromPointer({
   eventSpec,
   evt,
   dragging,
+  dragRect = null,
 }) {
   const slider = eventSpec.slider ?? {};
 
-  const hitElement = evt.currentTargetForSlider ??
-    findElementFromEventTarget(evt.target, slider.hitScopeId);
-
-  const rect = hitElement?.getBoundingClientRect?.();
+  const rect = dragRect;
 
   if (!rect || rect.width <= 0) return;
 

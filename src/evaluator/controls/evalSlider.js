@@ -14,6 +14,10 @@ export function evalSlider(ctx) {
 
   const width = Math.max(40, Number(p.width ?? 240));
   const trackHeight = Math.max(1, Number(p.trackHeight ?? 6));
+  const trackRadius = Math.max(
+    0,
+    Number(p.trackRadius ?? trackHeight / 2)
+    );
   const handleRadius = Math.max(2, Number(p.handleRadius ?? 9));
 
   const trackColor = p.trackColor ?? '#333333';
@@ -64,6 +68,7 @@ export function evalSlider(ctx) {
     progress,
     width,
     trackHeight,
+    trackRadius,
     handleRadius,
     trackColor,
     activeColor,
@@ -112,6 +117,7 @@ function makeSliderVisualOutput({
   progress,
   width,
   trackHeight,
+  trackRadius,
   handleRadius,
   trackColor,
   activeColor,
@@ -139,6 +145,7 @@ function makeSliderVisualOutput({
         y: trackY,
         width,
         height: trackHeight,
+        radius: trackRadius,
         fill: trackColor,
         meta: {
           sliderRole: 'track',
@@ -151,6 +158,7 @@ function makeSliderVisualOutput({
         y: trackY,
         width: activeWidth,
         height: trackHeight,
+        radius: trackRadius,
         fill: activeColor,
         meta: {
           sliderRole: 'activeTrack',
@@ -437,6 +445,7 @@ function makeRectElement({
   y,
   width,
   height,
+  radius = 0,
   fill,
   opacity = 1,
   meta = {},
@@ -452,7 +461,9 @@ function makeRectElement({
         y,
         width,
         height,
-      },
+        rx: radius,
+        ry: radius,
+        },
     },
     style: {
       fill: {
