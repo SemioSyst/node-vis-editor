@@ -1,0 +1,2204 @@
+{
+  "app": "node-vis-editor",
+  "version": "0.1",
+  "name": "node-vis-project",
+  "savedAt": "2026-06-04T10:41:17.505Z",
+  "reactFlow": {
+    "nodes": [
+      {
+        "id": "data-y-values",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1312,
+          "y": 989.9999999999999
+        },
+        "data": {
+          "dataMode": "array",
+          "rawText": "[180.437, 102.568, 23.011, 58.153, 73.135, 7.381, 0.687, 8.254]",
+          "label": "Y Values"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shape-bars",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -612,
+          "y": 648
+        },
+        "data": {
+          "label": "Bars",
+          "shapeType": "rect",
+          "defaultX": 0,
+          "defaultY": 0,
+          "defaultWidth": 34,
+          "defaultHeight": 48,
+          "cornerRadius": 0,
+          "alignX": "left",
+          "alignY": "center",
+          "fillColor": "#6f86e8",
+          "strokeColor": "#222222",
+          "strokeWidth": 0,
+          "opacity": 1,
+          "layoutAxis": "x",
+          "layoutGapX": 20,
+          "layoutGapY": 20,
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          }
+        },
+        "measured": {
+          "width": 240,
+          "height": 894
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinate-chart",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 1745.031433133021,
+          "y": 29.415556910782627
+        },
+        "data": {
+          "label": "Coordinate Chart",
+          "layers": [
+            {
+              "id": "layer-transition-13",
+              "sourceNodeId": "transition-13",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__transition-13-coordinate-chartlayers",
+              "label": "transition",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-d3AxisGenerator-100",
+              "sourceNodeId": "d3AxisGenerator-100",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-100-coordinate-chartlayers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": -40
+            },
+            {
+              "id": "layer-coordinateGroup-112",
+              "sourceNodeId": "coordinateGroup-112",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-112-coordinate-chartlayers",
+              "label": "coordinateGroup",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 300,
+              "y": 80
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-3",
+        "type": "tagMapper",
+        "position": {
+          "x": -834.1149290590212,
+          "y": 1128.6441493118355
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "rowTags": true,
+            "indexTags": false,
+            "globalTag": false
+          },
+          "indexTagValues": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]",
+          "applyIndexTags": true,
+          "globalTagValue": "B",
+          "applyGlobalTag": true,
+          "globalKeyPreset": "state"
+        },
+        "measured": {
+          "width": 240,
+          "height": 742
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-4",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1182.029482640887,
+          "y": -260.11018058680656
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[123.921, 58.572, 28.252, 54.196, 56.1, 0.665, 0.022, 4.219]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-5",
+        "type": "tagMapper",
+        "position": {
+          "x": -832.9309466356648,
+          "y": -281.8290077349568
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "globalTag": false,
+            "indexTags": false
+          },
+          "globalKeyPreset": "state",
+          "globalTagValue": "A",
+          "indexTagValues": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]",
+          "applyIndexTags": true
+        },
+        "measured": {
+          "width": 240,
+          "height": 742
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-7",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -504.12774584493945,
+          "y": -420.9425376359426
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          },
+          "defaultWidth": 34,
+          "alignX": "left",
+          "fillColor": "#ff2e2e",
+          "defaultHeight": 48,
+          "alignY": "center",
+          "strokeWidth": 0
+        },
+        "measured": {
+          "width": 240,
+          "height": 894
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "states-8",
+        "type": "states",
+        "position": {
+          "x": 1238.1872952877707,
+          "y": -360.32883846617403
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "states": [
+            {
+              "id": "state-xy-edge__coordinateGroup-68-states-8states",
+              "stateKey": "state-xy-edge__coordinateGroup-68-states-8states",
+              "sourceNodeId": "coordinateGroup-68",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-68-states-8states",
+              "label": "coordinateGroup",
+              "enabled": true
+            },
+            {
+              "id": "state-xy-edge__coordinateGroup-73-states-8states",
+              "stateKey": "state-xy-edge__coordinateGroup-73-states-8states",
+              "sourceNodeId": "coordinateGroup-73",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-73-states-8states",
+              "label": "coordinateGroup",
+              "enabled": true
+            },
+            {
+              "id": "state-xy-edge__coordinateGroup-80-states-8states",
+              "stateKey": "state-xy-edge__coordinateGroup-80-states-8states",
+              "sourceNodeId": "coordinateGroup-80",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-80-states-8states",
+              "label": "coordinateGroup",
+              "enabled": true
+            },
+            {
+              "id": "state-xy-edge__coordinateGroup-89-states-8states",
+              "stateKey": "state-xy-edge__coordinateGroup-89-states-8states",
+              "sourceNodeId": "coordinateGroup-89",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-89-states-8states",
+              "label": "coordinateGroup",
+              "enabled": true
+            },
+            {
+              "id": "state-xy-edge__coordinateGroup-98-states-8states",
+              "stateKey": "state-xy-edge__coordinateGroup-98-states-8states",
+              "sourceNodeId": "coordinateGroup-98",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-98-states-8states",
+              "label": "coordinateGroup",
+              "enabled": true
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 1047
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "pagePreview-12",
+        "type": "pagePreview",
+        "position": {
+          "x": 2711.2952857837854,
+          "y": 367.93769443190126
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Page Preview",
+          "previewWidth": 999,
+          "previewHeight": 900,
+          "pageHeight": 5000,
+          "visualPosition": "stickyCenter"
+        },
+        "measured": {
+          "width": 1312,
+          "height": 900
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "transition-13",
+        "type": "transition",
+        "position": {
+          "x": 1546.4604688428183,
+          "y": -139.84525474466272
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 401
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-21",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1180.6522407067487,
+          "y": -1841.1384500323277
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[95.152, 38.16, 29.143, 42.679, 46.051, 0.077, 0.008, 2.501]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-24",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -504.7944988108551,
+          "y": -1721.535612053076
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false,
+            "fallbackLayout": false
+          },
+          "defaultWidth": 34,
+          "fillColor": "#ffdc5c",
+          "alignX": "left",
+          "defaultHeight": 48,
+          "alignY": "center",
+          "layoutMode": "auto",
+          "strokeWidth": 0
+        },
+        "measured": {
+          "width": 240,
+          "height": 1048
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-60",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -831.3180634809961,
+          "y": -2349.365194878741
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0.0, 95.152, 133.311, 162.455, 205.134, 251.185, 251.262, 251.27]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-61",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -835.204517464658,
+          "y": -1297.4554151647578
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-65",
+        "type": "textGenerator",
+        "position": {
+          "x": -186.49043713471417,
+          "y": -2113.195416952582
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "1990",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "alignX": "left",
+          "fontSize": 10
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-66",
+        "type": "textGenerator",
+        "position": {
+          "x": -181.00823488152975,
+          "y": -1394.2614672489935
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "11,896 TWh",
+          "sectionCollapsed": {
+            "style": true,
+            "typography": true
+          },
+          "fontSize": 16,
+          "fontWeight": "bold",
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-67",
+        "type": "tagMapper",
+        "position": {
+          "x": -831.0649785115158,
+          "y": -1837.4548623852497
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "indexTags": false
+          },
+          "applyIndexTags": true,
+          "indexTagValues": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 637
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-68",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 142.80093222520486,
+          "y": -1860.3645024763155
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-textGenerator-65",
+              "sourceNodeId": "textGenerator-65",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-65-coordinateGroup-68layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 65
+            },
+            {
+              "id": "layer-textGenerator-66",
+              "sourceNodeId": "textGenerator-66",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-66-coordinateGroup-68layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 50
+            },
+            {
+              "id": "layer-shapeGenerator-24",
+              "sourceNodeId": "shapeGenerator-24",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-24-coordinateGroup-68layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-69",
+        "type": "previewNode",
+        "position": {
+          "x": 608.7942866503386,
+          "y": -1801.1826689662437
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 503,
+          "previewHeight": 279
+        },
+        "measured": {
+          "width": 520,
+          "height": 332
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-70",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -826.3988261600591,
+          "y": -824.5697503325756
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0.0, 123.921, 182.493, 210.746, 264.942, 321.042, 321.706, 321.728]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-71",
+        "type": "textGenerator",
+        "position": {
+          "x": -185.82967144604447,
+          "y": -0.7363689723889593
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "15,279 TWh",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 16,
+          "fontWeight": "bold",
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-72",
+        "type": "textGenerator",
+        "position": {
+          "x": -185.51753475685473,
+          "y": -709.7337102732524
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "2000",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 10,
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-73",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 152.014475030362,
+          "y": -595.2280981385957
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-7",
+              "sourceNodeId": "shapeGenerator-7",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-7-coordinateGroup-73layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-72",
+              "sourceNodeId": "textGenerator-72",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-72-coordinateGroup-73layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 65
+            },
+            {
+              "id": "layer-textGenerator-71",
+              "sourceNodeId": "textGenerator-71",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-71-coordinateGroup-73layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 50
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-74",
+        "type": "previewNode",
+        "position": {
+          "x": 628.892924085754,
+          "y": -1093.5651197065054
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 497,
+          "previewHeight": 326
+        },
+        "measured": {
+          "width": 514,
+          "height": 379
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-75",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -832.3312669170537,
+          "y": 258.78174978459276
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-76",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -837.2140301665504,
+          "y": 1670.7206446576529
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-77",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1197.2140301665504,
+          "y": 738.7206446576529
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0.0, 180.437, 283.005, 306.016, 364.169, 437.304, 444.685, 445.373]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-78",
+        "type": "textGenerator",
+        "position": {
+          "x": -179.2140301665504,
+          "y": 1462.7206446576529
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "21,264 TWh",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 16,
+          "fontWeight": "bold",
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-79",
+        "type": "textGenerator",
+        "position": {
+          "x": -185.2140301665504,
+          "y": 762.7206446576529
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "2010",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 10,
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-80",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 139.74511604572953,
+          "y": 814.1008313439194
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shape-bars",
+              "sourceNodeId": "shape-bars",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shape-bars-coordinateGroup-80layers",
+              "label": "Bars",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-79",
+              "sourceNodeId": "textGenerator-79",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-79-coordinateGroup-80layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 65
+            },
+            {
+              "id": "layer-textGenerator-78",
+              "sourceNodeId": "textGenerator-78",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-78-coordinateGroup-80layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 50
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-81",
+        "type": "previewNode",
+        "position": {
+          "x": 618.4675899459862,
+          "y": 1218.5637701039327
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 601,
+          "previewHeight": 330
+        },
+        "measured": {
+          "width": 618,
+          "height": 383
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-82",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -801.0159004193177,
+          "y": 2778.8040790248656
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-83",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1193.7280584089424,
+          "y": 2514.182572858484
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[201.324, 136.169, 16.552, 56.498, 92.736, 33.951, 18.206, 14.662]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-84",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1185.6568674216803,
+          "y": 2110.9267520464036
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0.0, 201.324, 337.493, 354.045, 410.543, 503.279, 537.231, 555.436]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-85",
+        "type": "tagMapper",
+        "position": {
+          "x": -810.7076133740684,
+          "y": 2254.7044156485513
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "indexTags": false
+          },
+          "applyIndexTags": true,
+          "indexTagValues": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 637
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-86",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -480.15536423110086,
+          "y": 2377.276188866541
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          },
+          "defaultHeight": 48,
+          "alignY": "center",
+          "strokeWidth": 0,
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 894
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-87",
+        "type": "textGenerator",
+        "position": {
+          "x": -168.71142751728394,
+          "y": 2790.736997386684
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "26,723 TWh",
+          "sectionCollapsed": {
+            "typography": true,
+            "style": true
+          },
+          "fontSize": 16,
+          "alignX": "left",
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-88",
+        "type": "textGenerator",
+        "position": {
+          "x": -180.71142751728394,
+          "y": 2114.736997386684
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "2020",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 10,
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-89",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 132.25713934969528,
+          "y": 2180.329432582261
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-86",
+              "sourceNodeId": "shapeGenerator-86",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-86-coordinateGroup-89layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-88",
+              "sourceNodeId": "textGenerator-88",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-88-coordinateGroup-89layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 65
+            },
+            {
+              "id": "layer-textGenerator-87",
+              "sourceNodeId": "textGenerator-87",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-87-coordinateGroup-89layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 50
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-90",
+        "type": "previewNode",
+        "position": {
+          "x": 698.0266958137123,
+          "y": 2499.211167262517
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 699,
+          "previewHeight": 395
+        },
+        "measured": {
+          "width": 716,
+          "height": 448
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-91",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1207.7140594538866,
+          "y": 3887.1554277134273
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[221.78, 142.921, 18.705, 57.552, 90.456, 49.476, 35.502, 16.47]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-92",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1199.7140594538866,
+          "y": 3495.1554277134273
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0.0, 221.78, 364.701, 383.406, 440.958, 531.413, 580.889, 616.391]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-93",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -819.7140594538866,
+          "y": 4413.155427713427
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-94",
+        "type": "tagMapper",
+        "position": {
+          "x": -825.7140594538866,
+          "y": 3869.1554277134273
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "indexTags": false
+          },
+          "applyIndexTags": true,
+          "indexTagValues": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 637
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-95",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -469.71405945388676,
+          "y": 3863.155427713427
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          },
+          "defaultHeight": 48,
+          "alignY": "center",
+          "strokeWidth": 0
+        },
+        "measured": {
+          "width": 240,
+          "height": 894
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-96",
+        "type": "textGenerator",
+        "position": {
+          "x": -163.71405945388688,
+          "y": 3497.1554277134273
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "2023",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 10,
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-97",
+        "type": "textGenerator",
+        "position": {
+          "x": -144.55689378878287,
+          "y": 4216.545411747855
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "29,665 TWh",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontSize": 16,
+          "fontWeight": "bold",
+          "alignX": "left"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-98",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 148.28594054611312,
+          "y": 3845.1554277134273
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-95",
+              "sourceNodeId": "shapeGenerator-95",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-95-coordinateGroup-98layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-96",
+              "sourceNodeId": "textGenerator-96",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-96-coordinateGroup-98layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 65
+            },
+            {
+              "id": "layer-textGenerator-97",
+              "sourceNodeId": "textGenerator-97",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-97-coordinateGroup-98layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 50
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 770
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-99",
+        "type": "previewNode",
+        "position": {
+          "x": 790.8804700611907,
+          "y": 3844.0033153209124
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 793,
+          "previewHeight": 192
+        },
+        "measured": {
+          "width": 810,
+          "height": 245
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-100",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": 1526.681367632616,
+          "y": 1026.8091831875267
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "x",
+          "sectionCollapsed": {
+            "tickLabel": true,
+            "xDomain": true,
+            "plotSize": true,
+            "display": true,
+            "style": false
+          },
+          "strokeColor": "#787878",
+          "textColor": "#787878"
+        },
+        "measured": {
+          "width": 240,
+          "height": 938
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-101",
+        "type": "scaleMapper",
+        "position": {
+          "x": 1201.9849721520632,
+          "y": 955.6441225751016
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "domainMode": "auto",
+          "domainMax": 30000,
+          "rangeMax": 640
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-103",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 861.4849703027446,
+          "y": 869.4309703469609
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0, 5000, 10000, 15000, 20000, 25000, 30000]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-106",
+        "type": "shapeGenerator",
+        "position": {
+          "x": 1544.0191554978257,
+          "y": -1213.6645089348715
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false,
+            "fallbackLayout": false
+          },
+          "defaultWidth": 15,
+          "defaultHeight": 15,
+          "strokeWidth": 0,
+          "layoutGapX": 40
+        },
+        "measured": {
+          "width": 240,
+          "height": 1046
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-107",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1248.8895820026198,
+          "y": -1372.5869137079505
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0,0,0,0,0,0,0,0]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-108",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1243.6859598166982,
+          "y": -1062.2562593093783
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#3B3B3B\",\n  \"#B07D2C\",\n  \"#8C4A2F\",\n  \"#8E63CE\",\n  \"#2F80ED\",\n  \"#2BB3C0\",\n  \"#F2C94C\",\n  \"#3FA34D\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-110",
+        "type": "textGenerator",
+        "position": {
+          "x": 2122.3694291298652,
+          "y": -1202.825152129894
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "Label",
+          "sectionCollapsed": {
+            "typography": false
+          },
+          "alignX": "left",
+          "fontSize": 8
+        },
+        "measured": {
+          "width": 240,
+          "height": 886
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-111",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1805.0903668882993,
+          "y": -1444.691774269749
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\"Coal\", \"Gas\", \"Oil\", \"Nuclear\", \"Hydro\", \"Wind\", \"Solar\", \"Other renewables\"]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-112",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 2398.109829453541,
+          "y": -809.0671018163588
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-textGenerator-110",
+              "sourceNodeId": "textGenerator-110",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-110-coordinateGroup-112layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-shapeGenerator-106",
+              "sourceNodeId": "shapeGenerator-106",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-106-coordinateGroup-112layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 10
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 193
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-113",
+        "type": "previewNode",
+        "position": {
+          "x": 2818.2757267506813,
+          "y": -643.2398257619795
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview",
+          "previewWidth": 395,
+          "previewHeight": 279
+        },
+        "measured": {
+          "width": 412,
+          "height": 332
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "finalOutput-114",
+        "type": "finalOutput",
+        "position": {
+          "x": 2192.44127851261,
+          "y": 1249.7551281361148
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 680
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "elementSelector-115",
+        "type": "elementSelector",
+        "position": {
+          "x": 515.9000952177544,
+          "y": -624.0148948679264
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "eventTrigger-116",
+        "type": "eventTrigger",
+        "position": {
+          "x": 884.2605804146017,
+          "y": -581.7906417231939
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "eventType": "scroll",
+          "scrollSource": "pageSteps",
+          "scrollSteps": [
+            {
+              "id": "step-0",
+              "position": 0
+            },
+            {
+              "id": "step-1",
+              "position": 800
+            },
+            {
+              "id": "step-1780569642456",
+              "position": 1600
+            },
+            {
+              "id": "step-1780569643353",
+              "position": 2400
+            },
+            {
+              "id": "step-1780569660772",
+              "position": 3200
+            }
+          ],
+          "pageTransitionDistance": 600
+        },
+        "measured": {
+          "width": 240,
+          "height": 812
+        },
+        "selected": false,
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "data-y-values",
+        "target": "tagMapper-3",
+        "targetHandle": "input",
+        "id": "xy-edge__data-y-values-tagMapper-3input"
+      },
+      {
+        "source": "simpleDataInput-4",
+        "target": "tagMapper-5",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-4-tagMapper-5input"
+      },
+      {
+        "source": "coordinate-chart",
+        "target": "pagePreview-12",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinate-chart-pagePreview-12visual"
+      },
+      {
+        "source": "states-8",
+        "target": "transition-13",
+        "targetHandle": "visual",
+        "id": "xy-edge__states-8-transition-13visual"
+      },
+      {
+        "source": "transition-13",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__transition-13-coordinate-chartlayers"
+      },
+      {
+        "source": "simpleDataInput-61",
+        "target": "shapeGenerator-24",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-61-shapeGenerator-24fill"
+      },
+      {
+        "source": "simpleDataInput-60",
+        "target": "shapeGenerator-24",
+        "targetHandle": "x",
+        "id": "xy-edge__simpleDataInput-60-shapeGenerator-24x"
+      },
+      {
+        "source": "simpleDataInput-21",
+        "target": "tagMapper-67",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-21-tagMapper-67input"
+      },
+      {
+        "source": "tagMapper-67",
+        "target": "shapeGenerator-24",
+        "targetHandle": "width",
+        "id": "xy-edge__tagMapper-67-shapeGenerator-24width"
+      },
+      {
+        "source": "textGenerator-65",
+        "target": "coordinateGroup-68",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-65-coordinateGroup-68layers"
+      },
+      {
+        "source": "textGenerator-66",
+        "target": "coordinateGroup-68",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-66-coordinateGroup-68layers"
+      },
+      {
+        "source": "shapeGenerator-24",
+        "target": "coordinateGroup-68",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-24-coordinateGroup-68layers"
+      },
+      {
+        "source": "coordinateGroup-68",
+        "target": "previewNode-69",
+        "id": "xy-edge__coordinateGroup-68-previewNode-69"
+      },
+      {
+        "source": "tagMapper-5",
+        "target": "shapeGenerator-7",
+        "targetHandle": "width",
+        "id": "xy-edge__tagMapper-5-shapeGenerator-7width"
+      },
+      {
+        "source": "simpleDataInput-70",
+        "target": "shapeGenerator-7",
+        "targetHandle": "x",
+        "id": "xy-edge__simpleDataInput-70-shapeGenerator-7x"
+      },
+      {
+        "source": "shapeGenerator-7",
+        "target": "coordinateGroup-73",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-7-coordinateGroup-73layers"
+      },
+      {
+        "source": "textGenerator-72",
+        "target": "coordinateGroup-73",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-72-coordinateGroup-73layers"
+      },
+      {
+        "source": "textGenerator-71",
+        "target": "coordinateGroup-73",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-71-coordinateGroup-73layers"
+      },
+      {
+        "source": "coordinateGroup-73",
+        "target": "previewNode-74",
+        "id": "xy-edge__coordinateGroup-73-previewNode-74"
+      },
+      {
+        "source": "simpleDataInput-75",
+        "target": "shapeGenerator-7",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-75-shapeGenerator-7fill"
+      },
+      {
+        "source": "simpleDataInput-77",
+        "target": "shape-bars",
+        "targetHandle": "x",
+        "id": "xy-edge__simpleDataInput-77-shape-barsx"
+      },
+      {
+        "source": "simpleDataInput-76",
+        "target": "shape-bars",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-76-shape-barsfill"
+      },
+      {
+        "source": "tagMapper-3",
+        "target": "shape-bars",
+        "targetHandle": "width",
+        "id": "xy-edge__tagMapper-3-shape-barswidth"
+      },
+      {
+        "source": "shape-bars",
+        "target": "coordinateGroup-80",
+        "targetHandle": "layers",
+        "id": "xy-edge__shape-bars-coordinateGroup-80layers"
+      },
+      {
+        "source": "textGenerator-79",
+        "target": "coordinateGroup-80",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-79-coordinateGroup-80layers"
+      },
+      {
+        "source": "textGenerator-78",
+        "target": "coordinateGroup-80",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-78-coordinateGroup-80layers"
+      },
+      {
+        "source": "coordinateGroup-80",
+        "target": "previewNode-81",
+        "id": "xy-edge__coordinateGroup-80-previewNode-81"
+      },
+      {
+        "source": "simpleDataInput-84",
+        "target": "shapeGenerator-86",
+        "targetHandle": "x",
+        "id": "xy-edge__simpleDataInput-84-shapeGenerator-86x"
+      },
+      {
+        "source": "tagMapper-85",
+        "target": "shapeGenerator-86",
+        "targetHandle": "width",
+        "id": "xy-edge__tagMapper-85-shapeGenerator-86width"
+      },
+      {
+        "source": "simpleDataInput-83",
+        "target": "tagMapper-85",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-83-tagMapper-85input"
+      },
+      {
+        "source": "simpleDataInput-82",
+        "target": "shapeGenerator-86",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-82-shapeGenerator-86fill"
+      },
+      {
+        "source": "shapeGenerator-86",
+        "target": "coordinateGroup-89",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-86-coordinateGroup-89layers"
+      },
+      {
+        "source": "textGenerator-88",
+        "target": "coordinateGroup-89",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-88-coordinateGroup-89layers"
+      },
+      {
+        "source": "textGenerator-87",
+        "target": "coordinateGroup-89",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-87-coordinateGroup-89layers"
+      },
+      {
+        "source": "coordinateGroup-89",
+        "target": "previewNode-90",
+        "id": "xy-edge__coordinateGroup-89-previewNode-90"
+      },
+      {
+        "source": "simpleDataInput-91",
+        "target": "tagMapper-94",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-91-tagMapper-94input"
+      },
+      {
+        "source": "tagMapper-94",
+        "target": "shapeGenerator-95",
+        "targetHandle": "width",
+        "id": "xy-edge__tagMapper-94-shapeGenerator-95width"
+      },
+      {
+        "source": "simpleDataInput-93",
+        "target": "shapeGenerator-95",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-93-shapeGenerator-95fill"
+      },
+      {
+        "source": "simpleDataInput-92",
+        "target": "shapeGenerator-95",
+        "targetHandle": "x",
+        "id": "xy-edge__simpleDataInput-92-shapeGenerator-95x"
+      },
+      {
+        "source": "shapeGenerator-95",
+        "target": "coordinateGroup-98",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-95-coordinateGroup-98layers"
+      },
+      {
+        "source": "textGenerator-96",
+        "target": "coordinateGroup-98",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-96-coordinateGroup-98layers"
+      },
+      {
+        "source": "textGenerator-97",
+        "target": "coordinateGroup-98",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-97-coordinateGroup-98layers"
+      },
+      {
+        "source": "coordinateGroup-98",
+        "target": "previewNode-99",
+        "id": "xy-edge__coordinateGroup-98-previewNode-99"
+      },
+      {
+        "source": "coordinateGroup-68",
+        "target": "states-8",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-68-states-8states"
+      },
+      {
+        "source": "coordinateGroup-80",
+        "target": "states-8",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-80-states-8states"
+      },
+      {
+        "source": "coordinateGroup-89",
+        "target": "states-8",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-89-states-8states"
+      },
+      {
+        "source": "coordinateGroup-98",
+        "target": "states-8",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-98-states-8states"
+      },
+      {
+        "source": "coordinateGroup-73",
+        "target": "states-8",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-73-states-8states"
+      },
+      {
+        "source": "scaleMapper-101",
+        "target": "d3AxisGenerator-100",
+        "targetHandle": "xScale",
+        "id": "xy-edge__scaleMapper-101-d3AxisGenerator-100xScale"
+      },
+      {
+        "source": "d3AxisGenerator-100",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-100-coordinate-chartlayers"
+      },
+      {
+        "source": "simpleDataInput-103",
+        "target": "scaleMapper-101",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-103-scaleMapper-101input"
+      },
+      {
+        "source": "simpleDataInput-108",
+        "target": "shapeGenerator-106",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-108-shapeGenerator-106fill"
+      },
+      {
+        "source": "simpleDataInput-107",
+        "target": "shapeGenerator-106",
+        "targetHandle": "y",
+        "id": "xy-edge__simpleDataInput-107-shapeGenerator-106y"
+      },
+      {
+        "source": "simpleDataInput-111",
+        "target": "textGenerator-110",
+        "targetHandle": "text",
+        "id": "xy-edge__simpleDataInput-111-textGenerator-110text"
+      },
+      {
+        "source": "textGenerator-110",
+        "target": "coordinateGroup-112",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-110-coordinateGroup-112layers"
+      },
+      {
+        "source": "shapeGenerator-106",
+        "target": "coordinateGroup-112",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-106-coordinateGroup-112layers"
+      },
+      {
+        "source": "coordinateGroup-112",
+        "target": "previewNode-113",
+        "id": "xy-edge__coordinateGroup-112-previewNode-113"
+      },
+      {
+        "source": "coordinateGroup-112",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__coordinateGroup-112-coordinate-chartlayers"
+      },
+      {
+        "source": "coordinate-chart",
+        "target": "finalOutput-114",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinate-chart-finalOutput-114visual"
+      },
+      {
+        "source": "coordinateGroup-73",
+        "target": "elementSelector-115",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinateGroup-73-elementSelector-115visual"
+      },
+      {
+        "source": "elementSelector-115",
+        "target": "eventTrigger-116",
+        "targetHandle": "selection",
+        "id": "xy-edge__elementSelector-115-eventTrigger-116selection"
+      },
+      {
+        "source": "eventTrigger-116",
+        "target": "states-8",
+        "targetHandle": "event",
+        "id": "xy-edge__eventTrigger-116-states-8event"
+      }
+    ],
+    "viewport": {
+      "x": -940.7691931929512,
+      "y": 437.82593833032183,
+      "zoom": 0.8705505632961245
+    }
+  }
+}

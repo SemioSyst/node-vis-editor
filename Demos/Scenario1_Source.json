@@ -1,0 +1,1462 @@
+{
+  "app": "node-vis-editor",
+  "version": "0.1",
+  "name": "node-vis-project",
+  "savedAt": "2026-06-04T05:17:54.910Z",
+  "reactFlow": {
+    "nodes": [
+      {
+        "id": "data-y-values",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1833.0362274648396,
+          "y": 498.8241876400526
+        },
+        "data": {
+          "dataMode": "matrix",
+          "rawText": "[\n  [19.14, 19.034, 19.37, 18.695, 20.728, 20.05, 20.736, 18.925, 20.158, 20.81, 22.087, 20.694, 22.382, 20.808, 20.177, 20.836, 20.873, 20.937, 21.479, 23.245, 21.089, 22.197, 20.73, 20.365],\n  [18.288, 18.469, 18.495, 18.708, 19.056, 18.975, 19.007, 19.036, 18.918, 18.683, 18.293, 17.966, 17.722, 17.122, 16.639, 16.727, 16.838, 16.716, 16.512, 16.283, 15.481, 14.966, 14.659, 14.529],\n  [21.398, 20.767, 20.718, 20.718, 20.874, 20.719, 20.237, 20.28, 19.409, 17.811, 18.225, 17.634, 16.812, 17.099, 17.119, 16.461, 15.935, 15.639, 16.001, 15.5, 13.817, 14.758, 14.802, 14.319],\n  [18.344, 17.908, 17.893, 18.255, 17.935, 17.583, 17.287, 17.828, 17.167, 15.997, 16.209, 16.288, 16.086, 16.11, 15.854, 15.655, 15.231, 15.395, 15.42, 15.325, 13.733, 13.977, 14.107, 13.88],\n  [10.091, 10.389, 10.335, 10.556, 10.644, 10.816, 11.266, 11.291, 11.492, 10.741, 11.346, 11.698, 11.782, 11.324, 11.298, 11.254, 11.177, 11.362, 11.677, 11.632, 11.149, 11.482, 11.509, 11.916],\n  [9.408, 9.685, 10.065, 10.212, 10.302, 10.422, 10.488, 10.829, 11.015, 11.078, 12.187, 12.69, 12.66, 12.674, 12.453, 12.439, 12.435, 12.713, 12.977, 12.481, 11.524, 11.882, 11.72, 11.385],\n  [2.87, 2.912, 3.185, 3.735, 4.002, 4.49, 4.921, 5.261, 5.617, 5.871, 6.37, 6.999, 7.132, 7.21, 7.188, 7.061, 6.943, 7.08, 7.292, 7.526, 7.641, 7.911, 8.218, 8.556],\n  [9.921, 9.79, 10.005, 10.056, 10.008, 10.057, 9.871, 10.141, 9.587, 9.051, 9.448, 9.846, 10.178, 10.271, 9.886, 9.585, 9.436, 9.321, 8.971, 8.698, 8.213, 8.422, 8.237, 7.935],\n  [10.99, 11.171, 10.952, 10.894, 10.678, 10.578, 10.85, 10.408, 10.561, 9.761, 10.228, 9.95, 10.061, 10.263, 9.74, 9.757, 9.642, 9.441, 9.101, 8.481, 7.739, 8.101, 7.942, 7.023],\n  [8.022, 7.812, 7.424, 8.338, 9.171, 8.41, 8.935, 9.203, 9.678, 9.173, 8.928, 8.949, 8.58, 8.343, 8.663, 8.065, 7.982, 7.634, 7.742, 7.9, 7.188, 7.145, 6.874, 6.907],\n  [9.635, 9.749, 9.41, 9.556, 9.53, 9.412, 9.301, 9.093, 8.785, 7.905, 8.125, 7.396, 7.622, 7.418, 6.765, 6.461, 6.062, 5.838, 5.689, 5.435, 4.844, 5.059, 4.563, 4.482],\n  [6.85, 6.871, 6.747, 6.799, 6.769, 6.756, 6.554, 6.35, 6.209, 5.885, 5.946, 5.572, 5.59, 5.591, 5.067, 5.116, 5.155, 5.183, 4.931, 4.812, 4.272, 4.65, 4.456, 4.068],\n  [3.969, 4.071, 4.04, 4.234, 4.201, 4.38, 4.424, 4.354, 4.285, 4.11, 4.017, 4.194, 4.293, 4.186, 4.041, 3.96, 3.917, 3.763, 3.76, 3.723, 3.383, 3.501, 3.528, 3.532],\n  [1.301, 1.446, 1.388, 1.506, 1.504, 1.505, 1.481, 1.635, 1.521, 1.639, 1.808, 2.006, 2.041, 1.929, 1.924, 2.105, 2.071, 2.136, 2.25, 2.441, 2.268, 2.287, 2.719, 2.711],\n  [1.955, 1.963, 1.948, 1.908, 1.979, 1.973, 1.976, 2.071, 2.168, 2.029, 2.273, 2.365, 2.527, 2.678, 2.781, 2.619, 2.42, 2.429, 2.312, 2.298, 2.147, 2.37, 2.283, 2.292],\n  [0.933, 0.929, 0.941, 0.957, 0.999, 1.035, 1.103, 1.17, 1.234, 1.316, 1.35, 1.4, 1.507, 1.54, 1.637, 1.681, 1.75, 1.784, 1.888, 1.88, 1.727, 1.892, 1.986, 2.13]\n]",
+          "label": "Y Values"
+        },
+        "measured": {
+          "width": 240,
+          "height": 309
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shape-bars",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -282,
+          "y": 60
+        },
+        "data": {
+          "label": "Bars",
+          "shapeType": "rect",
+          "defaultX": 0,
+          "defaultY": 0,
+          "defaultWidth": 25,
+          "defaultHeight": 25,
+          "cornerRadius": 0,
+          "alignX": "left",
+          "alignY": "bottom",
+          "fillColor": "#6f86e8",
+          "strokeColor": "#222222",
+          "strokeWidth": 1.5,
+          "opacity": 1,
+          "layoutAxis": "x",
+          "layoutGapX": 25,
+          "layoutGapY": 25,
+          "sectionCollapsed": {
+            "geometry": false,
+            "fallbackLayout": false,
+            "style": false
+          },
+          "layoutMode": "auto",
+          "matrixRowDirection": "up"
+        },
+        "measured": {
+          "width": 240,
+          "height": 1044
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinate-chart",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 1415.031433133021,
+          "y": 49.41555691078263
+        },
+        "data": {
+          "label": "Coordinate Chart",
+          "layers": [
+            {
+              "id": "layer-d3AxisGenerator-16",
+              "sourceNodeId": "d3AxisGenerator-16",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-16-coordinate-chartlayers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -30,
+              "y": 0
+            },
+            {
+              "id": "layer-d3AxisGenerator-15",
+              "sourceNodeId": "d3AxisGenerator-15",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-15-coordinate-chartlayers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": -30
+            },
+            {
+              "id": "layer-shape-bars",
+              "sourceNodeId": "shape-bars",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shape-bars-coordinate-chartlayers",
+              "label": "Bars",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-positionRule-1",
+              "sourceNodeId": "positionRule-1",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__positionRule-1-coordinate-chartlayers",
+              "label": "positionRule",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": ""
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 569
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "preview-chart",
+        "type": "previewNode",
+        "position": {
+          "x": 1837.5803698917503,
+          "y": 24.692344407490054
+        },
+        "data": {
+          "previewWidth": 800,
+          "previewHeight": 593,
+          "previewMode": "actual"
+        },
+        "measured": {
+          "width": 817,
+          "height": 646
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "elementSelector-1",
+        "type": "elementSelector",
+        "position": {
+          "x": 276.87833979126646,
+          "y": 145.41593203799277
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-2",
+        "type": "textGenerator",
+        "position": {
+          "x": -1113.601969113629,
+          "y": -953.9881776986226
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "fallbackLayout": true,
+            "typography": false,
+            "style": true
+          },
+          "alignY": "center",
+          "alignX": "left",
+          "defaultText": "Country",
+          "fontSize": 10,
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "positionRule-1",
+        "type": "positionRule",
+        "position": {
+          "x": 955.3643615434783,
+          "y": -57.33832327353912
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "matching": false
+          },
+          "anchorType": "pointer",
+          "offsetX": -8,
+          "offsetY": 8
+        },
+        "measured": {
+          "width": 240,
+          "height": 643
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "eventTrigger-1",
+        "type": "eventTrigger",
+        "position": {
+          "x": 592.0899280345011,
+          "y": 142.98272576563295
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 245
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-3",
+        "type": "tagMapper",
+        "position": {
+          "x": -1321.5981465676641,
+          "y": 665.656935750013
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "rowTags": false,
+            "indexTags": true,
+            "globalTag": false,
+            "columnTags": false
+          },
+          "indexTagValues": "",
+          "applyIndexTags": false,
+          "globalTagValue": "abb",
+          "applyGlobalTag": true,
+          "rowTagValues": "[\n  \"Saudi Arabia\",\n  \"Australia\",\n  \"United States\",\n  \"Canada\",\n  \"Russia\",\n  \"South Korea\",\n  \"China\",\n  \"Japan\",\n  \"Germany\",\n  \"South Africa\",\n  \"United Kingdom\",\n  \"France\",\n  \"Mexico\",\n  \"Indonesia\",\n  \"Brazil\",\n  \"India\"\n]",
+          "rowKeyPreset": "custom",
+          "rowCustomKey": "country",
+          "colKeyPreset": "custom",
+          "colCustomKey": "year",
+          "colTagValues": "[\n  2000, 2001, 2002, 2003, 2004, 2005,\n  2006, 2007, 2008, 2009, 2010, 2011,\n  2012, 2013, 2014, 2015, 2016, 2017,\n  2018, 2019, 2020, 2021, 2022, 2023\n]",
+          "applyRowTags": true,
+          "applyColumnTags": true
+        },
+        "measured": {
+          "width": 240,
+          "height": 941
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "dataInspector-4",
+        "type": "dataInspector",
+        "position": {
+          "x": 277.7306442196225,
+          "y": 431.7329675446137
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 232
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-5",
+        "type": "previewNode",
+        "position": {
+          "x": 883.6083148342755,
+          "y": 416.3277609646018
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Preview",
+          "previewWidth": 800,
+          "previewHeight": 230
+        },
+        "measured": {
+          "width": 817,
+          "height": 283
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-1",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 169.1509543396512,
+          "y": -996.9343431936568
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-17",
+              "sourceNodeId": "shapeGenerator-17",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-17-coordinateGroup-1layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-2",
+              "sourceNodeId": "textGenerator-2",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-2-coordinateGroup-1layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -40,
+              "y": 35
+            },
+            {
+              "id": "layer-textGenerator-1",
+              "sourceNodeId": "textGenerator-1",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-1-coordinateGroup-1layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -40,
+              "y": 20
+            },
+            {
+              "id": "layer-textGenerator-3",
+              "sourceNodeId": "textGenerator-3",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-3-coordinateGroup-1layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -40,
+              "y": -30
+            },
+            {
+              "id": "layer-textGenerator-4",
+              "sourceNodeId": "textGenerator-4",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-4-coordinateGroup-1layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -40,
+              "y": -10
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 1173
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-15",
+        "type": "previewNode",
+        "position": {
+          "x": 912.4341551806738,
+          "y": -1107.6017473864708
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Preview"
+        },
+        "measured": {
+          "width": 257,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-17",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -1125.0761214889208,
+          "y": -1856.8265356941738
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          },
+          "defaultWidth": 100,
+          "fillColor": "#ffffff",
+          "alignX": "center",
+          "alignY": "center",
+          "cornerRadius": 3,
+          "defaultHeight": 110,
+          "strokeColor": "#a3a3a3"
+        },
+        "measured": {
+          "width": 240,
+          "height": 887
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "contextSlots-18",
+        "type": "contextSlots",
+        "position": {
+          "x": 528.9821152658195,
+          "y": -932.5667562501226
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "availableElements": [
+            {
+              "elementId": "coordinateGroup-1-layer-shapeGenerator-17-0-shapeGenerator-17-rect-0",
+              "kind": "rect",
+              "displayName": "Rect · fill #ffffff · 100×110",
+              "detail": "shapeGenerator-17",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-shapeGenerator-17 / generated-shapes / coordinateGroup-1-layer-shapeGenerator-17-0-shapeGenerator-17-rect-0",
+              "properties": [
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.width",
+                  "label": "Stroke width",
+                  "format": "number"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.shape.width",
+                  "label": "Width",
+                  "format": "number"
+                },
+                {
+                  "value": "content.shape.height",
+                  "label": "Height",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Country\"",
+              "detail": "textGenerator-2",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-2 / generated-text / coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Year\"",
+              "detail": "textGenerator-1",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-1 / generated-text / coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Value\"",
+              "detail": "textGenerator-3",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-3 / generated-text / coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-4-0-textGenerator-4-text-0",
+              "kind": "text",
+              "displayName": "Text · \"CO2/capita(t):\"",
+              "detail": "textGenerator-4",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-4 / generated-text / coordinateGroup-1-layer-textGenerator-4-0-textGenerator-4-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            }
+          ],
+          "contextSlotElements": [
+            {
+              "elementId": "coordinateGroup-1-layer-shapeGenerator-17-0-shapeGenerator-17-rect-0",
+              "kind": "rect",
+              "displayName": "Rect · fill #ffffff · 100×110",
+              "detail": "shapeGenerator-17",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-shapeGenerator-17 / generated-shapes / coordinateGroup-1-layer-shapeGenerator-17-0-shapeGenerator-17-rect-0",
+              "properties": [
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.width",
+                  "label": "Stroke width",
+                  "format": "number"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.shape.width",
+                  "label": "Width",
+                  "format": "number"
+                },
+                {
+                  "value": "content.shape.height",
+                  "label": "Height",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Country\"",
+              "detail": "textGenerator-2",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-2 / generated-text / coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Year\"",
+              "detail": "textGenerator-1",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-1 / generated-text / coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "kind": "text",
+              "displayName": "Text · \"Value\"",
+              "detail": "textGenerator-3",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-3 / generated-text / coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            },
+            {
+              "elementId": "coordinateGroup-1-layer-textGenerator-4-0-textGenerator-4-text-0",
+              "kind": "text",
+              "displayName": "Text · \"CO2/capita(t):\"",
+              "detail": "textGenerator-4",
+              "pathLabel": "coordinate-group / coordinateGroup-1-layer-textGenerator-4 / generated-text / coordinateGroup-1-layer-textGenerator-4-0-textGenerator-4-text-0",
+              "properties": [
+                {
+                  "value": "content.text",
+                  "label": "Text content",
+                  "format": "text"
+                },
+                {
+                  "value": "style.fill.color",
+                  "label": "Fill colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.stroke.color",
+                  "label": "Stroke colour",
+                  "format": "color"
+                },
+                {
+                  "value": "style.opacity",
+                  "label": "Opacity",
+                  "format": "number"
+                },
+                {
+                  "value": "content.x",
+                  "label": "X position",
+                  "format": "number"
+                },
+                {
+                  "value": "content.y",
+                  "label": "Y position",
+                  "format": "number"
+                }
+              ],
+              "stateInfo": null
+            }
+          ],
+          "candidateElementId": "coordinateGroup-1-layer-shapeGenerator-17-0-shapeGenerator-17-rect-0",
+          "registeredElements": [
+            {
+              "id": "registered-coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "elementId": "coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0",
+              "alias": "\"Label\"",
+              "bindings": [
+                {
+                  "id": "binding-coordinateGroup-1-layer-textGenerator-2-0-textGenerator-2-text-0-1780194591680",
+                  "property": "content.text",
+                  "source": {
+                    "type": "contextPath",
+                    "path": "tags.country"
+                  },
+                  "format": {
+                    "type": "text",
+                    "decimals": 0,
+                    "prefix": "",
+                    "suffix": ""
+                  },
+                  "fallback": ""
+                }
+              ]
+            },
+            {
+              "id": "registered-coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "elementId": "coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0",
+              "alias": "\"Year\"",
+              "bindings": [
+                {
+                  "id": "binding-coordinateGroup-1-layer-textGenerator-1-0-textGenerator-1-text-0-1780548520149",
+                  "property": "content.text",
+                  "source": {
+                    "type": "contextPath",
+                    "path": "tags.year"
+                  },
+                  "format": {
+                    "type": "text",
+                    "decimals": 0,
+                    "prefix": "",
+                    "suffix": ""
+                  },
+                  "fallback": ""
+                }
+              ]
+            },
+            {
+              "id": "registered-coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "elementId": "coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0",
+              "alias": "\"Value\"",
+              "bindings": [
+                {
+                  "id": "binding-coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0-1780548553281",
+                  "property": "content.text",
+                  "source": {
+                    "type": "contextPath",
+                    "path": "tags.value"
+                  },
+                  "format": {
+                    "type": "text",
+                    "decimals": 0,
+                    "prefix": "",
+                    "suffix": ""
+                  },
+                  "fallback": ""
+                }
+              ]
+            }
+          ],
+          "selectedElementId": "coordinateGroup-1-layer-textGenerator-3-0-textGenerator-3-text-0"
+        },
+        "measured": {
+          "width": 240,
+          "height": 1019
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-1",
+        "type": "textGenerator",
+        "position": {
+          "x": -771.3643686753973,
+          "y": -1880.6728779300515
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "typography": false
+          },
+          "defaultText": "Year",
+          "alignX": "left",
+          "fontSize": 10,
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-2",
+        "type": "textGenerator",
+        "position": {
+          "x": -1113.601969113629,
+          "y": -953.9881776986226
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "fallbackLayout": true,
+            "typography": false,
+            "style": true
+          },
+          "alignY": "center",
+          "alignX": "left",
+          "defaultText": "Country",
+          "fontSize": 10,
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-3",
+        "type": "textGenerator",
+        "position": {
+          "x": -770.3151121037541,
+          "y": -949.9206823687164
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "typography": false
+          },
+          "defaultText": "Value",
+          "alignX": "left",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-4",
+        "type": "textGenerator",
+        "position": {
+          "x": -442.8698662157948,
+          "y": -954.4775071628815
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "CO2/capita(t): ",
+          "sectionCollapsed": {
+            "typography": false,
+            "style": false
+          },
+          "fontSize": 8,
+          "alignX": "left",
+          "fillColor": "#6e6e6e",
+          "fontWeight": "500"
+        },
+        "measured": {
+          "width": 240,
+          "height": 1016
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "colourMapper-13",
+        "type": "colourMapper",
+        "position": {
+          "x": -577.0321365355214,
+          "y": 673.9514847093258
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sequentialScheme": "inferno"
+        },
+        "measured": {
+          "width": 240,
+          "height": 478
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-14",
+        "type": "tagMapper",
+        "position": {
+          "x": -932.1631666066619,
+          "y": 664.5083968369502
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "cellTags": false
+          },
+          "applyCellTags": true,
+          "cellTagMatrix": "[\n  [19.14, 19.034, 19.37, 18.695, 20.728, 20.05, 20.736, 18.925, 20.158, 20.81, 22.087, 20.694, 22.382, 20.808, 20.177, 20.836, 20.873, 20.937, 21.479, 23.245, 21.089, 22.197, 20.73, 20.365],\n  [18.288, 18.469, 18.495, 18.708, 19.056, 18.975, 19.007, 19.036, 18.918, 18.683, 18.293, 17.966, 17.722, 17.122, 16.639, 16.727, 16.838, 16.716, 16.512, 16.283, 15.481, 14.966, 14.659, 14.529],\n  [21.398, 20.767, 20.718, 20.718, 20.874, 20.719, 20.237, 20.28, 19.409, 17.811, 18.225, 17.634, 16.812, 17.099, 17.119, 16.461, 15.935, 15.639, 16.001, 15.5, 13.817, 14.758, 14.802, 14.319],\n  [18.344, 17.908, 17.893, 18.255, 17.935, 17.583, 17.287, 17.828, 17.167, 15.997, 16.209, 16.288, 16.086, 16.11, 15.854, 15.655, 15.231, 15.395, 15.42, 15.325, 13.733, 13.977, 14.107, 13.88],\n  [10.091, 10.389, 10.335, 10.556, 10.644, 10.816, 11.266, 11.291, 11.492, 10.741, 11.346, 11.698, 11.782, 11.324, 11.298, 11.254, 11.177, 11.362, 11.677, 11.632, 11.149, 11.482, 11.509, 11.916],\n  [9.408, 9.685, 10.065, 10.212, 10.302, 10.422, 10.488, 10.829, 11.015, 11.078, 12.187, 12.69, 12.66, 12.674, 12.453, 12.439, 12.435, 12.713, 12.977, 12.481, 11.524, 11.882, 11.72, 11.385],\n  [2.87, 2.912, 3.185, 3.735, 4.002, 4.49, 4.921, 5.261, 5.617, 5.871, 6.37, 6.999, 7.132, 7.21, 7.188, 7.061, 6.943, 7.08, 7.292, 7.526, 7.641, 7.911, 8.218, 8.556],\n  [9.921, 9.79, 10.005, 10.056, 10.008, 10.057, 9.871, 10.141, 9.587, 9.051, 9.448, 9.846, 10.178, 10.271, 9.886, 9.585, 9.436, 9.321, 8.971, 8.698, 8.213, 8.422, 8.237, 7.935],\n  [10.99, 11.171, 10.952, 10.894, 10.678, 10.578, 10.85, 10.408, 10.561, 9.761, 10.228, 9.95, 10.061, 10.263, 9.74, 9.757, 9.642, 9.441, 9.101, 8.481, 7.739, 8.101, 7.942, 7.023],\n  [8.022, 7.812, 7.424, 8.338, 9.171, 8.41, 8.935, 9.203, 9.678, 9.173, 8.928, 8.949, 8.58, 8.343, 8.663, 8.065, 7.982, 7.634, 7.742, 7.9, 7.188, 7.145, 6.874, 6.907],\n  [9.635, 9.749, 9.41, 9.556, 9.53, 9.412, 9.301, 9.093, 8.785, 7.905, 8.125, 7.396, 7.622, 7.418, 6.765, 6.461, 6.062, 5.838, 5.689, 5.435, 4.844, 5.059, 4.563, 4.482],\n  [6.85, 6.871, 6.747, 6.799, 6.769, 6.756, 6.554, 6.35, 6.209, 5.885, 5.946, 5.572, 5.59, 5.591, 5.067, 5.116, 5.155, 5.183, 4.931, 4.812, 4.272, 4.65, 4.456, 4.068],\n  [3.969, 4.071, 4.04, 4.234, 4.201, 4.38, 4.424, 4.354, 4.285, 4.11, 4.017, 4.194, 4.293, 4.186, 4.041, 3.96, 3.917, 3.763, 3.76, 3.723, 3.383, 3.501, 3.528, 3.532],\n  [1.301, 1.446, 1.388, 1.506, 1.504, 1.505, 1.481, 1.635, 1.521, 1.639, 1.808, 2.006, 2.041, 1.929, 1.924, 2.105, 2.071, 2.136, 2.25, 2.441, 2.268, 2.287, 2.719, 2.711],\n  [1.955, 1.963, 1.948, 1.908, 1.979, 1.973, 1.976, 2.071, 2.168, 2.029, 2.273, 2.365, 2.527, 2.678, 2.781, 2.619, 2.42, 2.429, 2.312, 2.298, 2.147, 2.37, 2.283, 2.292],\n  [0.933, 0.929, 0.941, 0.957, 0.999, 1.035, 1.103, 1.17, 1.234, 1.316, 1.35, 1.4, 1.507, 1.54, 1.637, 1.681, 1.75, 1.784, 1.888, 1.88, 1.727, 1.892, 1.986, 2.13]\n]",
+          "cellKeyPreset": "custom",
+          "cellCustomKey": "value"
+        },
+        "measured": {
+          "width": 240,
+          "height": 673
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-15",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": 1085.8022900635456,
+          "y": 1213.029336803213
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "x"
+        },
+        "measured": {
+          "width": 240,
+          "height": 801
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-16",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": 1087.1632742420002,
+          "y": 2073.785048772773
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "y",
+          "yScaleType": "band",
+          "sectionCollapsed": {
+            "yDomain": true,
+            "xDomain": true,
+            "tickLabel": true,
+            "origin": true,
+            "display": true,
+            "plotSize": false
+          },
+          "yCategories": ""
+        },
+        "measured": {
+          "width": 240,
+          "height": 842
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-18",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 294.2835407167736,
+          "y": 1250.1087106666628
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  2000, 2001, 2002, 2003, 2004, 2005,\n  2006, 2007, 2008, 2009, 2010, 2011,\n  2012, 2013, 2014, 2015, 2016, 2017,\n  2018, 2019, 2020, 2021, 2022, 2023\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-20",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 295.1117648238977,
+          "y": 2064.805263466691
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\"Saudi Arabia\", \"Australia\", \"United States\", \"Canada\", \"Russia\", \"South Korea\", \"China\", \"Japan\", \"Germany\", \"South Africa\", \"United Kingdom\", \"France\", \"Mexico\", \"Indonesia\", \"Brazil\", \"India\"]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-21",
+        "type": "scaleMapper",
+        "position": {
+          "x": 695.1972550617874,
+          "y": 2048.6972721795637
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "scaleType": "band",
+          "rangeMax": 400
+        },
+        "measured": {
+          "width": 240,
+          "height": 764
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-22",
+        "type": "scaleMapper",
+        "position": {
+          "x": 694.4865848490134,
+          "y": 1218.9202797025716
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "domainBaseline": "dataExtent",
+          "sectionCollapsed": {
+            "manualDomain": false
+          },
+          "scaleType": "band",
+          "rangeMax": 600
+        },
+        "measured": {
+          "width": 240,
+          "height": 845
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "finalOutput-23",
+        "type": "finalOutput",
+        "position": {
+          "x": 1969.9783056013216,
+          "y": 1055.6729293113494
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 680
+        },
+        "selected": true,
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-coordinate-group-to-preview",
+        "source": "coordinate-chart",
+        "target": "preview-chart"
+      },
+      {
+        "source": "shape-bars",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__shape-bars-coordinate-chartlayers"
+      },
+      {
+        "source": "shape-bars",
+        "target": "elementSelector-1",
+        "targetHandle": "visual",
+        "id": "xy-edge__shape-bars-elementSelector-1visual"
+      },
+      {
+        "source": "positionRule-1",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__positionRule-1-coordinate-chartlayers"
+      },
+      {
+        "source": "elementSelector-1",
+        "target": "eventTrigger-1",
+        "targetHandle": "selection",
+        "id": "xy-edge__elementSelector-1-eventTrigger-1selection"
+      },
+      {
+        "source": "eventTrigger-1",
+        "target": "positionRule-1",
+        "targetHandle": "event",
+        "id": "xy-edge__eventTrigger-1-positionRule-1event"
+      },
+      {
+        "source": "data-y-values",
+        "target": "tagMapper-3",
+        "targetHandle": "input",
+        "id": "xy-edge__data-y-values-tagMapper-3input"
+      },
+      {
+        "source": "dataInspector-4",
+        "target": "previewNode-5",
+        "id": "xy-edge__dataInspector-4-previewNode-5"
+      },
+      {
+        "source": "shape-bars",
+        "target": "dataInspector-4",
+        "targetHandle": "input",
+        "id": "xy-edge__shape-bars-dataInspector-4input"
+      },
+      {
+        "source": "textGenerator-2",
+        "target": "coordinateGroup-1",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-2-coordinateGroup-1layers"
+      },
+      {
+        "source": "shapeGenerator-17",
+        "target": "coordinateGroup-1",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-17-coordinateGroup-1layers"
+      },
+      {
+        "source": "contextSlots-18",
+        "target": "previewNode-15",
+        "id": "xy-edge__contextSlots-18-previewNode-15"
+      },
+      {
+        "source": "contextSlots-18",
+        "target": "positionRule-1",
+        "targetHandle": "visual",
+        "id": "xy-edge__contextSlots-18-positionRule-1visual"
+      },
+      {
+        "source": "coordinateGroup-1",
+        "target": "contextSlots-18",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinateGroup-1-contextSlots-18visual"
+      },
+      {
+        "source": "textGenerator-1",
+        "target": "coordinateGroup-1",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-1-coordinateGroup-1layers"
+      },
+      {
+        "source": "textGenerator-3",
+        "target": "coordinateGroup-1",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-3-coordinateGroup-1layers"
+      },
+      {
+        "source": "textGenerator-4",
+        "target": "coordinateGroup-1",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-4-coordinateGroup-1layers"
+      },
+      {
+        "source": "colourMapper-13",
+        "target": "shape-bars",
+        "targetHandle": "fill",
+        "id": "xy-edge__colourMapper-13-shape-barsfill"
+      },
+      {
+        "source": "tagMapper-3",
+        "target": "tagMapper-14",
+        "targetHandle": "input",
+        "id": "xy-edge__tagMapper-3-tagMapper-14input"
+      },
+      {
+        "source": "tagMapper-14",
+        "target": "colourMapper-13",
+        "targetHandle": "input",
+        "id": "xy-edge__tagMapper-14-colourMapper-13input"
+      },
+      {
+        "source": "simpleDataInput-20",
+        "target": "scaleMapper-21",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-20-scaleMapper-21input"
+      },
+      {
+        "source": "scaleMapper-21",
+        "target": "d3AxisGenerator-16",
+        "targetHandle": "yScale",
+        "id": "xy-edge__scaleMapper-21-d3AxisGenerator-16yScale"
+      },
+      {
+        "source": "d3AxisGenerator-16",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-16-coordinate-chartlayers"
+      },
+      {
+        "source": "simpleDataInput-18",
+        "target": "scaleMapper-22",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-18-scaleMapper-22input"
+      },
+      {
+        "source": "scaleMapper-22",
+        "target": "d3AxisGenerator-15",
+        "targetHandle": "xScale",
+        "id": "xy-edge__scaleMapper-22-d3AxisGenerator-15xScale"
+      },
+      {
+        "source": "d3AxisGenerator-15",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-15-coordinate-chartlayers"
+      },
+      {
+        "source": "coordinate-chart",
+        "target": "finalOutput-23",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinate-chart-finalOutput-23visual"
+      }
+    ],
+    "viewport": {
+      "x": -1069.7880165419692,
+      "y": 193.68967907575137,
+      "zoom": 1.0000000000000007
+    }
+  }
+}

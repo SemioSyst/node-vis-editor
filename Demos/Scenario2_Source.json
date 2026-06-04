@@ -1,0 +1,1517 @@
+{
+  "app": "node-vis-editor",
+  "version": "0.1",
+  "name": "node-vis-project",
+  "savedAt": "2026-06-04T07:12:43.064Z",
+  "reactFlow": {
+    "nodes": [
+      {
+        "id": "data-x-categories",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1148.8305448437227,
+          "y": 96.832703635347
+        },
+        "data": {
+          "dataMode": "matrix",
+          "rawText": "[[0.0, 4.3, 8.59, 12.89, 17.19, 21.48, 25.78, 30.08, 34.37, 38.67, 42.97, 47.26, 51.56, 55.86, 60.15, 64.45, 68.75, 73.04, 77.34, 81.64, 85.93, 90.23, 94.53, 98.82, 103.12, 107.42, 111.71, 116.01, 120.31, 124.6, 128.9, 133.2, 137.49, 141.79, 146.09, 150.38, 154.68, 158.98, 163.27, 167.57, 171.87, 176.16, 180.46, 184.76, 189.05, 193.35, 197.65, 201.94, 206.24, 210.54, 214.83, 219.13, 223.43, 227.72, 232.02, 236.32, 240.61, 244.91, 249.21, 253.5, 257.8, 262.1, 266.39, 270.69, 274.99, 279.28, 283.58, 287.88, 292.17, 296.47, 300.77, 305.06, 309.36, 313.66, 317.95, 322.25, 326.55, 330.84, 335.14, 339.44, 343.73, 348.03, 352.33, 356.62, 360.92, 365.22, 369.51, 373.81, 378.11, 382.4, 386.7, 391.0, 395.29, 399.59, 403.89, 408.18, 412.48, 416.78, 421.07, 425.37, 429.67, 433.96, 438.26, 442.56, 446.85], [39.28, 43.58, 47.88, 52.17, 56.47, 60.77, 65.06, 69.36, 73.66, 77.95, 82.25, 86.55, 90.84, 95.14, 99.44, 103.73, 108.03, 112.33, 116.62, 120.92, 125.22, 129.51, 133.81, 138.11, 142.4, 146.7, 151.0, 155.29, 159.59, 163.89, 168.18, 172.48, 176.78, 181.07, 185.37, 189.67, 193.96, 198.26, 202.56, 206.85, 211.15, 215.45, 219.74, 224.04, 228.34, 232.63, 236.93, 241.23, 245.52, 249.82, 254.12, 258.41, 262.71, 267.01, 271.3, 275.6, 279.9, 284.19, 288.49, 292.79, 297.08, 301.38, 305.68, 309.97, 314.27, 318.57, 322.86, 327.16, 331.46, 335.75, 340.05, 344.35, 348.64, 352.94, 357.24, 361.53, 365.83, 370.13, 374.42, 378.72, 383.02, 387.31, 391.61, 395.91, 400.2, 404.5, 408.8, 413.09, 417.39, 421.69, 425.98, 430.28, 434.58, 438.87, 443.17, 447.47, 451.76, 456.06, 460.36, 464.65, 468.95, 473.25, 477.54, 481.84, 486.14], [273.15, 277.44, 281.74, 286.04, 290.33, 294.63, 298.93, 303.22, 307.52, 311.82, 316.11, 320.41, 324.71, 329.0, 333.3, 337.6, 341.89, 346.19, 350.49, 354.78, 359.08, 363.38, 367.67, 371.97, 376.27, 380.56, 384.86, 389.16, 393.45, 397.75, 402.05, 406.34, 410.64, 414.94, 419.23, 423.53, 427.83, 432.12, 436.42, 440.72, 445.01, 449.31, 453.61, 457.9, 462.2, 466.5, 470.79, 475.09, 479.39, 483.68, 487.98, 492.28, 496.57, 500.87, 505.17, 509.46, 513.76, 518.06, 522.35, 526.65, 530.95, 535.24, 539.54, 543.84, 548.13, 552.43, 556.73, 561.02, 565.32, 569.62, 573.91, 578.21, 582.51, 586.8, 591.1, 595.4, 599.69, 603.99, 608.29, 612.58, 616.88, 621.18, 625.47, 629.77, 634.07, 638.36, 642.66, 646.96, 651.25, 655.55, 659.85, 664.14, 668.44, 672.74, 677.03, 681.33, 685.63, 689.92, 694.22, 698.52, 702.81, 707.11, 711.41, 715.7, 720.0]]",
+          "label": "X Categories"
+        },
+        "measured": {
+          "width": 240,
+          "height": 309
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "data-y-values",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1148.9227301511949,
+          "y": 447.6930986611295
+        },
+        "data": {
+          "dataMode": "matrix",
+          "rawText": "[[0.0, 6.92, 13.85, 20.77, 27.69, 34.62, 41.54, 48.46, 55.38, 62.31, 69.23, 76.15, 83.08, 90.0, 96.92, 103.85, 110.77, 117.69, 124.62, 131.54, 138.46, 145.38, 152.31, 159.23, 166.15, 173.08, 180.0, 186.92, 193.85, 200.77, 207.69, 214.62, 221.54, 228.46, 235.38, 242.31, 249.23, 256.15, 263.08, 270.0, 276.92, 283.85, 290.77, 297.69, 304.62, 311.54, 318.46, 325.38, 332.31, 339.23, 346.15, 353.08, 360.0, 366.92, 373.85, 380.77, 387.69, 394.62, 401.54, 408.46, 415.38, 422.31, 429.23, 436.15, 443.08, 450.0, 456.92, 463.85, 470.77, 477.69, 484.62, 491.54, 498.46, 505.38, 512.31, 519.23, 526.15, 533.08, 540.0, 546.92, 553.85, 560.77, 567.69, 574.62, 581.54, 588.46, 595.38, 602.31, 609.23, 616.15, 623.08, 630.0, 636.92, 643.85, 650.77, 657.69, 664.62, 671.54, 678.46, 685.38, 692.31, 699.23, 706.15, 713.08, 720.0], [0.0, 6.92, 13.85, 20.77, 27.69, 34.62, 41.54, 48.46, 55.38, 62.31, 69.23, 76.15, 83.08, 90.0, 96.92, 103.85, 110.77, 117.69, 124.62, 131.54, 138.46, 145.38, 152.31, 159.23, 166.15, 173.08, 180.0, 186.92, 193.85, 200.77, 207.69, 214.62, 221.54, 228.46, 235.38, 242.31, 249.23, 256.15, 263.08, 270.0, 276.92, 283.85, 290.77, 297.69, 304.62, 311.54, 318.46, 325.38, 332.31, 339.23, 346.15, 353.08, 360.0, 366.92, 373.85, 380.77, 387.69, 394.62, 401.54, 408.46, 415.38, 422.31, 429.23, 436.15, 443.08, 450.0, 456.92, 463.85, 470.77, 477.69, 484.62, 491.54, 498.46, 505.38, 512.31, 519.23, 526.15, 533.08, 540.0, 546.92, 553.85, 560.77, 567.69, 574.62, 581.54, 588.46, 595.38, 602.31, 609.23, 616.15, 623.08, 630.0, 636.92, 643.85, 650.77, 657.69, 664.62, 671.54, 678.46, 685.38, 692.31, 699.23, 706.15, 713.08, 720.0], [0.0, 6.92, 13.85, 20.77, 27.69, 34.62, 41.54, 48.46, 55.38, 62.31, 69.23, 76.15, 83.08, 90.0, 96.92, 103.85, 110.77, 117.69, 124.62, 131.54, 138.46, 145.38, 152.31, 159.23, 166.15, 173.08, 180.0, 186.92, 193.85, 200.77, 207.69, 214.62, 221.54, 228.46, 235.38, 242.31, 249.23, 256.15, 263.08, 270.0, 276.92, 283.85, 290.77, 297.69, 304.62, 311.54, 318.46, 325.38, 332.31, 339.23, 346.15, 353.08, 360.0, 366.92, 373.85, 380.77, 387.69, 394.62, 401.54, 408.46, 415.38, 422.31, 429.23, 436.15, 443.08, 450.0, 456.92, 463.85, 470.77, 477.69, 484.62, 491.54, 498.46, 505.38, 512.31, 519.23, 526.15, 533.08, 540.0, 546.92, 553.85, 560.77, 567.69, 574.62, 581.54, 588.46, 595.38, 602.31, 609.23, 616.15, 623.08, 630.0, 636.92, 643.85, 650.77, 657.69, 664.62, 671.54, 678.46, 685.38, 692.31, 699.23, 706.15, 713.08, 720.0]]",
+          "label": "Y Values"
+        },
+        "measured": {
+          "width": 240,
+          "height": 309
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinate-chart",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 2857.9405607135755,
+          "y": 431.52593388220146
+        },
+        "data": {
+          "label": "Coordinate Chart",
+          "layers": [
+            {
+              "id": "layer-d3AxisGenerator-25",
+              "sourceNodeId": "d3AxisGenerator-25",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-25-coordinate-chartlayers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-coordinateGroup-14",
+              "sourceNodeId": "coordinateGroup-14",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-14-coordinate-chartlayers",
+              "label": "coordinateGroup",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 475,
+              "y": 500
+            },
+            {
+              "id": "layer-transition-24",
+              "sourceNodeId": "transition-24",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__transition-24-coordinate-chartlayers",
+              "label": "transition",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-43",
+              "sourceNodeId": "textGenerator-43",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-43-coordinate-chartlayers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -60,
+              "y": 250
+            },
+            {
+              "id": "layer-coordinateGroup-53",
+              "sourceNodeId": "coordinateGroup-53",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-53-coordinate-chartlayers",
+              "label": "coordinateGroup",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 500,
+              "y": 380
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 1173
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "preview-chart",
+        "type": "previewNode",
+        "position": {
+          "x": 3298.392914162759,
+          "y": 719.0647304695274
+        },
+        "data": {
+          "previewWidth": 800,
+          "previewHeight": 600,
+          "previewMode": "actual"
+        },
+        "measured": {
+          "width": 817,
+          "height": 653
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-1",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -1039.5889571382909,
+          "y": 941.593056252979
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[[352.11, 292.46, 254.24, 230.87, 216.96, 205.41, 196.85, 190.09, 184.52, 179.75, 175.75, 172.08, 168.53, 164.59, 159.45, 153.55, 147.41, 141.32, 135.97, 131.54, 127.99, 124.77, 122.2, 119.87, 117.64, 115.87, 113.91, 111.88, 109.94, 107.86, 105.6, 102.99, 99.99, 96.0, 91.42, 86.69, 82.59, 78.15, 73.7, 69.58, 66.28, 62.84, 59.14, 56.01, 53.67, 51.77, 50.31, 49.21, 48.44, 47.67, 47.0, 46.4, 45.78, 45.12, 44.43, 43.73, 43.02, 42.46, 41.97, 41.57, 41.24, 41.0, 40.8, 40.66, 40.52, 40.41, 40.28, 40.15, 39.74, 39.42, 38.9, 38.13, 37.09, 35.93, 34.64, 33.3, 31.95, 30.76, 29.62, 28.71, 27.91, 27.2, 26.6, 26.1, 25.56, 25.04, 24.45, 23.81, 23.22, 22.49, 21.7, 20.84, 19.53, 17.01, 13.08, 8.87, 5.5, 3.13, 1.84, 1.12, 0.71, 0.45, 0.26, 0.12, 0.0], [359.09, 344.68, 331.09, 319.41, 307.85, 296.12, 285.04, 274.31, 263.06, 251.45, 241.03, 231.69, 223.55, 216.17, 209.05, 202.16, 195.59, 189.98, 185.34, 181.43, 178.13, 175.48, 173.39, 171.55, 169.76, 168.25, 166.69, 165.26, 164.09, 163.13, 162.35, 161.66, 161.06, 160.52, 160.07, 159.65, 159.26, 158.91, 158.58, 158.19, 157.74, 157.24, 156.56, 155.44, 153.84, 151.63, 148.09, 142.85, 136.3, 129.8, 123.96, 119.65, 116.58, 114.51, 113.17, 112.26, 111.62, 111.1, 110.64, 110.2, 109.8, 109.41, 108.99, 108.59, 108.22, 107.9, 107.48, 107.07, 106.75, 106.45, 106.18, 105.97, 105.78, 105.64, 105.49, 105.36, 105.25, 105.14, 105.05, 104.97, 104.89, 104.81, 104.75, 104.68, 104.47, 103.27, 101.06, 98.44, 96.53, 95.56, 95.17, 95.0, 94.91, 94.87, 94.84, 94.83, 94.82, 94.81, 94.8, 94.79, 94.77, 94.75, 94.72, 94.7, 94.69], [359.63, 349.53, 340.79, 331.79, 314.61, 288.92, 259.64, 237.13, 221.58, 209.48, 198.59, 187.49, 178.15, 170.65, 164.85, 160.26, 156.57, 154.63, 153.2, 151.92, 150.43, 148.27, 145.6, 142.69, 138.31, 134.55, 131.0, 126.93, 123.59, 120.52, 117.19, 114.01, 111.3, 109.0, 106.99, 104.23, 100.1, 93.12, 80.88, 67.18, 53.15, 45.09, 40.59, 38.31, 37.14, 36.47, 36.03, 35.92, 35.82, 35.76, 35.72, 35.69, 35.66, 35.63, 35.6, 35.58, 35.56, 35.54, 35.51, 35.47, 33.71, 33.0, 32.94, 32.86, 32.78, 32.71, 32.63, 32.56, 32.52, 32.5, 32.47, 32.45, 32.44, 32.41, 32.4, 32.39, 32.38, 32.37, 32.35, 32.35, 32.34, 32.33, 32.33, 32.33, 32.33, 32.33, 32.33, 32.33, 32.33, 32.32, 32.32, 32.32, 32.32, 32.32, 32.32, 32.32, 32.32, 32.28, 32.21, 32.16, 32.09, 32.04, 32.0, 31.98, 31.96]]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 309
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-2",
+        "type": "tagMapper",
+        "position": {
+          "x": -691.0023276006209,
+          "y": 36.30978011117085
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "globalTag": false
+          },
+          "globalKeyPreset": "series",
+          "globalTagValue": "Line"
+        },
+        "measured": {
+          "width": 240,
+          "height": 581
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "tagMapper-3",
+        "type": "tagMapper",
+        "position": {
+          "x": -689.96673210699,
+          "y": 638.0252642791274
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "globalTag": false
+          },
+          "globalKeyPreset": "series",
+          "globalTagValue": "Line"
+        },
+        "measured": {
+          "width": 240,
+          "height": 581
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "pathGenerator-4",
+        "type": "pathGenerator",
+        "position": {
+          "x": -19.79723904473377,
+          "y": 531.7165543688004
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "style": false
+          },
+          "strokeWidth": 1
+        },
+        "measured": {
+          "width": 240,
+          "height": 672
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "pathGenerator-5",
+        "type": "pathGenerator",
+        "position": {
+          "x": -19.79723904473377,
+          "y": -126.28344563119924
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "style": false,
+            "curve": true
+          },
+          "strokeWidth": 1
+        },
+        "measured": {
+          "width": 240,
+          "height": 672
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-6",
+        "type": "scaleMapper",
+        "position": {
+          "x": -330.21657503187686,
+          "y": 1274.4817387470753
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rangeMax": 500
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-7",
+        "type": "scaleMapper",
+        "position": {
+          "x": -331.79723904473394,
+          "y": 641.7165543688006
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rangeMax": 500
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-8",
+        "type": "scaleMapper",
+        "position": {
+          "x": -331.79723904473394,
+          "y": 5.716554368800644
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rangeMax": 500
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-10",
+        "type": "shapeGenerator",
+        "position": {
+          "x": -678.5575451892869,
+          "y": -1529.1041261054825
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false
+          },
+          "defaultHeight": 40,
+          "defaultWidth": 60,
+          "alignX": "center",
+          "alignY": "center",
+          "cornerRadius": 3,
+          "strokeWidth": 1,
+          "fillColor": "#ffffff",
+          "strokeColor": "#ababab"
+        },
+        "measured": {
+          "width": 240,
+          "height": 887
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-11",
+        "type": "textGenerator",
+        "position": {
+          "x": -11.842293147475289,
+          "y": -747.966446054013
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "position": true,
+            "typography": true
+          },
+          "defaultText": "By Calendar Date",
+          "alignX": "right",
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 553
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-12",
+        "type": "textGenerator",
+        "position": {
+          "x": -12.57711409291096,
+          "y": 1163.1733288736798
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "position": true,
+            "typography": true
+          },
+          "defaultText": "By Outbreak Timeline",
+          "alignX": "right",
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 553
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-13",
+        "type": "textGenerator",
+        "position": {
+          "x": -319.9374729197278,
+          "y": -1594.2899534338376
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "Switch",
+          "sectionCollapsed": {
+            "typography": false
+          },
+          "fontWeight": "500"
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-14",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 6.81183460293812,
+          "y": -1744.185636996159
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-10",
+              "sourceNodeId": "shapeGenerator-10",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-10-coordinateGroup-14layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-13",
+              "sourceNodeId": "textGenerator-13",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-13-coordinateGroup-14layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 193
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-15",
+        "type": "previewNode",
+        "position": {
+          "x": 388.8667487151615,
+          "y": -1744.2462031816826
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview"
+        },
+        "measured": {
+          "width": 257,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-17",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 391.9211347891569,
+          "y": -492.0068857950439
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-textGenerator-11",
+              "sourceNodeId": "textGenerator-11",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-11-coordinateGroup-17layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 500,
+              "y": 460
+            },
+            {
+              "id": "layer-pathGenerator-5",
+              "sourceNodeId": "pathGenerator-5",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__pathGenerator-5-coordinateGroup-17layers",
+              "label": "pathGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-d3AxisGenerator-28",
+              "sourceNodeId": "d3AxisGenerator-28",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-28-coordinateGroup-17layers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 193
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-18",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -694.193943154442,
+          "y": 1157.138559356729
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#1F77B4\",\n  \"#E68613\",\n  \"#2CA02C\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-20",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 393.20173931172394,
+          "y": 575.9696194339533
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-textGenerator-12",
+              "sourceNodeId": "textGenerator-12",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-12-coordinateGroup-20layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 500,
+              "y": 460
+            },
+            {
+              "id": "layer-pathGenerator-4",
+              "sourceNodeId": "pathGenerator-4",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__pathGenerator-4-coordinateGroup-20layers",
+              "label": "pathGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-d3AxisGenerator-39",
+              "sourceNodeId": "d3AxisGenerator-39",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__d3AxisGenerator-39-coordinateGroup-20layers",
+              "label": "d3AxisGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-42",
+              "sourceNodeId": "textGenerator-42",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-42-coordinateGroup-20layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 250,
+              "y": -40
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 367
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "states-21",
+        "type": "states",
+        "position": {
+          "x": 1145.9656274526292,
+          "y": 70.9511898857254
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "states": [
+            {
+              "id": "state-xy-edge__coordinateGroup-17-states-21states",
+              "stateKey": "state-xy-edge__coordinateGroup-17-states-21states",
+              "sourceNodeId": "coordinateGroup-17",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-17-states-21states",
+              "label": "coordinateGroup",
+              "enabled": true
+            },
+            {
+              "id": "state-xy-edge__coordinateGroup-20-states-21states",
+              "stateKey": "state-xy-edge__coordinateGroup-20-states-21states",
+              "sourceNodeId": "coordinateGroup-20",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__coordinateGroup-20-states-21states",
+              "label": "coordinateGroup",
+              "enabled": true
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 669
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "elementSelector-22",
+        "type": "elementSelector",
+        "position": {
+          "x": 337.63957560909023,
+          "y": -1471.7467413359286
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 240,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "eventTrigger-23",
+        "type": "eventTrigger",
+        "position": {
+          "x": 651.3929048767427,
+          "y": -1423.2438112075959
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "eventType": "click"
+        },
+        "measured": {
+          "width": 240,
+          "height": 245
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "transition-24",
+        "type": "transition",
+        "position": {
+          "x": 1490.487701098645,
+          "y": 125.66767078654959
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "interpolation": false
+          },
+          "textMode": "crossfade"
+        },
+        "measured": {
+          "width": 240,
+          "height": 570
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-25",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": 1480.5811262765376,
+          "y": 1336.5167320863998
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "y",
+          "sectionCollapsed": {
+            "tickLabel": true
+          },
+          "yTickCount": 20,
+          "xTickCount": 20
+        },
+        "measured": {
+          "width": 240,
+          "height": 801
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-28",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": -318.4756715064363,
+          "y": -720.1846032524966
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "x",
+          "xTickCount": 4,
+          "xScaleType": "linear",
+          "sectionCollapsed": {
+            "xDomain": false,
+            "tickLabel": true,
+            "plotSize": true
+          }
+        },
+        "measured": {
+          "width": 240,
+          "height": 801
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-29",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 781.9839644972441,
+          "y": 1359.7424089662159
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[[118.656, 430.358, 979.68, 1619.654, 2184.447, 2800.746, 3366.209, 3892.865, 4388.265, 4861.744, 5298.298, 5734.383, 6188.291, 6735.979, 7522.032, 8539.474, 9744.3, 11106.767, 12459.994, 13707.5, 14794.291, 15854.566, 16754.041, 17612.824, 18477.96, 19194.912, 20022.902, 20914.844, 21805.062, 22802.73, 23938.682, 25317.963, 27004.459, 29426.24, 32469.2, 35939.15, 39256.867, 43186.0, 47519.566, 51920.484, 55741.34, 60013.81, 64985.867, 69504.22, 73081.79, 76132.55, 78558.68, 80449.01, 81777.65, 83149.516, 84350.42, 85458.84, 86588.26, 87825.516, 89144.42, 90492.36, 91887.0, 93001.33, 93982.375, 94805.11, 95467.32, 95976.77, 96390.24, 96677.83, 96962.37, 97198.44, 97457.805, 97741.62, 98603.01, 99287.695, 100402.32, 102082.56, 104374.4, 107027.31, 110019.52, 113249.33, 116575.47, 119604.016, 122550.97, 124969.13, 127140.19, 129103.695, 130786.26, 132196.53, 133733.77, 135230.69, 136959.56, 138873.84, 140624.77, 142869.27, 145304.11, 148005.81, 152238.66, 160727.33, 174865.55, 191461.69, 205824.81, 216608.12, 222672.83, 226143.16, 228137.3, 229434.78, 230375.08, 231054.94, 231659.45], [101.991, 139.401, 187.031, 240.694, 308.831, 397.664, 504.878, 636.128, 810.42, 1040.502, 1301.89, 1591.58, 1896.098, 2222.023, 2589.523, 3002.913, 3458.788, 3902.464, 4311.205, 4689.893, 5034.21, 5329.69, 5574.786, 5800.118, 6027.494, 6225.723, 6438.677, 6638.596, 6807.642, 6949.631, 7068.158, 7172.819, 7265.803, 7351.627, 7423.646, 7490.293, 7553.017, 7609.883, 7664.889, 7728.536, 7804.368, 7888.735, 8004.521, 8198.825, 8485.799, 8899.848, 9603.781, 10748.449, 12372.682, 14229.341, 16130.31, 17699.303, 18905.875, 19766.09, 20342.361, 20745.334, 21030.85, 21268.7, 21481.291, 21682.88, 21870.223, 22057.275, 22257.605, 22448.182, 22625.336, 22782.549, 22988.877, 23192.3, 23354.172, 23504.973, 23640.404, 23749.47, 23842.688, 23918.771, 23994.42, 24060.389, 24117.127, 24172.752, 24221.916, 24264.95, 24307.436, 24346.203, 24380.242, 24413.586, 24526.232, 25168.518, 26390.95, 27920.973, 29092.762, 29703.186, 29951.064, 30062.602, 30118.104, 30146.352, 30163.717, 30174.176, 30181.9, 30187.412, 30192.387, 30198.418, 30210.375, 30226.05, 30242.027, 30254.432, 30264.744], [100.802, 125.481, 151.634, 184.188, 266.932, 464.403, 872.356, 1415.741, 1978.067, 2565.673, 3243.036, 4116.807, 5032.561, 5913.053, 6697.889, 7393.33, 8002.676, 8342.853, 8603.866, 8843.461, 9132.926, 9566.019, 10131.144, 10785.383, 11851.216, 12848.832, 13867.004, 15133.057, 16260.617, 17368.033, 18657.994, 19978.64, 21174.99, 22252.432, 23231.076, 24650.42, 26940.664, 31302.975, 40722.664, 54663.914, 73907.14, 87893.2, 96815.805, 101682.61, 104278.336, 105781.05, 106788.02, 107047.55, 107273.984, 107404.1, 107495.75, 107580.28, 107640.555, 107708.04, 107766.484, 107818.28, 107865.86, 107926.55, 107981.77, 108074.93, 112258.17, 113967.43, 114130.18, 114327.15, 114509.266, 114684.47, 114876.84, 115043.58, 115146.57, 115203.19, 115266.91, 115326.01, 115361.97, 115417.68, 115444.06, 115473.6, 115500.57, 115533.84, 115564.44, 115586.195, 115604.84, 115619.35, 115624.95, 115629.59, 115632.1, 115632.914, 115634.35, 115635.55, 115637.14, 115637.984, 115638.66, 115639.41, 115640.28, 115641.164, 115642.15, 115644.27, 115657.34, 115752.125, 115918.93, 116047.875, 116225.055, 116357.47, 116448.414, 116507.65, 116539.18]]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 309
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-30",
+        "type": "scaleMapper",
+        "position": {
+          "x": 1137.2286048489475,
+          "y": 1350.1605501694364
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rangeMax": 500
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-33",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -955.5576048447228,
+          "y": -699.0025895630214
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[2020, 2021, 2022, 2023]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-34",
+        "type": "scaleMapper",
+        "position": {
+          "x": -649.9424150588144,
+          "y": -679.2131634513319
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "scaleType": "linear",
+          "rangeMax": 500,
+          "bandOutput": "center",
+          "paddingOuter": -2,
+          "paddingInner": 0,
+          "sectionCollapsed": {
+            "options": true,
+            "manualDomain": true
+          },
+          "domainBaseline": "dataExtent"
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-35",
+        "type": "simpleDataInput",
+        "position": {
+          "x": -671.4504816919539,
+          "y": 1889.4558946860204
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0, 25, 50, 75, 100]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "d3AxisGenerator-39",
+        "type": "d3AxisGenerator",
+        "position": {
+          "x": -5.961238205057953,
+          "y": 1953.949613670484
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "axisMode": "x"
+        },
+        "measured": {
+          "width": 240,
+          "height": 801
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "scaleMapper-40",
+        "type": "scaleMapper",
+        "position": {
+          "x": -315.66039518749534,
+          "y": 1956.7605962585674
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rangeMax": 500
+        },
+        "measured": {
+          "width": 240,
+          "height": 606
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-42",
+        "type": "textGenerator",
+        "position": {
+          "x": -2.9431153335656575,
+          "y": 2738.7409508067567
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "Weeks",
+          "sectionCollapsed": {
+            "typography": true
+          },
+          "fontWeight": "bold"
+        },
+        "measured": {
+          "width": 240,
+          "height": 630
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-43",
+        "type": "textGenerator",
+        "position": {
+          "x": 1481.3007613094878,
+          "y": 2216.550046614291
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "defaultText": "Case Number",
+          "sectionCollapsed": {
+            "typography": false
+          },
+          "fontWeight": "bold",
+          "rotate": -90
+        },
+        "measured": {
+          "width": 240,
+          "height": 871
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "shapeGenerator-44",
+        "type": "shapeGenerator",
+        "position": {
+          "x": 2150.8447455090363,
+          "y": -1082.8000798554815
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "geometry": false,
+            "style": false,
+            "fallbackLayout": true
+          },
+          "defaultWidth": 10,
+          "defaultHeight": 10,
+          "layoutMode": "linearY",
+          "strokeWidth": 0,
+          "layoutGapY": 20,
+          "alignX": "center",
+          "alignY": "center"
+        },
+        "measured": {
+          "width": 240,
+          "height": 892
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-47",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1784.9214700411057,
+          "y": -944.7459598393839
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"#1F77B4\",\n  \"#E68613\",\n  \"#2CA02C\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-49",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1786.6828212645976,
+          "y": -1344.2097933198368
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[0,20,40]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "textGenerator-50",
+        "type": "textGenerator",
+        "position": {
+          "x": 2148.8842337856213,
+          "y": -129.31895801405358
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "sectionCollapsed": {
+            "fallbackLayout": false,
+            "typography": false
+          },
+          "layoutAxis": "y",
+          "alignX": "right",
+          "fontSize": 10
+        },
+        "measured": {
+          "width": 240,
+          "height": 1010
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "simpleDataInput-51",
+        "type": "simpleDataInput",
+        "position": {
+          "x": 1816.532951876178,
+          "y": -362.0730300988585
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "rawText": "[\n  \"United States\",\n  \"India\",\n  \"Vietnam\"\n]"
+        },
+        "measured": {
+          "width": 240,
+          "height": 275
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "coordinateGroup-53",
+        "type": "coordinateGroup",
+        "position": {
+          "x": 2543.7385599975355,
+          "y": -701.4270612359894
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "layers": [
+            {
+              "id": "layer-shapeGenerator-44",
+              "sourceNodeId": "shapeGenerator-44",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__shapeGenerator-44-coordinateGroup-53layers",
+              "label": "shapeGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "layer-textGenerator-50",
+              "sourceNodeId": "textGenerator-50",
+              "sourceHandle": null,
+              "edgeId": "xy-edge__textGenerator-50-coordinateGroup-53layers",
+              "label": "textGenerator",
+              "role": "auto",
+              "layerHint": "auto",
+              "visible": true,
+              "locked": false,
+              "opacity": 1,
+              "x": -15,
+              "y": 0
+            }
+          ]
+        },
+        "measured": {
+          "width": 240,
+          "height": 193
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "previewNode-54",
+        "type": "previewNode",
+        "position": {
+          "x": 2946.517749995539,
+          "y": -492.8727860631909
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "label": "Basic Preview"
+        },
+        "measured": {
+          "width": 257,
+          "height": 213
+        },
+        "selected": false,
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-coordinate-group-to-preview",
+        "source": "coordinate-chart",
+        "target": "preview-chart"
+      },
+      {
+        "source": "data-x-categories",
+        "target": "tagMapper-2",
+        "targetHandle": "input",
+        "id": "xy-edge__data-x-categories-tagMapper-2input"
+      },
+      {
+        "source": "data-y-values",
+        "target": "tagMapper-3",
+        "targetHandle": "input",
+        "id": "xy-edge__data-y-values-tagMapper-3input"
+      },
+      {
+        "source": "textGenerator-13",
+        "target": "coordinateGroup-14",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-13-coordinateGroup-14layers"
+      },
+      {
+        "source": "shapeGenerator-10",
+        "target": "coordinateGroup-14",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-10-coordinateGroup-14layers"
+      },
+      {
+        "source": "coordinateGroup-14",
+        "target": "previewNode-15",
+        "id": "xy-edge__coordinateGroup-14-previewNode-15"
+      },
+      {
+        "source": "textGenerator-11",
+        "target": "coordinateGroup-17",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-11-coordinateGroup-17layers"
+      },
+      {
+        "source": "pathGenerator-5",
+        "target": "coordinateGroup-17",
+        "targetHandle": "layers",
+        "id": "xy-edge__pathGenerator-5-coordinateGroup-17layers"
+      },
+      {
+        "source": "textGenerator-12",
+        "target": "coordinateGroup-20",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-12-coordinateGroup-20layers"
+      },
+      {
+        "source": "pathGenerator-4",
+        "target": "coordinateGroup-20",
+        "targetHandle": "layers",
+        "id": "xy-edge__pathGenerator-4-coordinateGroup-20layers"
+      },
+      {
+        "source": "coordinateGroup-14",
+        "target": "elementSelector-22",
+        "targetHandle": "visual",
+        "id": "xy-edge__coordinateGroup-14-elementSelector-22visual"
+      },
+      {
+        "source": "elementSelector-22",
+        "target": "eventTrigger-23",
+        "targetHandle": "selection",
+        "id": "xy-edge__elementSelector-22-eventTrigger-23selection"
+      },
+      {
+        "source": "eventTrigger-23",
+        "target": "states-21",
+        "targetHandle": "event",
+        "id": "xy-edge__eventTrigger-23-states-21event"
+      },
+      {
+        "source": "coordinateGroup-17",
+        "target": "states-21",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-17-states-21states"
+      },
+      {
+        "source": "coordinateGroup-20",
+        "target": "states-21",
+        "targetHandle": "states",
+        "id": "xy-edge__coordinateGroup-20-states-21states"
+      },
+      {
+        "source": "simpleDataInput-1",
+        "target": "scaleMapper-6",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-1-scaleMapper-6input"
+      },
+      {
+        "source": "tagMapper-2",
+        "target": "scaleMapper-8",
+        "targetHandle": "input",
+        "id": "xy-edge__tagMapper-2-scaleMapper-8input"
+      },
+      {
+        "source": "tagMapper-3",
+        "target": "scaleMapper-7",
+        "targetHandle": "input",
+        "id": "xy-edge__tagMapper-3-scaleMapper-7input"
+      },
+      {
+        "source": "scaleMapper-6",
+        "target": "pathGenerator-4",
+        "targetHandle": "y",
+        "id": "xy-edge__scaleMapper-6-pathGenerator-4y",
+        "selected": false
+      },
+      {
+        "source": "scaleMapper-7",
+        "target": "pathGenerator-4",
+        "targetHandle": "x",
+        "id": "xy-edge__scaleMapper-7-pathGenerator-4x"
+      },
+      {
+        "source": "coordinateGroup-14",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__coordinateGroup-14-coordinate-chartlayers"
+      },
+      {
+        "source": "scaleMapper-8",
+        "target": "pathGenerator-5",
+        "targetHandle": "x",
+        "id": "xy-edge__scaleMapper-8-pathGenerator-5x"
+      },
+      {
+        "source": "scaleMapper-6",
+        "target": "pathGenerator-5",
+        "targetHandle": "y",
+        "id": "xy-edge__scaleMapper-6-pathGenerator-5y"
+      },
+      {
+        "source": "states-21",
+        "target": "transition-24",
+        "targetHandle": "visual",
+        "id": "xy-edge__states-21-transition-24visual"
+      },
+      {
+        "source": "transition-24",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__transition-24-coordinate-chartlayers"
+      },
+      {
+        "source": "d3AxisGenerator-25",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-25-coordinate-chartlayers"
+      },
+      {
+        "source": "d3AxisGenerator-28",
+        "target": "coordinateGroup-17",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-28-coordinateGroup-17layers"
+      },
+      {
+        "source": "simpleDataInput-29",
+        "target": "scaleMapper-30",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-29-scaleMapper-30input"
+      },
+      {
+        "source": "scaleMapper-30",
+        "target": "d3AxisGenerator-25",
+        "targetHandle": "yScale",
+        "id": "xy-edge__scaleMapper-30-d3AxisGenerator-25yScale"
+      },
+      {
+        "source": "simpleDataInput-33",
+        "target": "scaleMapper-34",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-33-scaleMapper-34input"
+      },
+      {
+        "source": "scaleMapper-34",
+        "target": "d3AxisGenerator-28",
+        "targetHandle": "xScale",
+        "id": "xy-edge__scaleMapper-34-d3AxisGenerator-28xScale"
+      },
+      {
+        "source": "simpleDataInput-35",
+        "target": "scaleMapper-40",
+        "targetHandle": "input",
+        "id": "xy-edge__simpleDataInput-35-scaleMapper-40input"
+      },
+      {
+        "source": "scaleMapper-40",
+        "target": "d3AxisGenerator-39",
+        "targetHandle": "xScale",
+        "id": "xy-edge__scaleMapper-40-d3AxisGenerator-39xScale"
+      },
+      {
+        "source": "d3AxisGenerator-39",
+        "target": "coordinateGroup-20",
+        "targetHandle": "layers",
+        "id": "xy-edge__d3AxisGenerator-39-coordinateGroup-20layers"
+      },
+      {
+        "source": "textGenerator-42",
+        "target": "coordinateGroup-20",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-42-coordinateGroup-20layers"
+      },
+      {
+        "source": "textGenerator-43",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-43-coordinate-chartlayers"
+      },
+      {
+        "source": "simpleDataInput-18",
+        "target": "pathGenerator-4",
+        "targetHandle": "stroke",
+        "id": "xy-edge__simpleDataInput-18-pathGenerator-4stroke"
+      },
+      {
+        "source": "simpleDataInput-18",
+        "target": "pathGenerator-5",
+        "targetHandle": "stroke",
+        "id": "xy-edge__simpleDataInput-18-pathGenerator-5stroke"
+      },
+      {
+        "source": "simpleDataInput-47",
+        "target": "shapeGenerator-44",
+        "targetHandle": "fill",
+        "id": "xy-edge__simpleDataInput-47-shapeGenerator-44fill"
+      },
+      {
+        "source": "simpleDataInput-49",
+        "target": "shapeGenerator-44",
+        "targetHandle": "y",
+        "id": "xy-edge__simpleDataInput-49-shapeGenerator-44y"
+      },
+      {
+        "source": "simpleDataInput-51",
+        "target": "textGenerator-50",
+        "targetHandle": "text",
+        "id": "xy-edge__simpleDataInput-51-textGenerator-50text"
+      },
+      {
+        "source": "shapeGenerator-44",
+        "target": "coordinateGroup-53",
+        "targetHandle": "layers",
+        "id": "xy-edge__shapeGenerator-44-coordinateGroup-53layers"
+      },
+      {
+        "source": "textGenerator-50",
+        "target": "coordinateGroup-53",
+        "targetHandle": "layers",
+        "id": "xy-edge__textGenerator-50-coordinateGroup-53layers"
+      },
+      {
+        "source": "coordinateGroup-53",
+        "target": "coordinate-chart",
+        "targetHandle": "layers",
+        "id": "xy-edge__coordinateGroup-53-coordinate-chartlayers"
+      },
+      {
+        "source": "coordinateGroup-53",
+        "target": "previewNode-54",
+        "id": "xy-edge__coordinateGroup-53-previewNode-54"
+      }
+    ],
+    "viewport": {
+      "x": -455.6249255051489,
+      "y": 79.82308499898386,
+      "zoom": 0.5
+    }
+  }
+}
