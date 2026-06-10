@@ -10,6 +10,12 @@ const STRUCTURAL_HANDLES = [
   'width',
   'height',
   'radius',
+  'outerRadius',
+  'innerRadius',
+  'startAngle',
+  'endAngle',
+  'totalAngle',
+  'padAngle',
   'cornerRadius',
   'alignX',
   'alignY',
@@ -33,6 +39,12 @@ const MATRIX_PRIMARY_HANDLE_ORDER = [
   'width',
   'height',
   'radius',
+  'outerRadius',
+  'innerRadius',
+  'startAngle',
+  'endAngle',
+  'totalAngle',
+  'padAngle',
   'cornerRadius',
   'fill',
   'opacity',
@@ -48,6 +60,12 @@ const MATRIX_ARRAY_RESOLVE_ORDER = {
   height: ['cell', 'row', 'column'],
 
   radius: ['cell', 'row', 'column'],
+  outerRadius: ['cell', 'row', 'column'],
+  innerRadius: ['cell', 'row', 'column'],
+  startAngle: ['cell', 'row', 'column'],
+  endAngle: ['cell', 'row', 'column'],
+  totalAngle: ['cell', 'row', 'column'],
+  padAngle: ['cell', 'row', 'column'],
   cornerRadius: ['cell', 'row', 'column'],
 
   fill: ['cell', 'row', 'column'],
@@ -63,6 +81,7 @@ export function evalShapeGenerator(ctx) {
   const warnings = [];
 
   const shapeType = params.shapeType ?? 'rect';
+  const circleVariant = getCircleVariant(params);
 
   const inputsByHandle = ctx.inputs?.byTargetHandle ?? {};
 
@@ -75,6 +94,12 @@ export function evalShapeGenerator(ctx) {
     'width',
     'height',
     'radius',
+    'outerRadius',
+    'innerRadius',
+    'startAngle',
+    'endAngle',
+    'totalAngle',
+    'padAngle',
     'cornerRadius',
     'alignX',
     'alignY',
@@ -84,6 +109,7 @@ export function evalShapeGenerator(ctx) {
     'opacity',
     'layoutGapX',
     'layoutGapY',
+    'values',
     'frame',
     'style',
   ]);
@@ -110,31 +136,43 @@ export function evalShapeGenerator(ctx) {
 
   const children = [];
 
-  for (let index = 0; index < count; index++) {
-    const elementContext = makeElementContext({
-      index,
-      matrixContext,
-    });
-
-    const resolved = resolveElementParams({
-      index,
+  if (shapeType === 'circle' && circleVariant === 'pieDonutValues') {
+    children.push(...makePieDonutElements({
+      ctx,
       shapeType,
       params,
       streams,
-      hasFrameInput,
-      hasStyleInput,
-      elementContext,
-    });
-
-    children.push(makeShapeElement({
-      ctx,
-      index,
-      shapeType,
-      resolved,
-      streams,
       parameterSources,
-      elementContext,
+      matrixContext,
+      warnings,
     }));
+  } else {
+    for (let index = 0; index < count; index++) {
+      const elementContext = makeElementContext({
+        index,
+        matrixContext,
+      });
+
+      const resolved = resolveElementParams({
+        index,
+        shapeType,
+        params,
+        streams,
+        hasFrameInput,
+        hasStyleInput,
+        elementContext,
+      });
+
+      children.push(makeShapeElement({
+        ctx,
+        index,
+        shapeType,
+        resolved,
+        streams,
+        parameterSources,
+        elementContext,
+      }));
+    }
   }
 
     const inputProvenance = collectInputProvenanceFromSources(parameterSources);
@@ -147,7 +185,10 @@ export function evalShapeGenerator(ctx) {
     transform: {
         type: 'generate-visual-elements',
         shapeType,
-        count,
+        ...(shapeType === 'circle' && circleVariant !== 'fullCircle'
+          ? { circleVariant }
+          : {}),
+        count: children.length,
     },
     });
 
@@ -184,7 +225,7 @@ export function evalShapeGenerator(ctx) {
         }),
 
         resolved: {
-          count,
+          count: children.length,
           matrix: matrixContext
             ? {
                 rows: matrixContext.rows,
@@ -204,7 +245,7 @@ export function evalShapeGenerator(ctx) {
         label: 'Shape Generator Output',
         outputRole: 'generated-visual-collection',
         warnings,
-        resolvedCount: count,
+        resolvedCount: children.length,
 
         matrixContext: matrixContext
         ? {
@@ -327,6 +368,13 @@ function buildParamStreams({
     if (output) {
       streams[handle] = makeStreamFromOutput(output, handle, 'layout', warnings);
     }
+  }
+
+  const valuesOutput = getFirstInputValue(inputsByHandle, 'values');
+  if (valuesOutput) {
+    streams.values = makeStreamFromOutput(valuesOutput, 'values', 'slice', warnings);
+  } else if (params.values !== undefined && params.values !== null && params.values !== '') {
+    streams.values = makeStreamFromRawValue(parseValuesInput(params.values), 'values', 'slice');
   }
 
   // Data input can still help infer count if connected.
@@ -837,6 +885,60 @@ function resolveElementParams({
     elementContext,
   });
 
+  const outerRadius = resolveParam({
+    handleId: 'outerRadius',
+    stream: streams.outerRadius,
+    index,
+    fallback: params.outerRadius ?? params.defaultRadius ?? 8,
+    repeatStyle: false,
+    elementContext,
+  });
+
+  const innerRadius = resolveParam({
+    handleId: 'innerRadius',
+    stream: streams.innerRadius,
+    index,
+    fallback: params.innerRadius ?? 0,
+    repeatStyle: false,
+    elementContext,
+  });
+
+  const startAngle = resolveParam({
+    handleId: 'startAngle',
+    stream: streams.startAngle,
+    index,
+    fallback: params.startAngle ?? -90,
+    repeatStyle: false,
+    elementContext,
+  });
+
+  const endAngle = resolveParam({
+    handleId: 'endAngle',
+    stream: streams.endAngle,
+    index,
+    fallback: params.endAngle ?? 90,
+    repeatStyle: false,
+    elementContext,
+  });
+
+  const totalAngle = resolveParam({
+    handleId: 'totalAngle',
+    stream: streams.totalAngle,
+    index,
+    fallback: params.totalAngle ?? null,
+    repeatStyle: false,
+    elementContext,
+  });
+
+  const padAngle = resolveParam({
+    handleId: 'padAngle',
+    stream: streams.padAngle,
+    index,
+    fallback: params.padAngle ?? 0,
+    repeatStyle: false,
+    elementContext,
+  });
+
   const cornerRadius = resolveParam({
     handleId: 'cornerRadius',
     stream: streams.cornerRadius,
@@ -901,6 +1003,7 @@ function resolveElementParams({
   });
 
   return {
+    circleVariant: getCircleVariant(params),
     x,
     // SVG-space y used for rendering.
     y,
@@ -909,6 +1012,12 @@ function resolveElementParams({
     width,
     height,
     radius,
+    outerRadius,
+    innerRadius,
+    startAngle,
+    endAngle,
+    totalAngle,
+    padAngle,
     cornerRadius,
     alignX,
     alignY,
@@ -1059,8 +1168,15 @@ function makeShapeElement({
   parameterSources,
   elementContext,
 }) {
-  const frame = makeFrame({ shapeType, resolved });
-  const content = makeContent({ shapeType, resolved });
+  const circleVariant = shapeType === 'circle'
+    ? getCircleVariant(resolved)
+    : null;
+  const radialGeometry = makeRadialGeometry({
+    circleVariant,
+    resolved,
+  });
+  const frame = makeFrame({ shapeType, resolved, radialGeometry });
+  const content = makeContent({ shapeType, resolved, radialGeometry });
 
   const parameterLineage = makeElementParameterLineage({
     index,
@@ -1075,6 +1191,40 @@ function makeShapeElement({
     parameterLineage,
     parameterSources,
   });
+
+  const inputValues = {
+    x: resolved.x,
+    // SVG-space y
+    y: resolved.y,
+    // User-space y before SVG conversion
+    userY: resolved.userY,
+    width: resolved.width,
+    height: resolved.height,
+    radius: resolved.radius,
+    cornerRadius: resolved.cornerRadius,
+    alignX: resolved.alignX,
+    alignY: resolved.alignY,
+    fill: resolved.fill,
+    stroke: resolved.stroke,
+    strokeWidth: resolved.strokeWidth,
+    opacity: resolved.opacity,
+  };
+
+  if (circleVariant && circleVariant !== 'fullCircle') {
+    inputValues.outerRadius = radialGeometry?.outerRadius ?? resolved.outerRadius;
+    inputValues.innerRadius = radialGeometry?.innerRadius ?? resolved.innerRadius;
+    inputValues.startAngle = radialGeometry?.startAngle ?? resolved.startAngle;
+    inputValues.endAngle = radialGeometry?.endAngle ?? resolved.endAngle;
+    inputValues.totalAngle = radialGeometry?.totalAngle ?? resolved.totalAngle;
+    inputValues.padAngle = resolved.padAngle;
+  }
+
+  const radialMetadata = circleVariant && circleVariant !== 'fullCircle'
+    ? {
+        circleVariant,
+        radial: radialGeometry?.meta ?? null,
+      }
+    : {};
 
   return {
     nodeType: 'element',
@@ -1096,27 +1246,12 @@ function makeShapeElement({
       collectionId: `${ctx.nodeId}-collection`,
       generatorNodeId: ctx.nodeId,
 
-      inputValues: {
-        x: resolved.x,
-        // SVG-space y
-        y: resolved.y,
-        // User-space y before SVG conversion
-        userY: resolved.userY,
-        width: resolved.width,
-        height: resolved.height,
-        radius: resolved.radius,
-        cornerRadius: resolved.cornerRadius,
-        alignX: resolved.alignX,
-        alignY: resolved.alignY,
-        fill: resolved.fill,
-        stroke: resolved.stroke,
-        strokeWidth: resolved.strokeWidth,
-        opacity: resolved.opacity,
-      },
+      inputValues,
 
       // The important new part.
       // Binding nodes can compare this with TextGenerator / PathGenerator later.
       parameterLineage,
+      ...radialMetadata,
 
       // Empty for now unless upstream nodes already provide tags.
       // Future TagMapper can make this useful without changing ShapeGenerator again.
@@ -1149,6 +1284,7 @@ function makeShapeElement({
       generatorNodeId: ctx.nodeId,
       matrixContext: elementContext?.matrix ?? null,
       matrixItem: elementContext?.matrixItem ?? null,
+      ...radialMetadata,
 
       // Duplicate a lightweight copy in meta so future selectors do not need
       // to know whether to read dataRef or meta first.
@@ -1158,9 +1294,465 @@ function makeShapeElement({
   };
 }
 
-function makeFrame({ shapeType, resolved }) {
+function makePieDonutElements({
+  ctx,
+  shapeType,
+  params,
+  streams,
+  parameterSources,
+  matrixContext,
+  warnings,
+}) {
+  const elementContext = makeElementContext({
+    index: 0,
+    matrixContext,
+  });
+  const baseResolved = resolveElementParams({
+    index: 0,
+    shapeType,
+    params,
+    streams,
+    elementContext,
+  });
+  const values = getPieValues(streams, params);
+  const positiveValues = values.map((value) => Math.max(0, toFiniteNumber(value, 0)));
+  const sum = positiveValues.reduce((total, value) => total + value, 0);
+
+  if (sum <= 0) {
+    warnings.push('Pie / Donut from Values needs at least one positive value.');
+    return [];
+  }
+
+  const startAngle = toFiniteNumber(baseResolved.startAngle, -90);
+  const totalAngleFallback =
+    Number.isFinite(Number(params.endAngle))
+      ? Number(params.endAngle) - startAngle
+      : 360;
+  const totalAngle = normalizeAngleSpan(
+    baseResolved.totalAngle ?? totalAngleFallback,
+    360
+  );
+  const signedTotalAngle = totalAngle === 0 ? 360 : totalAngle;
+  let cursor = startAngle;
+  const children = [];
+
+  positiveValues.forEach((value, sliceIndex) => {
+    if (value <= 0) return;
+
+    const fraction = value / sum;
+    const span = signedTotalAngle * fraction;
+    const rawStartAngle = cursor;
+    const rawEndAngle = cursor + span;
+    cursor = rawEndAngle;
+
+    const resolved = {
+      ...baseResolved,
+      fill: resolveParam({
+        handleId: 'fill',
+        stream: streams.fill,
+        index: sliceIndex,
+        fallback: params.fillColor ?? '#5b78ff',
+        repeatStyle: true,
+        elementContext,
+      }),
+      stroke: resolveParam({
+        handleId: 'stroke',
+        stream: streams.stroke,
+        index: sliceIndex,
+        fallback: params.strokeColor ?? '#000000',
+        repeatStyle: true,
+        elementContext,
+      }),
+      strokeWidth: resolveParam({
+        handleId: 'strokeWidth',
+        stream: streams.strokeWidth,
+        index: sliceIndex,
+        fallback: params.strokeWidth ?? 2,
+        repeatStyle: true,
+        elementContext,
+      }),
+      opacity: resolveParam({
+        handleId: 'opacity',
+        stream: streams.opacity,
+        index: sliceIndex,
+        fallback: params.opacity ?? 1,
+        repeatStyle: true,
+        elementContext,
+      }),
+      startAngle: rawStartAngle,
+      endAngle: rawEndAngle,
+      totalAngle: span,
+      values: value,
+      circleVariant: 'pieDonutValues',
+    };
+
+    const element = makeShapeElement({
+      ctx,
+      index: sliceIndex,
+      shapeType,
+      resolved,
+      streams,
+      parameterSources,
+      elementContext,
+    });
+
+    const radialMeta = {
+      index: sliceIndex,
+      value,
+      fraction,
+      percentage: fraction * 100,
+      startAngle: rawStartAngle,
+      endAngle: rawEndAngle,
+      innerRadius: element.dataRef?.inputValues?.innerRadius,
+      outerRadius: element.dataRef?.inputValues?.outerRadius,
+    };
+
+    element.id = `${ctx.nodeId}-circle-pieDonutValues-${sliceIndex}`;
+    element.tags = ['shape', 'circle', 'pie-donut-slice'];
+    element.dataRef = {
+      ...element.dataRef,
+      index: sliceIndex,
+      sliceIndex,
+      value,
+      fraction,
+      percentage: fraction * 100,
+      radial: {
+        ...(element.dataRef?.radial ?? {}),
+        ...radialMeta,
+      },
+    };
+    element.meta = {
+      ...element.meta,
+      elementIndex: sliceIndex,
+      sliceIndex,
+      value,
+      fraction,
+      percentage: fraction * 100,
+      radial: {
+        ...(element.meta?.radial ?? {}),
+        ...radialMeta,
+      },
+    };
+
+    children.push(element);
+  });
+
+  return children;
+}
+
+function makeRadialGeometry({
+  circleVariant,
+  resolved,
+}) {
+  if (!circleVariant || circleVariant === 'fullCircle') return null;
+
+  const outerRadius = Math.max(
+    0,
+    toFiniteNumber(resolved.outerRadius ?? resolved.radius, 0)
+  );
+  const innerRadius = clampInnerRadius(
+    toFiniteNumber(resolved.innerRadius, 0),
+    outerRadius
+  );
+
+  if (outerRadius <= 0) {
+    return {
+      outerRadius,
+      innerRadius: 0,
+      d: null,
+      meta: {
+        circleVariant,
+        innerRadius: 0,
+        outerRadius,
+      },
+    };
+  }
+
+  const center = {
+    x: outerRadius,
+    y: outerRadius,
+  };
+
+  if (circleVariant === 'donutRing') {
+    if (innerRadius <= 0) {
+      return {
+        outerRadius,
+        innerRadius: 0,
+        d: null,
+        meta: {
+          circleVariant,
+          innerRadius: 0,
+          outerRadius,
+          startAngle: -90,
+          endAngle: 270,
+          totalAngle: 360,
+        },
+      };
+    }
+
+    return {
+      outerRadius,
+      innerRadius,
+      startAngle: -90,
+      endAngle: 270,
+      totalAngle: 360,
+      d: describeFullDonutPath({
+        cx: center.x,
+        cy: center.y,
+        outerRadius,
+        innerRadius,
+      }),
+      meta: {
+        circleVariant,
+        innerRadius,
+        outerRadius,
+        startAngle: -90,
+        endAngle: 270,
+        totalAngle: 360,
+      },
+    };
+  }
+
+  if (circleVariant === 'sectorWedge' || circleVariant === 'pieDonutValues') {
+    const startAngle = toFiniteNumber(resolved.startAngle, -90);
+    const endAngle = toFiniteNumber(resolved.endAngle, startAngle);
+    const padAngle = Math.max(0, toFiniteNumber(resolved.padAngle, 0));
+    const padded = applyPadAngle(startAngle, endAngle, padAngle);
+    const span = normalizeAngleSpan(padded.endAngle - padded.startAngle, 360);
+
+    if (span <= 0) return null;
+
+    const d = innerRadius > 0
+      ? describeDonutSectorPath({
+          cx: center.x,
+          cy: center.y,
+          outerRadius,
+          innerRadius,
+          startAngle: padded.startAngle,
+          endAngle: padded.endAngle,
+        })
+      : describeWedgePath({
+          cx: center.x,
+          cy: center.y,
+          radius: outerRadius,
+          startAngle: padded.startAngle,
+          endAngle: padded.endAngle,
+        });
+
+    return {
+      outerRadius,
+      innerRadius,
+      startAngle: padded.startAngle,
+      endAngle: padded.endAngle,
+      totalAngle: span,
+      d,
+      meta: {
+        circleVariant,
+        innerRadius,
+        outerRadius,
+        startAngle: padded.startAngle,
+        endAngle: padded.endAngle,
+        rawStartAngle: startAngle,
+        rawEndAngle: endAngle,
+        totalAngle: span,
+        padAngle,
+      },
+    };
+  }
+
+  return null;
+}
+
+function getPieValues(streams, params) {
+  if (streams.values?.kind === 'array') return streams.values.values;
+  if (streams.values?.kind === 'scalar') return parseValuesInput(streams.values.value);
+  return parseValuesInput(params.values ?? []);
+}
+
+function parseValuesInput(value) {
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === 'string') {
+    return value
+      .split(/[\s,]+/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => Number(part));
+  }
+
+  if (value == null || value === '') return [];
+
+  return [value];
+}
+
+function getCircleVariant(params = {}) {
+  const raw = params.circleVariant ?? 'fullCircle';
+
+  if (raw === 'donutRing') return 'donutRing';
+  if (raw === 'sectorWedge') return 'sectorWedge';
+  if (raw === 'pieDonutValues') return 'pieDonutValues';
+
+  return 'fullCircle';
+}
+
+function polarToCartesian(cx, cy, radius, angleDegrees) {
+  const angleRadians = (angleDegrees * Math.PI) / 180;
+
+  // Angles are user-facing degrees: -90 is 12 o'clock, and positive angles
+  // advance clockwise in SVG coordinates.
+  return {
+    x: cx + radius * Math.cos(angleRadians),
+    y: cy + radius * Math.sin(angleRadians),
+  };
+}
+
+function describeWedgePath({
+  cx,
+  cy,
+  radius,
+  startAngle,
+  endAngle,
+}) {
+  const span = normalizeAngleSpan(endAngle - startAngle, 360);
+
+  if (span >= 360) {
+    return describeFullCirclePath({
+      cx,
+      cy,
+      radius,
+    });
+  }
+
+  const start = polarToCartesian(cx, cy, radius, startAngle);
+  const end = polarToCartesian(cx, cy, radius, startAngle + span);
+  const largeArcFlag = span > 180 ? 1 : 0;
+
+  return [
+    `M ${cx} ${cy}`,
+    `L ${start.x} ${start.y}`,
+    `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
+    'Z',
+  ].join(' ');
+}
+
+function describeDonutSectorPath({
+  cx,
+  cy,
+  outerRadius,
+  innerRadius,
+  startAngle,
+  endAngle,
+}) {
+  const span = normalizeAngleSpan(endAngle - startAngle, 360);
+
+  if (span >= 360) {
+    return describeFullDonutPath({
+      cx,
+      cy,
+      outerRadius,
+      innerRadius,
+    });
+  }
+
+  const outerStart = polarToCartesian(cx, cy, outerRadius, startAngle);
+  const outerEnd = polarToCartesian(cx, cy, outerRadius, startAngle + span);
+  const innerEnd = polarToCartesian(cx, cy, innerRadius, startAngle + span);
+  const innerStart = polarToCartesian(cx, cy, innerRadius, startAngle);
+  const largeArcFlag = span > 180 ? 1 : 0;
+
+  return [
+    `M ${outerStart.x} ${outerStart.y}`,
+    `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${outerEnd.x} ${outerEnd.y}`,
+    `L ${innerEnd.x} ${innerEnd.y}`,
+    `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${innerStart.x} ${innerStart.y}`,
+    'Z',
+  ].join(' ');
+}
+
+function describeFullDonutPath({
+  cx,
+  cy,
+  outerRadius,
+  innerRadius,
+}) {
+  const outerLeft = polarToCartesian(cx, cy, outerRadius, 180);
+  const outerRight = polarToCartesian(cx, cy, outerRadius, 0);
+  const innerRight = polarToCartesian(cx, cy, innerRadius, 0);
+  const innerLeft = polarToCartesian(cx, cy, innerRadius, 180);
+
+  return [
+    `M ${outerRight.x} ${outerRight.y}`,
+    `A ${outerRadius} ${outerRadius} 0 1 1 ${outerLeft.x} ${outerLeft.y}`,
+    `A ${outerRadius} ${outerRadius} 0 1 1 ${outerRight.x} ${outerRight.y}`,
+    `M ${innerRight.x} ${innerRight.y}`,
+    `A ${innerRadius} ${innerRadius} 0 1 0 ${innerLeft.x} ${innerLeft.y}`,
+    `A ${innerRadius} ${innerRadius} 0 1 0 ${innerRight.x} ${innerRight.y}`,
+    'Z',
+  ].join(' ');
+}
+
+function describeFullCirclePath({
+  cx,
+  cy,
+  radius,
+}) {
+  const left = polarToCartesian(cx, cy, radius, 180);
+  const right = polarToCartesian(cx, cy, radius, 0);
+
+  return [
+    `M ${right.x} ${right.y}`,
+    `A ${radius} ${radius} 0 1 1 ${left.x} ${left.y}`,
+    `A ${radius} ${radius} 0 1 1 ${right.x} ${right.y}`,
+    'Z',
+  ].join(' ');
+}
+
+function normalizeAngleSpan(value, fallback = 0) {
+  const n = toFiniteNumber(value, fallback);
+  if (n === 0) return 0;
+
+  const sign = n < 0 ? -1 : 1;
+  const abs = Math.min(Math.abs(n), 360);
+
+  return sign * abs;
+}
+
+function clampInnerRadius(innerRadius, outerRadius) {
+  const safeInnerRadius = Math.max(0, innerRadius);
+  const safeOuterRadius = Math.max(0, outerRadius);
+
+  if (safeInnerRadius >= safeOuterRadius) {
+    return Math.max(0, safeOuterRadius - 0.001);
+  }
+
+  return safeInnerRadius;
+}
+
+function applyPadAngle(startAngle, endAngle, padAngle) {
+  if (padAngle <= 0) {
+    return { startAngle, endAngle };
+  }
+
+  const span = endAngle - startAngle;
+  const direction = span < 0 ? -1 : 1;
+  const halfPad = Math.min(Math.abs(span) / 2, padAngle / 2);
+
+  return {
+    startAngle: startAngle + halfPad * direction,
+    endAngle: endAngle - halfPad * direction,
+  };
+}
+
+function toFiniteNumber(value, fallback) {
+  const n = Number(value);
+
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function makeFrame({ shapeType, resolved, radialGeometry = null }) {
   if (shapeType === 'circle') {
-    const size = resolved.radius * 2;
+    const radius = radialGeometry?.outerRadius ?? resolved.radius;
+    const size = radius * 2;
 
     return makeAlignedFrame({
       x: resolved.x,
@@ -1252,15 +1844,25 @@ function getDefaultAlignY(shapeType) {
   return 'top';
 }
 
-function makeContent({ shapeType, resolved }) {
+function makeContent({ shapeType, resolved, radialGeometry = null }) {
   if (shapeType === 'circle') {
+    if (radialGeometry?.d) {
+      return {
+        contentType: 'shape',
+        shape: {
+          shapeType: 'path',
+          d: radialGeometry.d,
+        },
+      };
+    }
+
     return {
         contentType: 'shape',
         shape: {
-            shapeType: 'circle',
-            cx: resolved.radius,
-            cy: resolved.radius,
-            r: resolved.radius,
+          shapeType: 'circle',
+          cx: radialGeometry?.outerRadius ?? resolved.radius,
+          cy: radialGeometry?.outerRadius ?? resolved.radius,
+          r: radialGeometry?.outerRadius ?? resolved.radius,
         },
     };
     }
@@ -1364,6 +1966,25 @@ function makeElementParameterLineage({
     'frame',
     'style',
   ];
+
+  const circleVariant = getCircleVariant(resolved);
+
+  if (circleVariant !== 'fullCircle') {
+    handles.splice(
+      handles.indexOf('cornerRadius'),
+      0,
+      'outerRadius',
+      'innerRadius',
+      'startAngle',
+      'endAngle',
+      'totalAngle',
+      'padAngle'
+    );
+
+    if (circleVariant === 'pieDonutValues') {
+      handles.splice(handles.indexOf('cornerRadius'), 0, 'values');
+    }
+  }
 
   const lineage = {};
 

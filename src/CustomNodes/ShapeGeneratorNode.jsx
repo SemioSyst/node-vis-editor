@@ -7,6 +7,7 @@ import { SelectField } from './UI/NodeFields.jsx';
 import {
   PortNumberField,
   PortColorField,
+  PortTextField,
   PortStatusRow,
 } from './UI/PortFields.jsx';
 import { useNodeInputStates } from './UI/useNodeInputStates.js';
@@ -16,6 +17,7 @@ export default function ShapeGeneratorNode({ id, data }) {
     const update = useUpdateNodeData(id);
 
     const shapeType = data.shapeType ?? 'rect';
+    const circleVariant = data.circleVariant ?? 'fullCircle';
     const layoutMode = data.layoutMode ?? legacyLayoutAxisToMode(data.layoutAxis ?? 'auto');
 
     const gapXDisabled = layoutMode === 'linearY';
@@ -86,6 +88,19 @@ export default function ShapeGeneratorNode({ id, data }) {
             { value: 'line', label: 'Line' },
             ]}
         />
+        {shapeType === 'circle' && (
+            <SelectField
+                label="Circle Variant"
+                value={circleVariant}
+                onChange={(v) => update({ circleVariant: v })}
+                options={[
+                { value: 'fullCircle', label: 'Full Circle' },
+                { value: 'donutRing', label: 'Donut / Ring' },
+                { value: 'sectorWedge', label: 'Sector / Wedge' },
+                { value: 'pieDonutValues', label: 'Pie / Donut from Values' },
+                ]}
+            />
+        )}
         </NodeSection>
 
         <NodeSection
@@ -119,7 +134,19 @@ export default function ShapeGeneratorNode({ id, data }) {
             sectionCollapsed={data.sectionCollapsed}
             title="Geometry"
             subtitle="Shape size and alignment to the generated point"
-            ports={['width', 'height', 'radius', 'cornerRadius']}
+            ports={[
+                'width',
+                'height',
+                'radius',
+                'cornerRadius',
+                'outerRadius',
+                'innerRadius',
+                'startAngle',
+                'endAngle',
+                'totalAngle',
+                'padAngle',
+                'values',
+            ]}
             defaultCollapsed
         >
         {(shapeType === 'rect' || shapeType === 'line') && (
@@ -152,7 +179,7 @@ export default function ShapeGeneratorNode({ id, data }) {
             />
         )}
 
-        {shapeType === 'circle' && (
+        {shapeType === 'circle' && circleVariant === 'fullCircle' && (
             <PortNumberField
             handleId="radius"
             label="Radius"
@@ -160,6 +187,78 @@ export default function ShapeGeneratorNode({ id, data }) {
             onChange={(v) => update({ defaultRadius: v })}
             state={getParamState('radius')}
             />
+        )}
+
+        {shapeType === 'circle' && circleVariant !== 'fullCircle' && (
+            <>
+            {circleVariant === 'pieDonutValues' && (
+                <PortTextField
+                    handleId="values"
+                    label="Values"
+                    value={data.values ?? '30,20,10,40'}
+                    onChange={(v) => update({ values: v })}
+                    state={getParamState('values')}
+                    placeholder="30,20,10,40"
+                />
+            )}
+
+            <PortNumberField
+                handleId="outerRadius"
+                label="Outer Radius"
+                value={data.outerRadius ?? data.defaultRadius ?? 8}
+                onChange={(v) => update({ outerRadius: v })}
+                min={0}
+                state={getParamState('outerRadius')}
+            />
+
+            <PortNumberField
+                handleId="innerRadius"
+                label="Inner Radius"
+                value={data.innerRadius ?? 0}
+                onChange={(v) => update({ innerRadius: v })}
+                min={0}
+                state={getParamState('innerRadius')}
+            />
+
+            {(circleVariant === 'sectorWedge' || circleVariant === 'pieDonutValues') && (
+                <>
+                <PortNumberField
+                    handleId="startAngle"
+                    label="Start Angle"
+                    value={data.startAngle ?? -90}
+                    onChange={(v) => update({ startAngle: v })}
+                    state={getParamState('startAngle')}
+                />
+
+                {circleVariant === 'sectorWedge' ? (
+                    <PortNumberField
+                        handleId="endAngle"
+                        label="End Angle"
+                        value={data.endAngle ?? 90}
+                        onChange={(v) => update({ endAngle: v })}
+                        state={getParamState('endAngle')}
+                    />
+                ) : (
+                    <PortNumberField
+                        handleId="totalAngle"
+                        label="Total Angle"
+                        value={data.totalAngle ?? 360}
+                        onChange={(v) => update({ totalAngle: v })}
+                        state={getParamState('totalAngle')}
+                    />
+                )}
+
+                <PortNumberField
+                    handleId="padAngle"
+                    label="Pad Angle"
+                    value={data.padAngle ?? 0}
+                    onChange={(v) => update({ padAngle: v })}
+                    min={0}
+                    state={getParamState('padAngle')}
+                />
+                </>
+            )}
+            </>
         )}
 
         <SelectField
