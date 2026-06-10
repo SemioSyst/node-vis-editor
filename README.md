@@ -10,7 +10,6 @@ The editor provides a low-code node graph interface for constructing interactive
 
 A typical workflow follows this structure:
 
-```txt
 data
 → mapping
 → visual elements
@@ -18,7 +17,6 @@ data
 → state change
 → transition / response
 → preview / final output
-txt```
 
 The system is designed around two key internal concepts:
 
