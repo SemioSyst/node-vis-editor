@@ -18,7 +18,7 @@ data
 → state change
 → transition / response
 → preview / final output
-```txt
+txt```
 
 The system is designed around two key internal concepts:
 
