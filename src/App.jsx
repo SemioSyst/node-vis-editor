@@ -87,9 +87,8 @@ const NODE_LIBRARY = [
   { type: 'pagePreview', label: 'Page Preview', defaultData: { label: 'Page Preview' } },
   { type: 'shapeGenerator', label: 'Shape Generator', defaultData: { } },
   { type: 'simpleDataInput', label: 'Simple Data Input', defaultData: { } },
-  { type: 'axisGenerator', label: 'Axis Generator', defaultData: { } },
   { type: 'scaleMapper', label: 'Scale Mapper', defaultData: { } },
-  { type: 'd3AxisGenerator', label: 'Axis Generator(D3)', defaultData: { } },
+  { type: 'd3AxisGenerator', label: 'Axis Generator', defaultData: { } },
   { type: 'coordinateGroup', label: 'Coordinate Group', defaultData: { } },
   { type: 'textGenerator', label: 'Text Generator', defaultData: { } },
   { type: 'pathGenerator', label: 'Path Generator', defaultData: { } },
@@ -106,6 +105,53 @@ const NODE_LIBRARY = [
   { type: 'contextSlots', label: 'Context Slots', defaultData: { } },
   { type: 'finalOutput', label: 'Final Output', defaultData: { } },
 ];
+
+const NODE_CATEGORIES = [
+  {
+    id: 'data',
+    label: 'Data',
+    description: 'Input and inspect data',
+    nodeTypes: ['simpleDataInput', 'dataInspector'],
+  },
+  {
+    id: 'mapping',
+    label: 'Mapping',
+    description: 'Map data to visual parameters',
+    nodeTypes: ['scaleMapper', 'colourMapper', 'tagMapper'],
+  },
+  {
+    id: 'generate',
+    label: 'Generate',
+    description: 'Generate visual marks and axes',
+    nodeTypes: ['shapeGenerator', 'textGenerator', 'pathGenerator', 'd3AxisGenerator'],
+  },
+  {
+    id: 'compose',
+    label: 'Compose',
+    description: 'Combine, position, and contextualise visuals',
+    nodeTypes: ['coordinateGroup', 'positionRule', 'contextSlots'],
+  },
+  {
+    id: 'interaction',
+    label: 'Interaction',
+    description: 'Select elements and create interaction inputs',
+    nodeTypes: ['elementSelector', 'eventTrigger', 'slider'],
+  },
+  {
+    id: 'stateMotion',
+    label: 'State & Motion',
+    description: 'Define states, transitions, and responses',
+    nodeTypes: ['states', 'transition', 'interactionEffect'],
+  },
+  {
+    id: 'output',
+    label: 'Output',
+    description: 'Preview, page-test, and export visuals',
+    nodeTypes: ['previewNode', 'pagePreview', 'finalOutput'],
+  },
+];
+
+const nodeLibraryByType = new Map(NODE_LIBRARY.map((node) => [node.type, node]));
 
 //Define custom node types
 const nodeTypes = {
@@ -540,6 +586,17 @@ export default function App() {
 
 function AddNodePanel({ addNode, flowWrapperRef }) {
   const { screenToFlowPosition } = useReactFlow();
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const dockRef = useRef(null);
+
+  const activeCategory = useMemo(
+    () => NODE_CATEGORIES.find((category) => category.id === activeCategoryId),
+    [activeCategoryId],
+  );
+  const activeNodes = useMemo(
+    () => activeCategory?.nodeTypes.map((type) => nodeLibraryByType.get(type)).filter(Boolean) ?? [],
+    [activeCategory],
+  );
 
   const addNodeAtViewportCenter = useCallback((nodeType) => {
     const bounds = flowWrapperRef.current?.getBoundingClientRect();
@@ -550,26 +607,89 @@ function AddNodePanel({ addNode, flowWrapperRef }) {
     addNode(nodeType, screenToFlowPosition(screenCenter));
   }, [addNode, flowWrapperRef, screenToFlowPosition]);
 
+  const handleCategoryClick = useCallback((categoryId) => {
+    setActiveCategoryId((currentCategoryId) => (
+      currentCategoryId === categoryId ? null : categoryId
+    ));
+  }, []);
+
+  const handleNodeClick = useCallback((nodeType) => {
+    addNodeAtViewportCenter(nodeType);
+    setActiveCategoryId(null);
+  }, [addNodeAtViewportCenter]);
+
+  const stopFlowPointerEvent = useCallback((event) => {
+    event.stopPropagation();
+  }, []);
+
+  useEffect(() => {
+    if (!activeCategoryId) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveCategoryId(null);
+      }
+    };
+
+    const handlePointerDown = (event) => {
+      if (dockRef.current?.contains(event.target)) return;
+      setActiveCategoryId(null);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [activeCategoryId]);
+
   return (
     <Panel position="bottom-center">
-      <div style={{ display: 'flex', gap: 8, padding: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 10 }}>
-        {NODE_LIBRARY.map((n) => (
-          <button
-            key={n.type}
-            onClick={() => addNodeAtViewportCenter(n.type)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid #555',
-              background: '#222',
-              color: '#fff',
-              cursor: 'pointer',
-              fontSize: 12,
-            }}
-          >
-            + {n.label}
-          </button>
-        ))}
+      <div
+        ref={dockRef}
+        className="bottom-node-dock nodrag"
+        onPointerDown={stopFlowPointerEvent}
+        onMouseDown={stopFlowPointerEvent}
+        onClick={stopFlowPointerEvent}
+      >
+        {activeCategory ? (
+          <div className="bottom-node-dock__popover">
+            <div className="bottom-node-dock__popover-header">
+              <div>
+                <div className="bottom-node-dock__popover-title">{activeCategory.label}</div>
+                <div className="bottom-node-dock__popover-description">{activeCategory.description}</div>
+              </div>
+            </div>
+            <div className="bottom-node-dock__node-grid">
+              {activeNodes.map((node) => (
+                <button
+                  key={node.type}
+                  type="button"
+                  className="bottom-node-dock__node-option nodrag"
+                  onClick={() => handleNodeClick(node.type)}
+                >
+                  <span className="bottom-node-dock__node-label">+ {node.label}</span>
+                  <span className="bottom-node-dock__node-type">{node.type}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="bottom-node-dock__categories">
+          {NODE_CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              className={`bottom-node-dock__category nodrag${category.id === activeCategoryId ? ' bottom-node-dock__category--active' : ''}`}
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
       </div>
     </Panel>
   );
